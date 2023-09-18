@@ -1,4 +1,73 @@
-import {Injectable} from '@nestjs/common';
-
+import {Inject, Injectable} from '@nestjs/common';
+import {InjectModel} from '@nestjs/mongoose';
+import * as firebaseAdmin from 'firebase-admin';
+import {Model} from 'mongoose';
+import {User} from 'src/models';
+import {CreateUserDTO} from './dto/createUserDTO';
+import {HttpBadRequest} from 'src/core';
+import {HttpResponse} from 'src/interface';
 @Injectable()
-export class UserService {}
+export class UserService {
+  constructor(@InjectModel(User.name) private readonly userModel: Model<User>) {}
+
+  async me(firebase_uid: string) {
+    try {
+      let data: any;
+      // check firebase_uid exists, if not exists, throw error => check strategy firebase-auth
+      if (!firebase_uid) {
+        throw new HttpBadRequest('Token signature invalid');
+      }
+
+      // get user from mongodb by firebase_uid
+      const dataMongo = await this.userModel.findOne({firebase_uid}).exec();
+
+      if (!dataMongo) {
+        throw new HttpBadRequest('User not found');
+      }
+
+      // get user from firebase by firebase_uid
+      const dataFirebase = await firebaseAdmin.auth().getUser(firebase_uid);
+
+      if (!dataFirebase) {
+        throw new HttpBadRequest('User not found');
+      }
+
+      data = {
+        ...dataMongo.toJSON(),
+        ...dataFirebase.toJSON(),
+      };
+
+      return new HttpResponse<any>(200, data, 'Get infomation success');
+    } catch (e) {
+      console.log(e);
+
+      throw new HttpBadRequest('Token signature invalid');
+    }
+  }
+
+  async create(createUserDTO: CreateUserDTO) {
+    return await this.userModel.create({
+      ...createUserDTO,
+    });
+  }
+
+  async findOneByEmail(email: string) {
+    return await this.userModel.findOne({email}).exec();
+  }
+
+  async findOneById(id: string) {
+    return await this.userModel.findById(id).exec();
+  }
+
+  async updateOneById(id: string, user: Partial<User>) {
+    return await this.userModel.findByIdAndUpdate(id, user, {new: true}).exec();
+  }
+
+  async deleteOneById(id: string) {
+    return await this.userModel.findByIdAndDelete(id).exec();
+  }
+
+  async findAll() {
+    return await this.userModel.find().exec();
+  }
+}

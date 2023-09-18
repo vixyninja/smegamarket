@@ -1,12 +1,13 @@
 import {HttpService} from '@nestjs/axios';
 import {Inject, Injectable} from '@nestjs/common';
-import {JwtService} from '@nestjs/jwt';
 import {AxiosResponse} from 'axios';
 import * as firebaseAuth from 'firebase/auth';
+import * as firebaseAdmin from 'firebase-admin';
 import {Observable, catchError, map, throwError} from 'rxjs';
 import {FIREBASE_API_KEY, FIREBASE_SECURE_TOKEN_URL} from 'src/configs';
 import {HttpBadRequest, HttpInternalServerError, HttpUnauthorized} from 'src/core';
 import {HttpOk, HttpSuccessResponse} from 'src/interface';
+import {UserService} from 'src/modules/user/user.service';
 import {ForgotPasswordDTO, LoginDTO, RegisterDTO} from './dto';
 import {TokenType} from './types';
 
@@ -14,22 +15,44 @@ import {TokenType} from './types';
 export class AuthService {
   constructor(
     @Inject('FirebaseAuth') private readonly firebaseAuth: firebaseAuth.Auth,
-    private readonly jwtService: JwtService,
     private readonly httpService: HttpService,
+    private readonly userService: UserService,
   ) {}
 
   async register(registerDTO: RegisterDTO) {
     try {
-      const {email, password} = registerDTO;
       let user: any;
-      if (user) {
+      let userModel: any;
+
+      // check email exists
+      user = await firebaseAdmin.auth().getUserByEmail(registerDTO.email);
+      userModel = await this.userService.findOneByEmail(registerDTO.email);
+
+      if (user || userModel) {
         throw new HttpBadRequest('Email already exists');
       }
-      user = await firebaseAuth.createUserWithEmailAndPassword(this.firebaseAuth, email, password);
-      if (!user) {
+
+      // create user with email and password to firebase
+      user = await firebaseAuth.createUserWithEmailAndPassword(
+        this.firebaseAuth,
+        registerDTO.email,
+        registerDTO.password,
+      );
+
+      // create user to mongodb
+      userModel = await this.userService.create({
+        firebase_uid: user.user.uid,
+        email: user.user.email,
+        name: user.user.displayName || 'Người dùng mới',
+      });
+
+      // handle error when create user
+      if (!user || !userModel) {
         throw new HttpBadRequest('Register failed');
       }
-      throw new HttpSuccessResponse<TokenType>(
+
+      // response token
+      return new HttpSuccessResponse<TokenType>(
         {
           accessToken: await firebaseAuth.getIdToken(user.user),
           refreshToken: user.user.refreshToken,
@@ -61,10 +84,16 @@ export class AuthService {
   async login(loginDTO: LoginDTO) {
     try {
       let user: any;
+
+      // login with email and password to firebase
       user = await firebaseAuth.signInWithEmailAndPassword(this.firebaseAuth, loginDTO.email, loginDTO.password);
+
+      // handle error when login
       if (!user) {
         throw new HttpBadRequest('Login failed');
       }
+
+      // response token
       return new HttpSuccessResponse<TokenType>(
         {
           accessToken: await firebaseAuth.getIdToken(user.user, true),

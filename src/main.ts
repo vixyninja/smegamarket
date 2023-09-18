@@ -13,7 +13,7 @@ async function bootstrap() {
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   });
-
+  app.setGlobalPrefix('v1');
   //global filter
   app.useGlobalFilters(new HttpExceptionFilter());
   //global pipe

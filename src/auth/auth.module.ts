@@ -5,6 +5,7 @@ import {HttpModule} from '@nestjs/axios';
 import {AuthController} from './auth.controller';
 import {AuthService} from './auth.service';
 import {FireBaseModule} from './firebase/firebase.module';
+import {UserModule} from 'src/modules/user/user.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import {FireBaseModule} from './firebase/firebase.module';
       timeout: 5000,
       maxRedirects: 5,
     }),
+    UserModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtService],
