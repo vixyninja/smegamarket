@@ -4,10 +4,9 @@ import {JwtService} from '@nestjs/jwt';
 import {HttpModule} from '@nestjs/axios';
 import {AuthController} from './auth.controller';
 import {AuthService} from './auth.service';
-import {FireBaseModule} from './firebase/firebase.module';
-import {UserModule} from 'src/modules/user/user.module';
-import {MailModule} from 'src/configs';
-import {RedisxModule} from 'src/configs/redisx/redisx.module';
+import {MailModule, RedisxModule} from 'src/configs';
+import {FireBaseModule} from './firebase';
+import {UserModule} from 'src/modules/user';
 
 @Module({
   imports: [

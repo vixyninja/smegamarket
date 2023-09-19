@@ -216,13 +216,4 @@ export class AuthService {
       throw new HttpInternalServerError('Server error');
     }
   }
-
-  async helloServer() {
-    const data = await this.redisService.getKey('hello');
-
-    if (!data) {
-      await this.redisService.setKey('hello', 'hello world');
-    }
-    return data;
-  }
 }

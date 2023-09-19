@@ -4,9 +4,10 @@ import {UserController} from './user.controller';
 import {MongooseModule} from '@nestjs/mongoose';
 import {User, UserSchema} from 'src/models';
 import {FireBaseModule} from 'src/auth/firebase/firebase.module';
+import {RedisxModule} from 'src/configs/redisx/redisx.module';
 
 @Module({
-  imports: [MongooseModule.forFeature([{name: User.name, schema: UserSchema}]), FireBaseModule],
+  imports: [MongooseModule.forFeature([{name: User.name, schema: UserSchema}]), FireBaseModule, RedisxModule],
   controllers: [UserController],
   providers: [UserService],
   exports: [UserService],

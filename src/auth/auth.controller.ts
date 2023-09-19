@@ -1,9 +1,9 @@
-import {Body, Controller, Get, Post, SetMetadata, UseGuards} from '@nestjs/common';
+import {Body, Controller, Post, SetMetadata, UseGuards} from '@nestjs/common';
 
 import {IS_PUBLIC_KEY} from 'src/core';
 import {AuthService} from './auth.service';
 import {ForgotPasswordDTO, LoginDTO, RegisterDTO} from './dto';
-import {FirebaseAuthGuard} from './firebase/firebase-guard.guard';
+import {FirebaseAuthGuard} from './firebase';
 @UseGuards(FirebaseAuthGuard)
 @Controller('auth')
 export class AuthController {
@@ -33,11 +33,5 @@ export class AuthController {
   @Post('refresh-token')
   async refreshToken(@Body() {refreshToken}) {
     return await this.authService.refreshToken(refreshToken);
-  }
-
-  @SetMetadata(IS_PUBLIC_KEY, true)
-  @Get()
-  async getHello() {
-    return this.authService.helloServer();
   }
 }

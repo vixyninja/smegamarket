@@ -6,13 +6,22 @@ import {User} from 'src/models';
 import {CreateUserDTO} from './dto/createUserDTO';
 import {HttpBadRequest} from 'src/core';
 import {HttpResponse} from 'src/interface';
+import {RedisxService} from 'src/configs/redisx/redisx.service';
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private readonly userModel: Model<User>) {}
+  constructor(
+    @InjectModel(User.name) private readonly userModel: Model<User>,
+    private readonly redisService: RedisxService,
+  ) {}
 
   async me(firebase_uid: string) {
     try {
       let data: any;
+      data = await this.redisService.getKey(firebase_uid);
+      if (data) {
+        return new HttpResponse<any>(200, JSON.parse(data), 'Get infomation success');
+      }
+
       // check firebase_uid exists, if not exists, throw error => check strategy firebase-auth
       if (!firebase_uid) {
         throw new HttpBadRequest('Token signature invalid');
@@ -24,7 +33,6 @@ export class UserService {
       if (!dataMongo) {
         throw new HttpBadRequest('User not found');
       }
-
       // get user from firebase by firebase_uid
       const dataFirebase = await firebaseAdmin.auth().getUser(firebase_uid);
 
@@ -36,6 +44,8 @@ export class UserService {
         ...dataMongo.toJSON(),
         ...dataFirebase.toJSON(),
       };
+
+      await this.redisService.setKey(firebase_uid, JSON.stringify(data));
 
       return new HttpResponse<any>(200, data, 'Get infomation success');
     } catch (e) {

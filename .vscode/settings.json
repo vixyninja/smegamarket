@@ -8,6 +8,7 @@
     "maxlength",
     "Modulex",
     "Redisx",
-    "streamifier"
+    "streamifier",
+    "Throttlerx"
   ]
 }

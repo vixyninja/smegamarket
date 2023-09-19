@@ -17,6 +17,9 @@ const MAIL_PORT: number = +process.env.MAIL_PORT;
 const MAIL_USER: string = process.env.MAIL_USER;
 const MAIL_PASSWORD: string = process.env.MAIL_PASSWORD;
 
+const THROTTLE_TTL: number = +process.env.THROTTLE_TTL;
+const THROTTLE_LIMIT: number = +process.env.THROTTLE_LIMIT;
+
 // redis
 const REDIS_HOST: string = process.env.REDIS_HOST;
 const REDIS_PORT: number = +process.env.REDIS_PORT;
@@ -121,4 +124,6 @@ export {
   REDIS_PASSWORD,
   REDIS_DBNAME,
   REDIS_USERNAME,
+  THROTTLE_LIMIT,
+  THROTTLE_TTL,
 };
