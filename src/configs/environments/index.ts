@@ -4,13 +4,18 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 // cross domain
-
 const CORS_ORIGIN: string[] = ['http://localhost:3000'];
 
 // environment
 const NODE_ENV: string = process.env.NODE_ENV;
 const PORT: number = +process.env.PORT;
 const HASH: number = +process.env.HASH;
+
+// mail
+const MAIL_HOST: string = process.env.MAIL_HOST;
+const MAIL_PORT: number = +process.env.MAIL_PORT;
+const MAIL_USER: string = process.env.MAIL_USER;
+const MAIL_PASSWORD: string = process.env.MAIL_PASSWORD;
 
 // postgres
 const POSTGRES_USER: string = process.env.POSTGRES_USER;
@@ -100,4 +105,8 @@ export {
   MONGO_INITDB_DATABASE,
   MONGO_INITDB_ROOT_USERNAME,
   MONGO_INITDB_ROOT_PASSWORD,
+  MAIL_HOST,
+  MAIL_PORT,
+  MAIL_USER,
+  MAIL_PASSWORD,
 };

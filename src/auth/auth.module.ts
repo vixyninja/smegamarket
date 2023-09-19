@@ -6,6 +6,7 @@ import {AuthController} from './auth.controller';
 import {AuthService} from './auth.service';
 import {FireBaseModule} from './firebase/firebase.module';
 import {UserModule} from 'src/modules/user/user.module';
+import {MailModule} from 'src/configs';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import {UserModule} from 'src/modules/user/user.module';
       maxRedirects: 5,
     }),
     UserModule,
+    MailModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtService],

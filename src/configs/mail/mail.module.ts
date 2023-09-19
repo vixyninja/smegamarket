@@ -1,28 +1,29 @@
 import {MailerModule} from '@nestjs-modules/mailer';
-import {PugAdapter} from '@nestjs-modules/mailer/dist/adapters/pug.adapter';
+import {HandlebarsAdapter} from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import {Module} from '@nestjs/common';
-
+import {join} from 'path';
+import {MAIL_HOST, MAIL_PASSWORD, MAIL_USER} from '../environments';
 import {MailService} from './mail.service';
 @Module({
   imports: [
     MailerModule.forRootAsync({
       useFactory: () => ({
         transport: {
-          host: 'smtp.gmail.com',
+          host: MAIL_HOST,
           port: 587,
           date: new Date(),
           secure: false,
           auth: {
-            user: 'nevergiveup2k3@gmail.com',
-            pass: 'ymsflakmmvaaeess',
+            user: MAIL_USER,
+            pass: MAIL_PASSWORD,
           },
         },
         defaults: {
-          from: '"nest-modules" <modules@nestjs.com>',
+          from: '"No Reply" <noreply@lms.com.vn>',
         },
         template: {
-          dir: __dirname + '/templates',
-          adapter: new PugAdapter(),
+          dir: join(__dirname, 'templates'),
+          adapter: new HandlebarsAdapter(),
           options: {
             strict: true,
           },

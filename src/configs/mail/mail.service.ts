@@ -7,17 +7,21 @@ import {HttpInternalServerError} from 'src/core';
 export class MailService {
   constructor(private readonly mailerService: MailerService) {}
 
-  async sendUserConfirmation(email: string, token: string) {
+  async sendUserConfirmation(email: string, name: string) {
     const url = `https://www.facebook.com/vy.huynhhong.90`;
     try {
       await this.mailerService.sendMail({
         to: email,
-        subject: 'Create account successfully',
-        from: 'noreply@nestjs.com',
-        text: 'Hello',
-        html: `<b>Welcome to my channel ${url}</b>`,
+        subject: `Hello ${name}. Welcome to Nice App!`,
+        template: './confirmation',
+        context: {
+          name: email,
+          url,
+        },
+        date: new Date(),
       });
     } catch (e) {
+      console.log(e);
       throw new HttpInternalServerError(e.message);
     }
   }
