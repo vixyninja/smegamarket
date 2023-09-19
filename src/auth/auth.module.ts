@@ -7,6 +7,7 @@ import {AuthService} from './auth.service';
 import {FireBaseModule} from './firebase/firebase.module';
 import {UserModule} from 'src/modules/user/user.module';
 import {MailModule} from 'src/configs';
+import {RedisxModule} from 'src/configs/redisx/redisx.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import {MailModule} from 'src/configs';
     }),
     UserModule,
     MailModule,
+    RedisxModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtService],

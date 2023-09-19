@@ -39,8 +39,6 @@ export class UserService {
 
       return new HttpResponse<any>(200, data, 'Get infomation success');
     } catch (e) {
-      console.log(e);
-
       throw new HttpBadRequest('Token signature invalid');
     }
   }

@@ -2,7 +2,6 @@ import {HttpService} from '@nestjs/axios';
 import {Inject, Injectable} from '@nestjs/common';
 import {AxiosResponse} from 'axios';
 import * as firebaseAuth from 'firebase/auth';
-import * as firebaseAdmin from 'firebase-admin';
 import {Observable, catchError, map, throwError} from 'rxjs';
 import {FIREBASE_API_KEY, FIREBASE_SECURE_TOKEN_URL, MailService} from 'src/configs';
 import {HttpBadRequest, HttpInternalServerError, HttpUnauthorized} from 'src/core';
@@ -10,6 +9,7 @@ import {HttpOk, HttpSuccessResponse} from 'src/interface';
 import {UserService} from 'src/modules/user/user.service';
 import {ForgotPasswordDTO, LoginDTO, RegisterDTO} from './dto';
 import {TokenType} from './types';
+import {RedisxService} from 'src/configs/redisx/redisx.service';
 
 @Injectable()
 export class AuthService {
@@ -18,6 +18,7 @@ export class AuthService {
     private readonly httpService: HttpService,
     private readonly userService: UserService,
     private readonly mailService: MailService,
+    private readonly redisService: RedisxService,
   ) {}
 
   async register(registerDTO: RegisterDTO) {
@@ -54,6 +55,11 @@ export class AuthService {
       if (!user || !userModel) {
         throw new HttpBadRequest('Register failed');
       }
+
+      await firebaseAuth.updateProfile(user.user, {
+        displayName: userModel.name,
+      });
+      await firebaseAuth.sendEmailVerification(user.user);
       await this.mailService.sendUserConfirmation(user.user.email, userModel.name);
       // response token
       return new HttpSuccessResponse<TokenType>(
@@ -209,5 +215,14 @@ export class AuthService {
     } catch (e) {
       throw new HttpInternalServerError('Server error');
     }
+  }
+
+  async helloServer() {
+    const data = await this.redisService.getKey('hello');
+
+    if (!data) {
+      await this.redisService.setKey('hello', 'hello world');
+    }
+    return data;
   }
 }

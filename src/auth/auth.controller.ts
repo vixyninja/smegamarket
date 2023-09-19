@@ -1,4 +1,4 @@
-import {Body, Controller, Post, SetMetadata, UseGuards} from '@nestjs/common';
+import {Body, Controller, Get, Post, SetMetadata, UseGuards} from '@nestjs/common';
 
 import {IS_PUBLIC_KEY} from 'src/core';
 import {AuthService} from './auth.service';
@@ -33,5 +33,11 @@ export class AuthController {
   @Post('refresh-token')
   async refreshToken(@Body() {refreshToken}) {
     return await this.authService.refreshToken(refreshToken);
+  }
+
+  @SetMetadata(IS_PUBLIC_KEY, true)
+  @Get()
+  async getHello() {
+    return this.authService.helloServer();
   }
 }

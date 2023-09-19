@@ -17,6 +17,13 @@ const MAIL_PORT: number = +process.env.MAIL_PORT;
 const MAIL_USER: string = process.env.MAIL_USER;
 const MAIL_PASSWORD: string = process.env.MAIL_PASSWORD;
 
+// redis
+const REDIS_HOST: string = process.env.REDIS_HOST;
+const REDIS_PORT: number = +process.env.REDIS_PORT;
+const REDIS_PASSWORD: string = process.env.REDIS_PASSWORD;
+const REDIS_DBNAME: number = +process.env.REDIS_DBNAME;
+const REDIS_USERNAME: string = process.env.REDIS_USERNAME;
+
 // postgres
 const POSTGRES_USER: string = process.env.POSTGRES_USER;
 const POSTGRES_PASSWORD: string = process.env.POSTGRES_PASSWORD;
@@ -109,4 +116,9 @@ export {
   MAIL_PORT,
   MAIL_USER,
   MAIL_PASSWORD,
+  REDIS_HOST,
+  REDIS_PORT,
+  REDIS_PASSWORD,
+  REDIS_DBNAME,
+  REDIS_USERNAME,
 };

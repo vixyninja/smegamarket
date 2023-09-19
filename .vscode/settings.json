@@ -1,3 +1,13 @@
 {
-  "cSpell.words": ["autopopulate", "cloudinary", "INITDB", "maxlength", "streamifier"]
+  "cSpell.words": [
+    "autopopulate",
+    "cloudinary",
+    "DBNAME",
+    "flushall",
+    "INITDB",
+    "maxlength",
+    "Modulex",
+    "Redisx",
+    "streamifier"
+  ]
 }
