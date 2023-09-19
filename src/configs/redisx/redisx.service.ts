@@ -5,8 +5,8 @@ import {InjectRedis, Redis} from '@nestjs-modules/ioredis';
 export class RedisxService {
   constructor(@InjectRedis() private readonly redis: Redis) {}
 
-  async setKey(key: string, value: string) {
-    return await this.redis.set(key, value);
+  async setKey(key: string, value: string, expire?: number) {
+    return await this.redis.set(key, value, 'EX', expire || 60 * 60 * 24 * 30);
   }
 
   async getKey(key: string) {

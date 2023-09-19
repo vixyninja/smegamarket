@@ -29,10 +29,6 @@ export class MongooseConfigService implements MongooseOptionsFactory {
         console.log('ERROR MONGODB CONNECTION', error);
         return error;
       },
-      checkServerIdentity(hostname, cert) {
-        console.log('hostname', hostname);
-        return undefined;
-      },
     };
   }
 }

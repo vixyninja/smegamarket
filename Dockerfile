@@ -1,5 +1,6 @@
 FROM node:18-alpine
 WORKDIR /app
 COPY . .
-RUN yarn install --frozen-lockfile
+RUN curl -fsSL https://bun.sh/install | bash
+RUN bun install
 CMD ["yarn", "start:dev"]

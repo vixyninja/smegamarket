@@ -4,6 +4,9 @@ import {IS_PUBLIC_KEY} from 'src/core';
 import {AuthService} from './auth.service';
 import {ForgotPasswordDTO, LoginDTO, RegisterDTO} from './dto';
 import {FirebaseAuthGuard} from './firebase';
+import {SkipThrottle} from '@nestjs/throttler';
+
+@SkipThrottle()
 @UseGuards(FirebaseAuthGuard)
 @Controller('auth')
 export class AuthController {

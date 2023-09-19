@@ -2,27 +2,32 @@ import {Logger} from '@nestjs/common';
 import {NestFactory} from '@nestjs/core';
 import helmet from 'helmet';
 import {AppModule} from './app.module';
-import {HttpExceptionFilter, TimeoutInterceptor, ValidationPipe} from './core';
+import {HttpExceptionFilter, LogsInterceptor, TimeoutInterceptor, ValidationPipe} from './core';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    bodyParser: true,
+    cors: true,
+    bufferLogs: true,
+    snapshot: true,
+  });
   app.use(helmet());
   app.enableCors({
     origin: true,
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'x-requested-with', 'Access-Control-Allow-Origin'],
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    maxAge: 3600,
+    exposedHeaders: ['Content-Range', 'X-Content-Range'],
   });
   app.setGlobalPrefix('v1');
-  //global filter
   app.useGlobalFilters(new HttpExceptionFilter());
-  //global pipe
   app.useGlobalPipes(new ValidationPipe());
-  //global timeout
-  app.useGlobalInterceptors(new TimeoutInterceptor());
-
+  app.useGlobalInterceptors(new TimeoutInterceptor(), new LogsInterceptor());
   await app.listen(process.env.PORT);
 }
 bootstrap().then(() =>
-  Logger.log(`🌚 🌚 Application is listening on port ${process.env.PORT} 👀 👀 , ${process.env.NODE_ENV} 😈 😈 😈 😈 `),
+  Logger.debug(
+    `🌚 🌚 Application is listening on port ${process.env.PORT} 👀 👀 , ${process.env.NODE_ENV} 😈 😈 😈 😈 `,
+  ),
 );

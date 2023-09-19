@@ -1,12 +1,12 @@
-import {Inject, Injectable} from '@nestjs/common';
+import {Injectable} from '@nestjs/common';
 import {InjectModel} from '@nestjs/mongoose';
 import * as firebaseAdmin from 'firebase-admin';
 import {Model} from 'mongoose';
-import {User} from 'src/models';
-import {CreateUserDTO} from './dto/createUserDTO';
+import {RedisxService} from 'src/configs/redisx/redisx.service';
 import {HttpBadRequest} from 'src/core';
 import {HttpResponse} from 'src/interface';
-import {RedisxService} from 'src/configs/redisx/redisx.service';
+import {User} from 'src/models';
+import {CreateUserDTO} from './dto/createUserDTO';
 @Injectable()
 export class UserService {
   constructor(
