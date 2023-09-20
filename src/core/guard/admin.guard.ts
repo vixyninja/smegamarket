@@ -11,7 +11,6 @@ export class AdminGuard implements CanActivate {
   }
 
   private validateAdmin(request: Request): boolean {
-    console.log(request['user']);
     if (request['user'].role === 'admin') return true;
     return false;
   }

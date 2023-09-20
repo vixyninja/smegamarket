@@ -9,13 +9,19 @@ const streamifier = require('streamifier');
 export class CloudinaryService {
   async uploadFileImage(file: Express.Multer.File): Promise<CloudinaryResponse> {
     return new Promise((resolve, rejects) => {
-      const uploadStream = cloudinary.uploader.upload_stream((error, result) => {
-        if (result) {
-          resolve(result);
-        } else {
-          rejects(new HttpBadRequest(error.message));
-        }
-      });
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'lms-be',
+          timestamp: Math.floor(Date.now() / 1000),
+        },
+        (error, result) => {
+          if (result) {
+            resolve(result);
+          } else {
+            rejects(new HttpBadRequest(error.message));
+          }
+        },
+      );
       streamifier.createReadStream(file.buffer).pipe(uploadStream);
     });
   }

@@ -18,9 +18,7 @@ export class MongooseConfigService implements MongooseOptionsFactory {
         password: MONGO_INITDB_ROOT_PASSWORD,
       },
       connectTimeoutMS: 10000,
-      lazyConnection: true,
       dbName: MONGO_INITDB_DATABASE,
-      retryAttempts: 3,
       connectionFactory: (connection) => {
         connection.plugin(require('mongoose-autopopulate'));
         return connection;

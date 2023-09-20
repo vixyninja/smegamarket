@@ -22,11 +22,9 @@ export class FirebaseAuthStrategy extends PassportStrategy(Strategy, 'firebase-a
           publicKey: APP_SECRET.replace(/\\n/g, '\n'),
         })
         .then((decodedToken) => {
-          console.info(decodedToken);
           return decodedToken;
         })
         .catch((error) => {
-          console.error(error);
           throw new HttpBadRequest('Token signature invalid');
         });
       if (!decodedToken) {
@@ -35,7 +33,6 @@ export class FirebaseAuthStrategy extends PassportStrategy(Strategy, 'firebase-a
       req['user'] = decodedToken;
       return decodedToken;
     } catch (error) {
-      console.log(error);
       throw new HttpBadRequest('Token signature invalid');
     }
   }

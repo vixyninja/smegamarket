@@ -2,7 +2,13 @@ import {Logger} from '@nestjs/common';
 import {NestFactory} from '@nestjs/core';
 import helmet from 'helmet';
 import {AppModule} from './app.module';
-import {HttpExceptionFilter, LogsInterceptor, TimeoutInterceptor, ValidationPipe} from './core';
+import {
+  FormatResponseInterceptor,
+  HttpExceptionFilter,
+  LogsInterceptor,
+  TimeoutInterceptor,
+  ValidationPipe,
+} from './core';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -23,7 +29,7 @@ async function bootstrap() {
   app.setGlobalPrefix('v1');
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(new ValidationPipe());
-  app.useGlobalInterceptors(new TimeoutInterceptor(), new LogsInterceptor());
+  app.useGlobalInterceptors(new TimeoutInterceptor(), new FormatResponseInterceptor(), new LogsInterceptor());
   await app.listen(process.env.PORT);
 }
 bootstrap().then(() =>
