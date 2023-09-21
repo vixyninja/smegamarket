@@ -1,5 +1,5 @@
-FROM oven/bun
+FROM node:20-alpine
 WORKDIR /app
 COPY . .
-RUN bun install
-CMD ["bun", "start:dev"]
+RUN yarn install --frozen-lockfile
+CMD ["yarn", "start:dev"]
