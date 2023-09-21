@@ -4,10 +4,10 @@ import {Logger} from 'src/core';
 import {AuthModule} from './auth/auth.module';
 import {CloudinaryModule, MailModule, MongodbModule, RedisxModule, ThrottlerxModule} from './configs';
 import {UserModule} from './modules/user';
-import {LinkModule} from './modules/link/link.module';
-import {CommentModule} from './modules/comment/comment.module';
-import {ReviewModule} from './modules/review/review.module';
-import {CourseModule} from './modules/course/course.module';
+import {LinkModule} from './modules/link';
+import {CommentModule} from './modules/comment';
+import {ReviewModule} from './modules/review';
+import {CourseModule} from './modules/course';
 
 @Module({
   imports: [
@@ -20,7 +20,7 @@ import {CourseModule} from './modules/course/course.module';
     ThrottlerxModule,
     LinkModule,
     CommentModule,
-    // ReviewModule,
+    ReviewModule,
     CourseModule,
   ],
   providers: [],

@@ -1,8 +1,8 @@
-import {MiddlewareConsumer, Module, NestModule} from '@nestjs/common';
+import {Module} from '@nestjs/common';
 import {APP_GUARD} from '@nestjs/core';
 import {ThrottlerGuard, ThrottlerModule} from '@nestjs/throttler';
-import {THROTTLE_TTL, THROTTLE_LIMIT, REDIS_HOST, REDIS_USERNAME, REDIS_PORT, REDIS_PASSWORD} from '../environments';
 import {ThrottlerStorageRedisService} from 'nestjs-throttler-storage-redis';
+import {REDIS_HOST, REDIS_PASSWORD, REDIS_PORT, REDIS_USERNAME, THROTTLE_LIMIT, THROTTLE_TTL} from '../environments';
 
 @Module({
   imports: [

@@ -1,11 +1,15 @@
 import {fakerVI} from '@faker-js/faker';
 import {Injectable} from '@nestjs/common';
 import {InjectModel} from '@nestjs/mongoose';
-import {Model} from 'mongoose';
+import {Model, Types} from 'mongoose';
 import {CloudinaryService} from 'src/configs';
 import {HttpInternalServerError} from 'src/core';
 import {HttpCreatedResponse} from 'src/interface';
 import {Course, CourseData} from 'src/models';
+import {LinkService} from '../link';
+import {CommentService} from '../comment';
+import {ReviewService} from '../review';
+import {UserService} from '../user';
 
 @Injectable()
 export class CourseService {
@@ -13,26 +17,37 @@ export class CourseService {
     @InjectModel(Course.name) private readonly courseModel: Model<Course>,
     @InjectModel(CourseData.name) private readonly courseDataModel: Model<CourseData>,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly linkService: LinkService,
+    private readonly commentService: CommentService,
+    private readonly reviewService: ReviewService,
+    private readonly userService: UserService,
   ) {}
 
-  async createCourse(course: Course, thumbnail: Express.Multer.File) {
+  async createCourse(course: Course, thumbnail: Express.Multer.File, email: any) {
     try {
+      const user = await this.userService.findOneByEmail(email);
       // upload image to cloudinary
       const uploadImage = await this.cloudinaryService.uploadFileImage(thumbnail);
-
+      const newLink = await this.linkService.createLink({
+        title: fakerVI.lorem.sentence(3),
+        url: fakerVI.internet.url(),
+      });
+      const newComment = await this.commentService.createComment(user, fakerVI.lorem.paragraphs(3));
+      const newReplyComment = await this.commentService.createComment(user, fakerVI.lorem.paragraphs(3));
+      const newReview = await this.reviewService.createReview(
+        {
+          rating: fakerVI.number.int(100),
+          comment: [newComment],
+          user: user,
+          commentReply: [newReplyComment],
+        },
+        fakerVI.lorem.paragraphs(3),
+        user,
+      );
       // create course
       const newCourseData = await this.courseDataModel.create({
         description: fakerVI.lorem.paragraphs(3),
-        links: [
-          {
-            title: fakerVI.lorem.sentence(3),
-            url: fakerVI.internet.url(),
-          },
-          {
-            title: fakerVI.lorem.sentence(3),
-            url: fakerVI.internet.url(),
-          },
-        ],
+        links: [newLink],
         title: fakerVI.lorem.sentence(3),
         videoDuration: fakerVI.number.int(100),
         videoPlayer: fakerVI.internet.url(),
@@ -61,7 +76,7 @@ export class CourseService {
           public_id: uploadImage.public_id,
           url: uploadImage.url,
         },
-        reviews: [],
+        reviews: [newReview],
       });
 
       return new HttpCreatedResponse<any>(newCourse, 'Create course successfully');

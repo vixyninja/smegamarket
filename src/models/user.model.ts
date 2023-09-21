@@ -8,10 +8,10 @@ export class User {
   @Prop({name: 'firebase_uid', type: String, required: true, trim: true})
   firebase_uid: string;
 
-  @Prop({required: true, trim: true, name: 'name', type: String})
+  @Prop({required: true, name: 'name', type: String})
   name: string;
 
-  @Prop({required: true, trim: true, unique: true, name: 'email', type: String})
+  @Prop({required: true, unique: true, name: 'email', type: String})
   email: string;
 
   @Prop({name: 'salt', type: String, select: false})
@@ -35,22 +35,6 @@ export class User {
 
   @Prop({name: 'courses', type: Array, default: []})
   courses: Array<{course: string; progress: number}>;
-
-  constructor(
-    name: string,
-    email: string,
-    salt: string,
-    avatar: {public_id: string; url: string},
-    role: string,
-    courses: Array<{course: string; progress: number}>,
-  ) {
-    this.name = name;
-    this.email = email;
-    this.salt = salt;
-    this.avatar = avatar;
-    this.role = role;
-    this.courses = courses;
-  }
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

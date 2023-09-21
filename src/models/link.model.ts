@@ -5,10 +5,10 @@ export type LinkDocument = Link & Document;
 
 @Schema({timestamps: true, id: true})
 export class Link {
-  @Prop({required: true, trim: true, name: 'title', type: String})
+  @Prop({name: 'title', type: String, default: ''})
   title: string;
 
-  @Prop({required: true, trim: true, name: 'url', type: String})
+  @Prop({name: 'url', type: String, default: ''})
   url: string;
 }
 

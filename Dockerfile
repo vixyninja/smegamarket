@@ -1,6 +1,5 @@
-FROM node:18-alpine
+FROM oven/bun
 WORKDIR /app
 COPY . .
-RUN curl -fsSL https://bun.sh/install | bash
 RUN bun install
-CMD ["yarn", "start:dev"]
+CMD ["bun", "start:dev"]
