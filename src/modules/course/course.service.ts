@@ -37,6 +37,7 @@ export class CourseService {
       // return success
       return new HttpCreatedResponse<any>(course, 'Create course successfully');
     } catch (e) {
+      console.log(e);
       throw new HttpInternalServerError();
     }
   }
@@ -51,6 +52,11 @@ export class CourseService {
       // create course data
       const courseData = await this.courseDataModel.create({
         ...createCourseDataDTO,
+        videoThumbnail: {
+          public_id: '',
+          url: '',
+        },
+        links: [],
       });
 
       // push course data to course
@@ -61,6 +67,7 @@ export class CourseService {
       // return success
       return new HttpCreatedResponse<any>(courseData, 'Create course data successfully');
     } catch (e) {
+      console.log(e);
       throw new HttpInternalServerError();
     }
   }
@@ -180,9 +187,7 @@ export class CourseService {
       const course = await this.courseModel.findById(id);
 
       // return error if course not found
-      if (course.$isEmpty) {
-        return new HttpBadRequest('Course not found');
-      }
+      course.$isEmpty('Course not found');
 
       // execute update course
       const executeUpdateCourse = await course.updateOne({
@@ -217,9 +222,7 @@ export class CourseService {
       const course = await this.courseModel.findById(id);
 
       // return error if course data not found
-      if (course.$isEmpty) {
-        return new HttpBadRequest('Course data not found');
-      }
+      course.$isEmpty('Course data not found');
 
       // execute update course data
       const executeUpdateCourseData = await course.updateOne({
@@ -254,15 +257,12 @@ export class CourseService {
       const course = await this.courseModel.findById(id);
 
       // return error if course not found
-      if (course.$isEmpty) {
-        return new HttpBadRequest('Course not found');
-      }
+      course.$isEmpty('Course not found');
 
       // Delete old thumbnail
-      await this.cloudinaryService.deleteFileImage(course.thumbnail.public_id.toString());
+      // await this.cloudinaryService.deleteFileImage(course.thumbnail.public_id.toString());
 
       // Update new thumbnail
-
       const thumbnailUrl = await this.cloudinaryService.uploadFileImage(thumbnail);
 
       // execute update thumbnail
@@ -276,7 +276,7 @@ export class CourseService {
       });
 
       // return error if update thumbnail fail
-      if (!executeUpdateThumbnail.$isUpdated) {
+      if (!executeUpdateThumbnail) {
         return new HttpBadRequest("Can't update thumbnail");
       }
 
@@ -284,8 +284,9 @@ export class CourseService {
       await this.redisService.delKey(id);
 
       // return success
-      return new HttpResponse<any>(200, executeUpdateThumbnail, 'Update thumbnail successfully');
+      return new HttpOk('Update thumbnail successfully');
     } catch (e) {
+      console.log(e);
       throw new HttpInternalServerError();
     }
   }
@@ -300,9 +301,7 @@ export class CourseService {
       const courseData = await this.courseDataModel.findById(id).exec();
 
       // return error if course data not found
-      if (courseData.$isEmpty) {
-        return new HttpBadRequest('Course data not found');
-      }
+      courseData.$isEmpty('Course data not found');
 
       // Delete old thumbnail
       await this.cloudinaryService.deleteFileImage(courseData.videoThumbnail.public_id.toString());
@@ -351,9 +350,7 @@ export class CourseService {
       const course = await this.courseModel.findById(id).exec();
 
       // return error if course not found
-      if (course.$isEmpty) {
-        return new HttpBadRequest('Course not found');
-      }
+      course.$isEmpty('Course not found');
 
       // Delete course
       const executeDeleteCourse = await course.deleteOne();
@@ -390,18 +387,12 @@ export class CourseService {
       const course = await this.courseModel.findById(courseId).exec();
 
       // return error if course not found
-      if (course.$isEmpty) {
-        return new HttpBadRequest('Course not found');
-      }
-
+      course.$isEmpty('Course not found');
       // check course data found
       const courseData = await this.courseDataModel.findById(courseDataId).exec();
 
       // return error if course data not found
-      if (courseData.$isEmpty) {
-        return new HttpBadRequest('Course data not found');
-      }
-
+      courseData.$isEmpty('Course data not found');
       // Delete course data
       const executeDeleteCourseData = await courseData.deleteOne();
 
@@ -417,7 +408,7 @@ export class CourseService {
       // Delete all videoThumbnail of course data in cloudinary
 
       // return error if delete course data fail
-      if (!executeDeleteCourseData.$isDeleted) {
+      if (!executeDeleteCourseData) {
         return new HttpBadRequest("Can't delete course data");
       }
 

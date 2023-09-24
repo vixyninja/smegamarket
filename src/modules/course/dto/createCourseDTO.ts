@@ -14,12 +14,6 @@ export class CreateCourseDTO {
   @IsNotEmpty()
   readonly discount: number;
 
-  @IsOptional()
-  readonly thumbnail: Express.Multer.File;
-
-  @IsNotEmpty()
-  readonly tags: string[];
-
   @IsNotEmpty()
   readonly level: string;
 
@@ -35,15 +29,18 @@ export class CreateCourseDTO {
   @IsNotEmpty()
   readonly isPublished: boolean;
 
-  @IsNotEmpty()
+  @IsOptional()
   readonly rating: number;
-
-  @IsNotEmpty()
-  readonly purchased: number;
 
   @IsOptional()
   readonly courseData: CreateCourseDataDTO[];
 
   @IsOptional()
   readonly reviews: [];
+
+  @IsOptional()
+  readonly tags: [];
+
+  @IsOptional()
+  readonly purchased: number;
 }

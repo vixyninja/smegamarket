@@ -14,63 +14,63 @@ export class CourseController {
   // @UseGuards(FirebaseAuthGuard, AdminGuard)
   @Post('create-course')
   async createCourse(@Body() body: CreateCourseDTO) {
-    return this.courseService.createCourse(body);
+    return await this.courseService.createCourse(body);
   }
 
   @Post('create-course-data/:id')
   async createCourseData(@Param('id') id: string, @Body() body: CreateCourseDataDTO) {
-    return this.courseService.createCourseData(body, id);
+    return await this.courseService.createCourseData(body, id);
   }
 
   // ! READ
   @Get('get-all-courses')
   async getAllCourses() {
-    return this.courseService.getAllCourses();
+    return await this.courseService.getAllCourses();
   }
 
   @Get('get-course/:id')
   async getCourseById(@Param('id') id: string) {
-    return this.courseService.getCourseById(id);
+    return await this.courseService.getCourseById(id);
   }
 
   @Get('get-course-data/:id')
   async getCourseDataById(@Param('id') id: string) {
-    return this.courseService.getCourseDataById(id);
+    return await this.courseService.getCourseDataById(id);
   }
 
   // ! UPDATE
   @Put('update-course-thumbnail/:id')
   @UseInterceptors(FileInterceptor('thumbnail'))
   async updateCourseThumbnail(@Param('id') id: string, @UploadedFile() thumbnail: Express.Multer.File) {
-    return this.courseService.updateCourseThumbnail(id, thumbnail);
+    return await this.courseService.updateCourseThumbnail(id, thumbnail);
   }
 
   @Put('update-course-data-thumbnail/:id')
   @UseInterceptors(FileInterceptor('thumbnail'))
   async updateCourseDataThumbnail(@Param('id') id: string, @UploadedFile() thumbnail: Express.Multer.File) {
-    return this.courseService.updateCourseThumbnail(id, thumbnail);
+    return await this.courseService.updateCourseDataThumbnail(id, thumbnail);
   }
 
   @Put('update-course/:id')
   async updateCourse(@Param('id') id: string, @Body() body: UpdateCourseDTO) {
-    return this.courseService.updateCourseById(id, body);
+    return await this.courseService.updateCourseById(id, body);
   }
 
   @Put('update-course-data/:id')
   async updateCourseData(@Param('id') id: string, @Body() body: UpdateCourseDataDTO) {
-    return this.courseService.updateCourseDataById(id, body);
+    return await this.courseService.updateCourseDataById(id, body);
   }
 
   // ! DELETE
   // @UseGuards(FirebaseAuthGuard, AdminGuard)
   @Put('delete-course')
   async deleteCourse(@Body() body: {courseId: string}) {
-    return this.courseService.deleteCourseById(body.courseId);
+    return await this.courseService.deleteCourseById(body.courseId);
   }
 
   // @UseGuards(FirebaseAuthGuard, AdminGuard)
   @Put('delete-course-data')
   async deleteCourseData(@Body() body: {courseId: string; courseDataId: string}) {
-    return this.courseService.deleteCourseDataById(body.courseId, body.courseDataId);
+    return await this.courseService.deleteCourseDataById(body.courseId, body.courseDataId);
   }
 }

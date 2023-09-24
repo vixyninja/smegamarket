@@ -8,16 +8,16 @@ export type CourseDataDocument = CourseData & Document;
 
 @Schema({timestamps: true, id: true})
 export class CourseData {
-  @Prop({required: true, name: 'title', type: String})
+  @Prop({required: true, name: 'title', type: String, default: ''})
   title: string;
 
   @Prop({required: true, name: 'description', type: String, default: ''})
   description: string;
 
-  @Prop({required: true, name: 'videoURL', type: String})
+  @Prop({required: true, name: 'videoURL', type: String, default: ''})
   videoURL: string;
 
-  @Prop({required: true, name: 'videoThumbnail', type: Object})
+  @Prop({required: true, name: 'videoThumbnail', type: Object, default: {public_id: '', url: ''}})
   videoThumbnail: {
     public_id: {
       type: String;
@@ -29,13 +29,13 @@ export class CourseData {
     };
   };
 
-  @Prop({required: true, name: 'videoSelection', type: String})
+  @Prop({required: true, name: 'videoSelection', type: String, default: ''})
   videoSelection: string;
 
-  @Prop({required: true, name: 'videoDuration', type: Number})
+  @Prop({required: true, name: 'videoDuration', type: Number, default: 0})
   videoDuration: Number;
 
-  @Prop({required: true, name: 'videoPlayer', type: String})
+  @Prop({required: true, name: 'videoPlayer', type: String, default: ''})
   videoPlayer: String;
 
   @Prop({name: 'links', type: [Types.ObjectId], ref: Link.name, default: []})
@@ -60,6 +60,10 @@ export class Course {
     required: true,
     name: 'thumbnail',
     type: Object,
+    default: {
+      public_id: '',
+      url: '',
+    },
   })
   thumbnail: {
     public_id: {

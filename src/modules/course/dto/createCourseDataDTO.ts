@@ -1,4 +1,4 @@
-import {IsNotEmpty} from 'class-validator';
+import {IsNotEmpty, IsOptional} from 'class-validator';
 
 export class CreateCourseDataDTO {
   @IsNotEmpty()
@@ -11,9 +11,6 @@ export class CreateCourseDataDTO {
   videoURL: string;
 
   @IsNotEmpty()
-  videoThumbnail: Express.Multer.File;
-
-  @IsNotEmpty()
   videoSelection: string;
 
   @IsNotEmpty()
@@ -22,6 +19,6 @@ export class CreateCourseDataDTO {
   @IsNotEmpty()
   videoPlayer: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   links: [string];
 }
