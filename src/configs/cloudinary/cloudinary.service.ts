@@ -40,8 +40,8 @@ export class CloudinaryService {
 
   async uploadMultipleFileImage(files: Express.Multer.File[]): Promise<CloudinaryResponse[]> {
     let result: CloudinaryResponse[] = [];
-    for (const file of files) {
-      result = [...result, await this.uploadFileImage(file)];
+    for await (const file of files) {
+      result.push(await this.uploadFileImage(file));
     }
     return result;
   }

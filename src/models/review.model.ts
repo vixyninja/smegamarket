@@ -13,10 +13,20 @@ export class Review {
   @Prop({name: 'rating', type: Number, required: true, default: 0})
   rating: number;
 
-  @Prop({name: 'comment', type: [Types.ObjectId], ref: Comment.name, default: []})
+  @Prop({
+    name: 'comment',
+    type: [Types.ObjectId],
+    ref: Comment.name,
+    default: [],
+  })
   comment: [Comment];
 
-  @Prop({name: 'commentReply', type: [Types.ObjectId], ref: Comment.name, default: []})
+  @Prop({
+    name: 'commentReply',
+    type: [Types.ObjectId],
+    ref: Comment.name,
+    default: [],
+  })
   commentReply: [Comment];
 }
 

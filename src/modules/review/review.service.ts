@@ -1,27 +1,29 @@
 import {Injectable} from '@nestjs/common';
 import {InjectModel} from '@nestjs/mongoose';
 import {Model} from 'mongoose';
-import {HttpBadRequest, HttpInternalServerError} from 'src/core';
-import {Comment, Review, User} from 'src/models';
+import {HttpInternalServerError} from 'src/core';
+import {Review} from 'src/models';
 import {CommentService} from '../comment';
+import {UserService} from '../user';
+import {CreateReviewDTO, UpdateReviewDTO} from './dto';
 
 @Injectable()
 export class ReviewService {
   constructor(
     @InjectModel(Review.name) private readonly reviewModel: Model<Review>,
     private readonly commentService: CommentService,
+    private readonly userService: UserService,
   ) {}
 
-  async createReview(review: Review, comment: string, user: User) {
+  async createReview(createReviewDTO: CreateReviewDTO) {
     try {
-      const newComment = await this.commentService.createComment(user, comment);
-      if (!newComment) {
-        throw new HttpBadRequest('Comment is not created');
-      }
       return await this.reviewModel.create({
-        user: user,
-        comment: newComment,
-        rating: review.rating,
+        user: await this.userService.findOneById(createReviewDTO.user),
+        rating: createReviewDTO.rating || 0,
+        comment: await this.commentService.createComment({
+          ...createReviewDTO.comment,
+        }),
+        commentReply: [],
       });
     } catch (error) {
       throw new HttpInternalServerError();
@@ -52,9 +54,36 @@ export class ReviewService {
     }
   }
 
-  async updateReviewById(id: string, review: Review) {
+  async updateReviewById(reviewUpdateDTO: UpdateReviewDTO, reviewId: string) {
     try {
-      return await this.reviewModel.findByIdAndUpdate(id, review, {new: true});
+      return await this.reviewModel.findByIdAndUpdate(
+        reviewId,
+        {
+          $set: {
+            comment: reviewUpdateDTO.comment,
+            rating: reviewUpdateDTO.rating,
+          },
+        },
+        {new: true},
+      );
+    } catch (e) {
+      throw new HttpInternalServerError();
+    }
+  }
+
+  async updateReviewCommentById(reviewUpdateDTO: UpdateReviewDTO, reviewId: string) {
+    try {
+      return await this.reviewModel.findByIdAndUpdate(
+        reviewId,
+        {
+          $addToSet: {
+            commentReply: await this.commentService.createComment({
+              ...reviewUpdateDTO.comment,
+            }),
+          },
+        },
+        {new: true},
+      );
     } catch (e) {
       throw new HttpInternalServerError();
     }

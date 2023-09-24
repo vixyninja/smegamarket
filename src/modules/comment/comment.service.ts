@@ -3,23 +3,29 @@ import {InjectModel} from '@nestjs/mongoose';
 import {Model} from 'mongoose';
 import {HttpInternalServerError} from 'src/core';
 import {Comment, User} from 'src/models';
+import {CreateCommentDTO, UpdateCommentDTO} from './dto';
+import {UserService} from '../user';
 
 @Injectable()
 export class CommentService {
-  constructor(@InjectModel(Comment.name) private readonly commentModel: Model<Comment>) {}
+  constructor(
+    @InjectModel(Comment.name) private readonly commentModel: Model<Comment>,
+    private readonly userService: UserService,
+  ) {}
 
-  async createComment(user: User, comment: string) {
+  async createComment(createCommentDTO: CreateCommentDTO) {
     try {
       return await this.commentModel.create({
-        owner: user,
-        comment: comment,
+        owner: await this.userService.findOneById(createCommentDTO.owner),
+        comment: createCommentDTO.comment,
+        like: [],
       });
     } catch (e) {
       throw new HttpInternalServerError();
     }
   }
 
-  async deleteComment(commentId: string, user: User) {
+  async deleteComment(user: User, commentId: string) {
     try {
       return await this.commentModel.deleteOne({
         _id: commentId,
@@ -38,23 +44,31 @@ export class CommentService {
     }
   }
 
-  async updateComment(commentId: string, content: string, user: User) {
+  async updateComment(updateCommentDTO: UpdateCommentDTO, commentId: string) {
     try {
-      return await this.commentModel.updateOne({_id: commentId, user: user}, {comment: content});
+      return await this.commentModel.updateOne(
+        {_id: commentId},
+        {
+          $set: {
+            comment: updateCommentDTO.comment,
+          },
+        },
+        {new: true},
+      );
     } catch (e) {
       throw new HttpInternalServerError();
     }
   }
 
-  async likeComment(commentId: string, user: User) {
+  async likeComment(user: User, commentId: string) {
     try {
-      return await this.commentModel.updateOne({_id: commentId}, {$set: {like: user}});
+      return await this.commentModel.updateOne({_id: commentId}, {$addToSet: {like: user}});
     } catch (e) {
       throw new HttpInternalServerError();
     }
   }
 
-  async unlikeComment(commentId: string, user: User) {
+  async unlikeComment(user: User, commentId: string) {
     try {
       return await this.commentModel.updateOne({_id: commentId}, {$pull: {like: user}});
     } catch (e) {

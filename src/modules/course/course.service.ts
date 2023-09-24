@@ -1,87 +1,433 @@
-import {fakerVI} from '@faker-js/faker';
 import {Injectable} from '@nestjs/common';
 import {InjectModel} from '@nestjs/mongoose';
-import {Model, Types} from 'mongoose';
-import {CloudinaryService} from 'src/configs';
-import {HttpInternalServerError} from 'src/core';
-import {HttpCreatedResponse} from 'src/interface';
+import {Model, isValidObjectId} from 'mongoose';
+import {CloudinaryService, RedisxService} from 'src/configs';
+import {HttpBadRequest, HttpInternalServerError} from 'src/core';
+import {HttpCreatedResponse, HttpOk, HttpResponse} from 'src/interface';
 import {Course, CourseData} from 'src/models';
-import {LinkService} from '../link';
 import {CommentService} from '../comment';
+import {LinkService} from '../link';
 import {ReviewService} from '../review';
 import {UserService} from '../user';
+import {CreateCourseDTO, CreateCourseDataDTO, UpdateCourseDTO, UpdateCourseDataDTO} from './dto';
 
 @Injectable()
 export class CourseService {
   constructor(
     @InjectModel(Course.name) private readonly courseModel: Model<Course>,
-    @InjectModel(CourseData.name) private readonly courseDataModel: Model<CourseData>,
+    @InjectModel(CourseData.name)
+    private readonly courseDataModel: Model<CourseData>,
     private readonly cloudinaryService: CloudinaryService,
     private readonly linkService: LinkService,
     private readonly commentService: CommentService,
     private readonly reviewService: ReviewService,
     private readonly userService: UserService,
+    private readonly redisService: RedisxService,
   ) {}
 
-  async createCourse(course: Course, thumbnail: Express.Multer.File, email: any) {
+  // ! CREATE
+  async createCourse(body: CreateCourseDTO) {
     try {
-      const user = await this.userService.findOneByEmail(email);
-      // upload image to cloudinary
-      const uploadImage = await this.cloudinaryService.uploadFileImage(thumbnail);
-      const newLink = await this.linkService.createLink({
-        title: fakerVI.lorem.sentence(3),
-        url: fakerVI.internet.url(),
-      });
-      const newComment = await this.commentService.createComment(user, fakerVI.lorem.paragraphs(3));
-      const newReplyComment = await this.commentService.createComment(user, fakerVI.lorem.paragraphs(3));
-      const newReview = await this.reviewService.createReview(
-        {
-          rating: fakerVI.number.int(100),
-          comment: [newComment],
-          user: user,
-          commentReply: [newReplyComment],
-        },
-        fakerVI.lorem.paragraphs(3),
-        user,
-      );
       // create course
-      const newCourseData = await this.courseDataModel.create({
-        description: fakerVI.lorem.paragraphs(3),
-        links: [newLink],
-        title: fakerVI.lorem.sentence(3),
-        videoDuration: fakerVI.number.int(100),
-        videoPlayer: fakerVI.internet.url(),
-        videoSelection: fakerVI.internet.url(),
-        videoThumbnail: {
-          public_id: uploadImage.public_id,
-          url: uploadImage.url,
-        },
-        videoURL: fakerVI.internet.url(),
-      });
-      const newCourse = await this.courseModel.create({
-        benefits: fakerVI.lorem.paragraphs(3),
-        description: fakerVI.lorem.paragraphs(3),
-        courseData: [newCourseData],
-        name: fakerVI.lorem.sentence(3),
-        demoURL: fakerVI.internet.url(),
-        discount: fakerVI.number.int(100),
-        isPublished: fakerVI.helpers.arrayElement([true, false]),
-        level: fakerVI.lorem.sentence(3),
-        prerequisites: fakerVI.lorem.paragraphs(3),
-        price: fakerVI.number.int(100),
-        purchased: fakerVI.number.int(100),
-        rating: fakerVI.number.int(100),
-        tags: [fakerVI.lorem.sentence(3), fakerVI.lorem.sentence(3)],
-        thumbnail: {
-          public_id: uploadImage.public_id,
-          url: uploadImage.url,
-        },
-        reviews: [newReview],
+      const course = await this.courseModel.create({
+        ...body,
+        courseData: [],
       });
 
-      return new HttpCreatedResponse<any>(newCourse, 'Create course successfully');
+      // return success
+      return new HttpCreatedResponse<any>(course, 'Create course successfully');
     } catch (e) {
-      console.log(e);
+      throw new HttpInternalServerError();
+    }
+  }
+
+  async createCourseData(createCourseDataDTO: CreateCourseDataDTO, id: string) {
+    try {
+      // check valid objectID
+      if (isValidObjectId(id) === false) {
+        return new HttpBadRequest('Invalid id');
+      }
+
+      // create course data
+      const courseData = await this.courseDataModel.create({
+        ...createCourseDataDTO,
+      });
+
+      // push course data to course
+      await this.courseModel.findByIdAndUpdate(id, {
+        $push: {courseData: courseData._id},
+      });
+
+      // return success
+      return new HttpCreatedResponse<any>(courseData, 'Create course data successfully');
+    } catch (e) {
+      throw new HttpInternalServerError();
+    }
+  }
+
+  // ! READ
+  async getAllCourses() {
+    try {
+      // init courses variable
+      let courses: any;
+
+      // check courses found in redis
+      courses = await this.redisService.getKey('courses');
+
+      // return courses if found in redis
+      if (courses) {
+        return new HttpResponse<any>(200, courses, courses.length + ' courses');
+      }
+
+      // check courses found in mongodb
+      courses = await this.courseModel.find().populate('courseData');
+
+      // return error if courses not found
+      if (!courses) {
+        return new HttpBadRequest('Courses not found');
+      }
+
+      // set courses in redis
+      await this.redisService.setKey('courses', JSON.stringify(courses), 60 * 60);
+
+      // return courses
+      return new HttpResponse<any>(200, courses, courses.length + ' courses');
+    } catch (e) {
+      throw new HttpInternalServerError();
+    }
+  }
+
+  async getCourseById(id: string) {
+    try {
+      // check valid objectID
+      if (isValidObjectId(id) === false) {
+        return new HttpBadRequest('Invalid id');
+      }
+
+      // init course variable
+      let course: any;
+
+      // check course found in redis
+      course = await this.redisService.getKey(id);
+
+      // return course if found in redis
+      if (course) {
+        return new HttpResponse<any>(200, JSON.parse(course), 'Get course successfully');
+      }
+
+      // check course found in mongodb
+      course = await this.courseModel.findById(id).populate('courseData');
+
+      // return error if course not found
+      if (!course) {
+        return new HttpBadRequest('Course not found');
+      }
+
+      // set course in redis
+      await this.redisService.setKey(id, JSON.stringify(course), 60 * 60);
+
+      // return course
+      return new HttpResponse<any>(200, course, 'Get course successfully');
+    } catch (e) {
+      throw new HttpInternalServerError();
+    }
+  }
+
+  async getCourseDataById(id: string) {
+    try {
+      // check valid objectID
+      if (isValidObjectId(id) === false) {
+        return new HttpBadRequest('Invalid id');
+      }
+      // init course data variable
+      let courseData: any;
+
+      // check course data found in redis
+      courseData = await this.redisService.getKey(id);
+
+      // return course data if found in redis
+      if (courseData) {
+        return new HttpResponse<any>(200, JSON.parse(courseData), 'Get course data successfully');
+      }
+
+      // check course data found in mongodb
+      courseData = await this.courseDataModel.findById(id);
+
+      // return error if course data not found
+      if (!courseData) {
+        return new HttpBadRequest('Course data not found');
+      }
+
+      // set course data in redis
+      await this.redisService.setKey(id, JSON.stringify(courseData), 60 * 60);
+
+      // return course data
+      return new HttpResponse<any>(200, courseData, 'Get course data successfully');
+    } catch (e) {
+      throw new HttpInternalServerError();
+    }
+  }
+
+  // ! UPDATE
+  async updateCourseById(id: string, updateCourseDTO: UpdateCourseDTO) {
+    try {
+      // check valid objectID
+      if (isValidObjectId(id) === false) {
+        return new HttpBadRequest('Invalid id');
+      }
+
+      // check course found
+      const course = await this.courseModel.findById(id);
+
+      // return error if course not found
+      if (course.$isEmpty) {
+        return new HttpBadRequest('Course not found');
+      }
+
+      // execute update course
+      const executeUpdateCourse = await course.updateOne({
+        $set: {
+          ...updateCourseDTO,
+        },
+      });
+
+      // return error if update course fail
+      if (!executeUpdateCourse.$isUpdated) {
+        return new HttpBadRequest("Can't update course");
+      }
+
+      // remove course data in redis
+      await this.redisService.delKey(id);
+
+      // return success
+      return new HttpResponse<any>(200, course, 'Update course successfully');
+    } catch (e) {
+      throw new HttpInternalServerError();
+    }
+  }
+
+  async updateCourseDataById(id: string, updateCourseDataDTO: UpdateCourseDataDTO) {
+    try {
+      // check valid objectID
+      if (isValidObjectId(id) === false) {
+        return new HttpBadRequest('Invalid id');
+      }
+
+      // check course data found
+      const course = await this.courseModel.findById(id);
+
+      // return error if course data not found
+      if (course.$isEmpty) {
+        return new HttpBadRequest('Course data not found');
+      }
+
+      // execute update course data
+      const executeUpdateCourseData = await course.updateOne({
+        $set: {
+          ...updateCourseDataDTO,
+        },
+      });
+
+      // return error if update course data fail
+      if (!executeUpdateCourseData.$isUpdated) {
+        return new HttpBadRequest("Can't update course data");
+      }
+
+      // remove course data in redis
+      await this.redisService.delKey(id);
+
+      // return success
+      return new HttpResponse<any>(200, course, 'Update course data successfully');
+    } catch (e) {
+      throw new HttpInternalServerError();
+    }
+  }
+
+  async updateCourseThumbnail(id: string, thumbnail: Express.Multer.File) {
+    try {
+      // check valid objectID
+      if (isValidObjectId(id) === false) {
+        return new HttpBadRequest('Invalid id');
+      }
+
+      // check course found
+      const course = await this.courseModel.findById(id);
+
+      // return error if course not found
+      if (course.$isEmpty) {
+        return new HttpBadRequest('Course not found');
+      }
+
+      // Delete old thumbnail
+      await this.cloudinaryService.deleteFileImage(course.thumbnail.public_id.toString());
+
+      // Update new thumbnail
+
+      const thumbnailUrl = await this.cloudinaryService.uploadFileImage(thumbnail);
+
+      // execute update thumbnail
+      const executeUpdateThumbnail = await course.updateOne({
+        $set: {
+          thumbnail: {
+            public_id: thumbnailUrl.public_id,
+            url: thumbnailUrl.url,
+          },
+        },
+      });
+
+      // return error if update thumbnail fail
+      if (!executeUpdateThumbnail.$isUpdated) {
+        return new HttpBadRequest("Can't update thumbnail");
+      }
+
+      // remove course data in redis
+      await this.redisService.delKey(id);
+
+      // return success
+      return new HttpResponse<any>(200, executeUpdateThumbnail, 'Update thumbnail successfully');
+    } catch (e) {
+      throw new HttpInternalServerError();
+    }
+  }
+
+  async updateCourseDataThumbnail(id: string, thumbnail: Express.Multer.File) {
+    try {
+      // check valid objectID
+      if (isValidObjectId(id) === false) {
+        return new HttpBadRequest('Invalid id');
+      }
+      // check course data found
+      const courseData = await this.courseDataModel.findById(id).exec();
+
+      // return error if course data not found
+      if (courseData.$isEmpty) {
+        return new HttpBadRequest('Course data not found');
+      }
+
+      // Delete old thumbnail
+      await this.cloudinaryService.deleteFileImage(courseData.videoThumbnail.public_id.toString());
+
+      // Update new thumbnail
+      const thumbnailUrl = await this.cloudinaryService.uploadFileImage(thumbnail);
+
+      // return error if update thumbnail fail
+      if (!thumbnailUrl) {
+        return new HttpBadRequest("Can't update thumbnail");
+      }
+
+      // execute update thumbnail
+      const executeUpdateThumbnail = await courseData.updateOne({
+        $set: {
+          videoThumbnail: {
+            public_id: thumbnailUrl.public_id,
+            url: thumbnailUrl.url,
+          },
+        },
+      });
+
+      // return error if update thumbnail fail
+      if (!executeUpdateThumbnail.$isUpdated) {
+        return new HttpBadRequest("Can't update thumbnail");
+      }
+
+      // remove course data in redis
+      await this.redisService.delKey(id);
+
+      // return success
+      return new HttpResponse<any>(200, executeUpdateThumbnail, 'Update thumbnail successfully');
+    } catch (e) {
+      throw new HttpInternalServerError();
+    }
+  }
+
+  // ! DELETE
+  async deleteCourseById(id: string) {
+    try {
+      // check valid objectID
+      if (isValidObjectId(id) === false) {
+        return new HttpBadRequest('Invalid id');
+      }
+      // check course found
+      const course = await this.courseModel.findById(id).exec();
+
+      // return error if course not found
+      if (course.$isEmpty) {
+        return new HttpBadRequest('Course not found');
+      }
+
+      // Delete course
+      const executeDeleteCourse = await course.deleteOne();
+
+      // return error if delete course fail
+      if (!executeDeleteCourse.$isDeleted) {
+        return new HttpBadRequest("Can't delete course");
+      }
+
+      // todo: FUTURE WORK
+      // Delete all comment of course
+      // Delete all link of course
+      // Delete all review of course
+      // Delete all course data of course
+
+      // remove course data in redis
+      await this.redisService.delKey(id);
+
+      // return success
+      return new HttpOk('Delete course successfully');
+    } catch (e) {
+      throw new HttpInternalServerError();
+    }
+  }
+
+  async deleteCourseDataById(courseId: string, courseDataId: string) {
+    try {
+      // check valid objectID
+      if (isValidObjectId(courseId) === false) {
+        return new HttpBadRequest('Invalid id');
+      }
+
+      // check course found
+      const course = await this.courseModel.findById(courseId).exec();
+
+      // return error if course not found
+      if (course.$isEmpty) {
+        return new HttpBadRequest('Course not found');
+      }
+
+      // check course data found
+      const courseData = await this.courseDataModel.findById(courseDataId).exec();
+
+      // return error if course data not found
+      if (courseData.$isEmpty) {
+        return new HttpBadRequest('Course data not found');
+      }
+
+      // Delete course data
+      const executeDeleteCourseData = await courseData.deleteOne();
+
+      // Delete course data in course
+      await course.updateOne({
+        $pull: {courseData: courseDataId},
+      });
+
+      // todo: FUTURE WORK
+      // Delete all comment of course data
+      // Delete all link of course data
+      // Delete all review of course data
+      // Delete all videoThumbnail of course data in cloudinary
+
+      // return error if delete course data fail
+      if (!executeDeleteCourseData.$isDeleted) {
+        return new HttpBadRequest("Can't delete course data");
+      }
+
+      // remove course data in redis
+      await this.redisService.delKey(courseDataId);
+      await this.redisService.delKey(courseId);
+
+      // return success
+      return new HttpOk('Delete course data successfully');
+    } catch (e) {
       throw new HttpInternalServerError();
     }
   }

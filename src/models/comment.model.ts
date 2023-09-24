@@ -6,10 +6,10 @@ export type CommentDocument = Comment & Document;
 
 @Schema({timestamps: true, id: true})
 export class Comment {
-  @Prop({name: 'owner', type: Types.ObjectId, ref: User.name, required: true})
+  @Prop({name: 'owner', type: Types.ObjectId, ref: User.name})
   owner: User;
 
-  @Prop({required: true, name: 'comment', type: String, default: ''})
+  @Prop({name: 'comment', type: String, default: ''})
   comment: string;
 
   @Prop({name: 'like', type: [Types.ObjectId], ref: User.name, default: []})

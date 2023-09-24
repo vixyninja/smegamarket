@@ -3,14 +3,18 @@ import {InjectModel} from '@nestjs/mongoose';
 import {Model} from 'mongoose';
 import {HttpInternalServerError} from 'src/core';
 import {Link} from 'src/models';
+import {CreateLinkDTO, UpdateLinkDTO} from './dto';
 
 @Injectable()
 export class LinkService {
   constructor(@InjectModel(Link.name) private readonly linkModel: Model<Link>) {}
 
-  async createLink(link: Link) {
+  async createLink(createLinkDTO: CreateLinkDTO) {
     try {
-      return await this.linkModel.create(link);
+      return await this.linkModel.create({
+        title: createLinkDTO.title,
+        url: createLinkDTO.url,
+      });
     } catch (error) {
       throw new HttpInternalServerError();
     }
@@ -32,9 +36,18 @@ export class LinkService {
     }
   }
 
-  async updateLinkById(id: string, link: Link) {
+  async updateLinkById(updateLinkDTO: UpdateLinkDTO, id: string) {
     try {
-      return await this.linkModel.findByIdAndUpdate(id, link, {new: true});
+      return await this.linkModel.findByIdAndUpdate(
+        id,
+        {
+          $set: {
+            title: updateLinkDTO.title,
+            url: updateLinkDTO.url,
+          },
+        },
+        {new: true},
+      );
     } catch (error) {
       throw new HttpInternalServerError();
     }

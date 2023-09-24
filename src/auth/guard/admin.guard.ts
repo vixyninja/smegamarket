@@ -1,5 +1,4 @@
 import {CanActivate, ExecutionContext, Injectable} from '@nestjs/common';
-import {Observable} from 'rxjs';
 import {HttpUnauthorized} from 'src/core';
 import {UserService} from 'src/modules/user';
 

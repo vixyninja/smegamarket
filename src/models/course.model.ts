@@ -44,19 +44,23 @@ export class CourseData {
 
 @Schema({timestamps: true, id: true})
 export class Course {
-  @Prop({required: true, name: 'name', type: String})
+  @Prop({required: true, name: 'name', type: String, default: ''})
   name: string;
 
   @Prop({required: true, name: 'description', type: String, default: ''})
   description: string;
 
-  @Prop({required: true, name: 'price', type: Number})
+  @Prop({required: true, name: 'price', type: Number, default: 0})
   price: number;
 
   @Prop({required: true, name: 'discount', type: Number, default: 0})
   discount: number;
 
-  @Prop({required: true, name: 'thumbnail', type: Object})
+  @Prop({
+    required: true,
+    name: 'thumbnail',
+    type: Object,
+  })
   thumbnail: {
     public_id: {
       type: String;
@@ -71,10 +75,10 @@ export class Course {
   @Prop({required: true, name: 'tags', type: [String], default: []})
   tags: [string];
 
-  @Prop({required: true, name: 'level', type: String})
+  @Prop({required: true, name: 'level', type: String, default: ''})
   level: string;
 
-  @Prop({required: true, name: 'demoURL', type: String})
+  @Prop({required: true, name: 'demoURL', type: String, default: ''})
   demoURL: string;
 
   @Prop({required: true, name: 'benefits', type: String, default: ''})
@@ -83,10 +87,21 @@ export class Course {
   @Prop({required: true, name: 'prerequisites', type: String, default: ''})
   prerequisites: string;
 
-  @Prop({name: 'reviews', type: [Types.ObjectId], ref: Review.name, default: []})
+  @Prop({
+    name: 'reviews',
+    type: [Types.ObjectId],
+    ref: Review.name,
+    default: [],
+  })
   reviews: [Review];
 
-  @Prop({required: true, name: 'courseData', type: [Types.ObjectId], ref: CourseData.name, default: []})
+  @Prop({
+    required: true,
+    name: 'courseData',
+    type: [Types.ObjectId],
+    ref: CourseData.name,
+    default: [],
+  })
   courseData: [CourseData];
 
   @Prop({required: true, name: 'isPublished', type: Boolean, default: false})
@@ -95,8 +110,8 @@ export class Course {
   @Prop({required: true, name: 'rating', type: Number, default: 0})
   rating: number;
 
-  @Prop({required: true, name: 'purchased', type: Number, default: 0})
-  purchased: number;
+  @Prop({required: true, name: 'purchased', type: Boolean, default: false})
+  purchased: boolean;
 }
 
 export const CourseSchema = SchemaFactory.createForClass(Course);

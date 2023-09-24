@@ -1,6 +1,6 @@
 import {Module} from '@nestjs/common';
 import {MongooseModule} from '@nestjs/mongoose';
-import {CloudinaryModule} from 'src/configs';
+import {CloudinaryModule, RedisxModule} from 'src/configs';
 import {Course, CourseData, CourseDataSchema, CourseSchema} from 'src/models';
 import {CommentModule} from '../comment';
 import {ReviewModule} from '../review';
@@ -20,6 +20,7 @@ import {LinkModule} from '../link';
     ReviewModule,
     CommentModule,
     LinkModule,
+    RedisxModule,
   ],
   controllers: [CourseController],
   providers: [CourseService],
