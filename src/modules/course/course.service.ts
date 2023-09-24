@@ -37,7 +37,6 @@ export class CourseService {
       // return success
       return new HttpCreatedResponse<any>(course, 'Create course successfully');
     } catch (e) {
-      console.log(e);
       throw new HttpInternalServerError();
     }
   }
@@ -67,7 +66,6 @@ export class CourseService {
       // return success
       return new HttpCreatedResponse<any>(courseData, 'Create course data successfully');
     } catch (e) {
-      console.log(e);
       throw new HttpInternalServerError();
     }
   }
@@ -260,8 +258,9 @@ export class CourseService {
       course.$isEmpty('Course not found');
 
       // Delete old thumbnail
-      // await this.cloudinaryService.deleteFileImage(course.thumbnail.public_id.toString());
-
+      if (course.thumbnail.public_id.toString().length > 0) {
+        await this.cloudinaryService.deleteFileImage(course.thumbnail.public_id.toString());
+      }
       // Update new thumbnail
       const thumbnailUrl = await this.cloudinaryService.uploadFileImage(thumbnail);
 
@@ -286,7 +285,6 @@ export class CourseService {
       // return success
       return new HttpOk('Update thumbnail successfully');
     } catch (e) {
-      console.log(e);
       throw new HttpInternalServerError();
     }
   }
@@ -304,7 +302,9 @@ export class CourseService {
       courseData.$isEmpty('Course data not found');
 
       // Delete old thumbnail
-      await this.cloudinaryService.deleteFileImage(courseData.videoThumbnail.public_id.toString());
+      if (courseData.videoThumbnail.public_id.toString().length > 0) {
+        await this.cloudinaryService.deleteFileImage(courseData.videoThumbnail.public_id.toString());
+      }
 
       // Update new thumbnail
       const thumbnailUrl = await this.cloudinaryService.uploadFileImage(thumbnail);
@@ -325,7 +325,7 @@ export class CourseService {
       });
 
       // return error if update thumbnail fail
-      if (!executeUpdateThumbnail.$isUpdated) {
+      if (!executeUpdateThumbnail) {
         return new HttpBadRequest("Can't update thumbnail");
       }
 
@@ -333,8 +333,10 @@ export class CourseService {
       await this.redisService.delKey(id);
 
       // return success
-      return new HttpResponse<any>(200, executeUpdateThumbnail, 'Update thumbnail successfully');
+      return new HttpOk('Update thumbnail successfully');
     } catch (e) {
+      console.log(e);
+
       throw new HttpInternalServerError();
     }
   }

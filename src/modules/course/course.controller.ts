@@ -1,4 +1,15 @@
-import {Body, Controller, Get, Param, Post, Put, SetMetadata, UploadedFile, UseInterceptors} from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  SetMetadata,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import {FileInterceptor} from '@nestjs/platform-express';
 import {IS_PUBLIC_KEY} from 'src/core';
 import {CourseService} from './course.service';
@@ -63,13 +74,13 @@ export class CourseController {
 
   // ! DELETE
   // @UseGuards(FirebaseAuthGuard, AdminGuard)
-  @Put('delete-course')
+  @Delete('delete-course')
   async deleteCourse(@Body() body: {courseId: string}) {
     return await this.courseService.deleteCourseById(body.courseId);
   }
 
   // @UseGuards(FirebaseAuthGuard, AdminGuard)
-  @Put('delete-course-data')
+  @Delete('delete-course-data')
   async deleteCourseData(@Body() body: {courseId: string; courseDataId: string}) {
     return await this.courseService.deleteCourseDataById(body.courseId, body.courseDataId);
   }
