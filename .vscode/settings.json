@@ -6,6 +6,7 @@
     "flushall",
     "INITDB",
     "maxlength",
+    "metatype",
     "Modulex",
     "Redisx",
     "streamifier",

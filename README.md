@@ -1,1 +1,1 @@
-# lms-be
+# SMegaMarket
