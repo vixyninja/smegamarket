@@ -1,16 +1,12 @@
-import {MiddlewareConsumer, Module, NestModule} from '@nestjs/common';
+import {Module} from '@nestjs/common';
 
-import {Logger} from 'src/core';
-import {AuthModule} from './auth/auth.module';
-import {CloudinaryModule, MailModule, MongodbModule, RedisxModule, ThrottlerxModule} from './configs';
+import {AppController} from './app.controller';
+import {CloudinaryModule, MailModule, RedisxModule, ThrottlerxModule} from './configs';
+import {PostgresDBModule} from './configs/postgresdb';
 
 @Module({
-  imports: [MailModule, CloudinaryModule, AuthModule, MongodbModule, RedisxModule, ThrottlerxModule],
+  imports: [MailModule, CloudinaryModule, RedisxModule, PostgresDBModule, ThrottlerxModule],
   providers: [],
-  controllers: [],
+  controllers: [AppController],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(Logger).forRoutes('*');
-  }
-}
+export class AppModule {}

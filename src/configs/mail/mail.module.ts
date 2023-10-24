@@ -2,20 +2,20 @@ import {MailerModule} from '@nestjs-modules/mailer';
 import {HandlebarsAdapter} from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import {Module} from '@nestjs/common';
 import {join} from 'path';
-import {MAIL_HOST, MAIL_PASSWORD, MAIL_USER} from '../environments';
 import {MailService} from './mail.service';
+import {Environment} from '../environments';
 @Module({
   imports: [
     MailerModule.forRootAsync({
       useFactory: () => ({
         transport: {
-          host: MAIL_HOST,
+          host: Environment.MAIL_HOST,
           port: 587,
           date: new Date(),
           secure: false,
           auth: {
-            user: MAIL_USER,
-            pass: MAIL_PASSWORD,
+            user: Environment.MAIL_USER,
+            pass: Environment.MAIL_PASSWORD,
           },
         },
         defaults: {

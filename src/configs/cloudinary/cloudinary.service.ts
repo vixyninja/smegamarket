@@ -1,7 +1,7 @@
 import {Injectable} from '@nestjs/common';
 import {v2 as cloudinary} from 'cloudinary';
 import {HttpBadRequest} from 'src/core';
-import {CloudinaryResponse} from './types';
+import {CloudinaryResponse} from './type';
 
 const streamifier = require('streamifier');
 

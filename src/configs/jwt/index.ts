@@ -1,11 +1,6 @@
 import {Injectable} from '@nestjs/common';
 import {JwtService} from '@nestjs/jwt';
-import {
-  ACCESS_TOKEN_EXPIRATION_TIME,
-  ACCESS_TOKEN_SECRET,
-  REFRESH_TOKEN_EXPIRATION_TIME,
-  REFRESH_TOKEN_SECRET,
-} from '../environments';
+import {Environment} from '../environments';
 
 export type JWTPayload = {
   uid: string;
@@ -17,12 +12,12 @@ type Token = 'access' | 'refresh';
 
 const common: Record<Token, Record<string, string>> = {
   access: {
-    secret: ACCESS_TOKEN_SECRET,
-    expiration: ACCESS_TOKEN_EXPIRATION_TIME,
+    secret: Environment.ACCESS_TOKEN_SECRET,
+    expiration: Environment.ACCESS_TOKEN_EXPIRATION_TIME,
   },
   refresh: {
-    secret: REFRESH_TOKEN_SECRET,
-    expiration: REFRESH_TOKEN_EXPIRATION_TIME,
+    secret: Environment.REFRESH_TOKEN_SECRET,
+    expiration: Environment.REFRESH_TOKEN_EXPIRATION_TIME,
   },
 };
 

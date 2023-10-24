@@ -2,7 +2,7 @@ import {Module} from '@nestjs/common';
 import {APP_GUARD} from '@nestjs/core';
 import {ThrottlerGuard, ThrottlerModule} from '@nestjs/throttler';
 import {ThrottlerStorageRedisService} from 'nestjs-throttler-storage-redis';
-import {REDIS_HOST, REDIS_PASSWORD, REDIS_PORT, REDIS_USERNAME, THROTTLE_LIMIT, THROTTLE_TTL} from '../environments';
+import {Environment} from '@/configs/environments';
 
 @Module({
   imports: [
@@ -10,15 +10,15 @@ import {REDIS_HOST, REDIS_PASSWORD, REDIS_PORT, REDIS_USERNAME, THROTTLE_LIMIT, 
       useFactory: () => ({
         throttlers: [
           {
-            ttl: THROTTLE_TTL,
-            limit: THROTTLE_LIMIT,
+            ttl: Environment.THROTTLE_TTL,
+            limit: Environment.THROTTLE_LIMIT,
           },
         ],
         storage: new ThrottlerStorageRedisService({
-          host: REDIS_HOST,
-          port: REDIS_PORT,
-          username: REDIS_USERNAME,
-          password: REDIS_PASSWORD,
+          host: Environment.REDIS_HOST,
+          port: Environment.REDIS_PORT,
+          username: Environment.REDIS_USERNAME,
+          password: Environment.REDIS_PASSWORD,
         }),
       }),
     }),

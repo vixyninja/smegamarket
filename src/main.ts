@@ -3,6 +3,7 @@ import {NestFactory} from '@nestjs/core';
 import helmet from 'helmet';
 import {AppModule} from './app.module';
 import {
+  ErrorsInterceptor,
   FormatResponseInterceptor,
   HttpExceptionFilter,
   LogsInterceptor,
@@ -17,7 +18,12 @@ async function bootstrap() {
     bufferLogs: true,
     snapshot: true,
   });
+
+  const prefix = 'api/v1';
+  const port = process.env.PORT;
+
   app.use(helmet());
+
   app.enableCors({
     origin: true,
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'x-requested-with', 'Access-Control-Allow-Origin'],
@@ -26,11 +32,20 @@ async function bootstrap() {
     maxAge: 3600,
     exposedHeaders: ['Content-Range', 'X-Content-Range'],
   });
-  app.setGlobalPrefix('v1');
+  app.setGlobalPrefix(prefix);
+
   app.useGlobalFilters(new HttpExceptionFilter());
+
   app.useGlobalPipes(new ValidationPipe());
-  app.useGlobalInterceptors(new TimeoutInterceptor(), new FormatResponseInterceptor(), new LogsInterceptor());
-  await app.listen(process.env.PORT);
+
+  app.useGlobalInterceptors(
+    new TimeoutInterceptor(),
+    new ErrorsInterceptor(),
+    new LogsInterceptor(),
+    new FormatResponseInterceptor(),
+  );
+
+  await app.listen(port);
 }
 bootstrap().then(() =>
   Logger.debug(

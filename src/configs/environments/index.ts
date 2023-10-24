@@ -10,6 +10,7 @@ const CORS_ORIGIN: string[] = ['http://localhost:3000'];
 const NODE_ENV: string = process.env.NODE_ENV;
 const PORT: number = +process.env.PORT;
 const HASH: number = +process.env.HASH;
+const SERVER_NAME = 'mega_market';
 
 // mail
 const MAIL_HOST: string = process.env.MAIL_HOST;
@@ -17,6 +18,7 @@ const MAIL_PORT: number = +process.env.MAIL_PORT;
 const MAIL_USER: string = process.env.MAIL_USER;
 const MAIL_PASSWORD: string = process.env.MAIL_PASSWORD;
 
+// throttle
 const THROTTLE_TTL: number = +process.env.THROTTLE_TTL;
 const THROTTLE_LIMIT: number = +process.env.THROTTLE_LIMIT;
 
@@ -41,6 +43,7 @@ const MONGO_PORT: number = +process.env.MONGO_PORT;
 const MONGO_INITDB_DATABASE: string = process.env.MONGO_INITDB_DATABASE;
 const MONGO_INITDB_ROOT_USERNAME: string = process.env.MONGO_INITDB_ROOT_USERNAME;
 const MONGO_INITDB_ROOT_PASSWORD: string = process.env.MONGO_INITDB_ROOT_PASSWORD;
+
 // jwt
 const ACCESS_TOKEN_SECRET: string = process.env.ACCESS_TOKEN_SECRET;
 const ACCESS_TOKEN_EXPIRATION_TIME: string = process.env.ACCESS_TOKEN_EXPIRATION_TIME;
@@ -49,6 +52,7 @@ const REFRESH_TOKEN_EXPIRATION_TIME: string = process.env.REFRESH_TOKEN_EXPIRATI
 const APP_SECRET: string = process.env.APP_SECRET;
 
 // cloud
+const FOLDER_NAME: string = process.env.FOLDER_NAME;
 const CLOUD_NAME: string = process.env.CLOUD_NAME;
 const API_KEY: string = process.env.API_KEY;
 const API_SECRET: string = process.env.API_SECRET;
@@ -73,7 +77,7 @@ const FIREBASE_MEASUREMENT_ID: string = process.env.FIREBASE_MEASUREMENT_ID;
 const FIREBASE_ADMIN_CLIENT_EMAIL: string = process.env.FIREBASE_ADMIN_CLIENT_EMAIL;
 const FIREBASE_SECURE_TOKEN_URL: string = process.env.FIREBASE_SECURE_TOKEN_URL;
 
-export {
+export const Environment = {
   ACCESS_TOKEN_EXPIRATION_TIME,
   ACCESS_TOKEN_SECRET,
   API_KEY,
@@ -126,4 +130,6 @@ export {
   REDIS_USERNAME,
   THROTTLE_LIMIT,
   THROTTLE_TTL,
+  SERVER_NAME,
+  FOLDER_NAME,
 };

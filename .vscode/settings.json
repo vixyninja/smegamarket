@@ -8,8 +8,10 @@
     "maxlength",
     "metatype",
     "Modulex",
+    "postgresdb",
     "Redisx",
     "streamifier",
-    "Throttlerx"
+    "Throttlerx",
+    "typeorm"
   ]
 }

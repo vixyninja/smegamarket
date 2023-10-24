@@ -1,5 +1,5 @@
 import {HttpException, HttpStatus} from '@nestjs/common';
-import * as TEXT from '../../constants';
+import * as TEXT from '../constants';
 
 export class HttpInternalServerError extends HttpException {
   constructor(error?: any) {

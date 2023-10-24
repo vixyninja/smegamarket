@@ -1,9 +1,9 @@
+import {Environment} from '@/configs';
 import {Injectable} from '@nestjs/common';
 import {JwtService} from '@nestjs/jwt';
 import {PassportStrategy} from '@nestjs/passport';
 import {Request} from 'express';
 import {ExtractJwt, Strategy} from 'passport-firebase-jwt';
-import {APP_SECRET} from 'src/configs';
 import {HttpBadRequest} from 'src/core';
 
 @Injectable()
@@ -19,7 +19,7 @@ export class FirebaseAuthStrategy extends PassportStrategy(Strategy, 'firebase-a
       const decodedToken = await this.jwtService
         .verifyAsync(token, {
           algorithms: ['RS256'],
-          publicKey: APP_SECRET.replace(/\\n/g, '\n'),
+          publicKey: Environment.APP_SECRET.replace(/\\n/g, '\n'),
         })
         .then((decodedToken) => {
           return decodedToken;
