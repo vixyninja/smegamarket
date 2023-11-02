@@ -1,10 +1,9 @@
 import {Module} from '@nestjs/common';
-
-import {AppController} from './app.controller';
-import {CloudinaryModule, MailModule, RedisxModule, ThrottlerxModule} from './configs';
-import {UserModule} from './modules/user';
 import {TypeOrmModule} from '@nestjs/typeorm';
-import {PostgresDBService} from './configs/postgresdb';
+import {AppController} from './app.controller';
+import {CloudinaryModule, MailModule, PostgresDBService, RedisxModule, ThrottlerxModule} from './configs';
+import {UserModule} from './modules/user';
+import {AuthModule} from './auth/auth.module';
 
 @Module({
   imports: [
@@ -15,6 +14,8 @@ import {PostgresDBService} from './configs/postgresdb';
     CloudinaryModule,
     RedisxModule,
     ThrottlerxModule,
+    AuthModule,
+    // MODULES
     UserModule,
   ],
   providers: [],

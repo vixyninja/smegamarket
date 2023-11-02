@@ -3,7 +3,6 @@ import {NestFactory} from '@nestjs/core';
 import helmet from 'helmet';
 import {AppModule} from './app.module';
 import {
-  ErrorsInterceptor,
   FormatResponseInterceptor,
   HttpExceptionFilter,
   LogsInterceptor,
@@ -33,18 +32,9 @@ async function bootstrap() {
     exposedHeaders: ['Content-Range', 'X-Content-Range'],
   });
   app.setGlobalPrefix(prefix);
-
   app.useGlobalFilters(new HttpExceptionFilter());
-
   app.useGlobalPipes(new ValidationPipe());
-
-  app.useGlobalInterceptors(
-    new TimeoutInterceptor(),
-    new ErrorsInterceptor(),
-    new LogsInterceptor(),
-    new FormatResponseInterceptor(),
-  );
-
+  app.useGlobalInterceptors(new TimeoutInterceptor(), new LogsInterceptor(), new FormatResponseInterceptor());
   await app.listen(port);
 }
 bootstrap().then(() =>

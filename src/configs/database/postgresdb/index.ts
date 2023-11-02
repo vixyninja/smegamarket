@@ -1,6 +1,6 @@
+import {Environment} from '@/configs/environments';
 import {Injectable} from '@nestjs/common';
 import {TypeOrmModuleOptions, TypeOrmOptionsFactory} from '@nestjs/typeorm';
-import {Environment} from '../environments';
 
 @Injectable()
 export class PostgresDBService implements TypeOrmOptionsFactory {

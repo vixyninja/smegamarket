@@ -3,7 +3,7 @@ import {v2 as cloudinary} from 'cloudinary';
 import {Environment} from '../environments';
 
 export const CloudinaryProvider: Provider = {
-  provide: 'Cloudinary',
+  provide: 'CLOUDINARY',
   useFactory: () => {
     return cloudinary.config({
       cloud_name: Environment.CLOUD_NAME,

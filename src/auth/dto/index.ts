@@ -1,4 +1,2 @@
-export * from './login.dto';
-export * from './register.dto';
-export * from './refresh.dto';
-export * from './forgotPass.dto';
+export * from './signin-google.dto';
+export * from './signin-email.dto';

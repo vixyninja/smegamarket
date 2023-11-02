@@ -1,215 +1,87 @@
-// import {HttpService} from '@nestjs/axios';
-// import {Inject, Injectable} from '@nestjs/common';
-// import {AxiosResponse} from 'axios';
-// import * as firebaseAuth from 'firebase/auth';
-// import {Observable, catchError, map, throwError} from 'rxjs';
-// import {HttpBadRequest, HttpInternalServerError, HttpUnauthorized} from 'src/core';
-// import {HttpOk, HttpSuccessResponse} from 'src/interface';
-// import {ForgotPasswordDTO, LoginDTO, RegisterDTO} from './dto';
-// import {TokenType} from './types';
-// import {RedisxService} from 'src/configs/redisx/redisx.service';
+import {Environment, JWTService, RedisxService} from '@/configs';
+import {JWTPayload} from '@/configs/jwt/typedef';
+import {HttpBadRequest, RoleEnum} from '@/core';
+import {CreateUserDTO, UserEntity, UserService} from '@/modules/user';
+import {Injectable} from '@nestjs/common';
+import {InjectRepository} from '@nestjs/typeorm';
+import {LoginTicket, OAuth2Client, TokenPayload} from 'google-auth-library';
+import {Repository} from 'typeorm';
+import {SignInEmailDTO, SignInGoogleDTO} from './dto';
 
-// @Injectable()
-// export class AuthService {
-//   constructor(
-//     @Inject('FirebaseAuth') private readonly firebaseAuth: firebaseAuth.Auth,
-//     private readonly httpService: HttpService,
-//     private readonly redisService: RedisxService,
-//   ) {}
+interface AuthServiceInterface {
+  signInGoogle(signInGoogleDTO: SignInGoogleDTO): Promise<any>;
+  signInFacebook(): Promise<any>;
+  signUpEmailAndPassword(signInEmailDTO: SignInEmailDTO): Promise<any>;
+  signInEmailAndPassword(): Promise<any>;
+  signOut(): Promise<any>;
+  forgotPassword(): Promise<any>;
+}
 
-//   async register(registerDTO: RegisterDTO) {
-//     try {
-//       let user: any;
-//       let userModel: any;
-//       // check email exists
-//       userModel = await this.userService.findOneByEmail(registerDTO.email);
+@Injectable()
+export class AuthService implements AuthServiceInterface {
+  constructor(
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
+    private readonly userService: UserService,
+    private readonly redisService: RedisxService,
+    private readonly jwtService: JWTService,
+  ) {}
+  async signInGoogle(signInGoogleDTO: SignInGoogleDTO): Promise<any> {
+    try {
+      const {deviceToken, deviceType, idToken} = signInGoogleDTO;
+      const client: OAuth2Client = new OAuth2Client(Environment.GOOGLE_CLIENT_ID);
+      const ticker: LoginTicket = await client.verifyIdToken({
+        idToken: idToken,
+        audience: Environment.GOOGLE_CLIENT_ID,
+        maxExpiry: 1000 * 60 * 60 * 24 * 7,
+      });
 
-//       if (userModel) {
-//         throw new HttpBadRequest('Email already exists');
-//       }
+      const payload: TokenPayload = ticker.getPayload();
 
-//       // create user with email and password to firebase
-//       user = await firebaseAuth.createUserWithEmailAndPassword(
-//         this.firebaseAuth,
-//         registerDTO.email,
-//         registerDTO.password,
-//       );
-
-//       // handle error when create user firebase
-//       if (!user) {
-//         throw new HttpBadRequest('Register failed');
-//       }
-
-//       // create user to mongodb
-//       userModel = await this.userService.create({
-//         firebase_uid: user.user.uid,
-//         email: user.user.email,
-//         name: user.user.displayName || 'Người dùng mới',
-//       });
-
-//       // handle error when create user
-//       if (!user || !userModel) {
-//         throw new HttpBadRequest('Register failed');
-//       }
-
-//       await firebaseAuth.updateProfile(user.user, {
-//         displayName: userModel.name,
-//       });
-//       await firebaseAuth.sendEmailVerification(user.user);
-//       await this.mailService.sendUserConfirmation(user.user.email, userModel.name);
-//       // response token
-//       return new HttpSuccessResponse<TokenType>(
-//         {
-//           accessToken: await firebaseAuth.getIdToken(user.user),
-//           refreshToken: user.user.refreshToken,
-//         },
-//         'Register successfully',
-//       );
-//     } catch (e) {
-//       if (e.code === 'auth/user-not-found') {
-//         throw new HttpBadRequest('Email not exists');
-//       } else if (e.code === 'auth/wrong-password') {
-//         throw new HttpBadRequest('Password is incorrect');
-//       } else if (e.code === 'auth/too-many-requests') {
-//         throw new HttpBadRequest('Too many requests, please try again later');
-//       } else if (e.code === 'auth/invalid-email') {
-//         throw new HttpBadRequest('Email is invalid');
-//       } else if (e.code === 'auth/user-disabled') {
-//         throw new HttpBadRequest('User is disabled');
-//       } else if (e.code === 'auth/operation-not-allowed') {
-//         throw new HttpBadRequest('Operation not allowed');
-//       } else if (e.code === 'auth/weak-password') {
-//         throw new HttpBadRequest('Password is too weak');
-//       } else if (e.code === 'auth/email-already-in-use') {
-//         throw new HttpBadRequest('Email already exists');
-//       }
-//       throw new HttpInternalServerError(e.message || 'Server error');
-//     }
-//   }
-
-//   async login(loginDTO: LoginDTO) {
-//     try {
-//       let user: any;
-
-//       // login with email and password to firebase
-//       user = await firebaseAuth.signInWithEmailAndPassword(this.firebaseAuth, loginDTO.email, loginDTO.password);
-
-//       // handle error when login
-//       if (!user) {
-//         throw new HttpBadRequest('Login failed');
-//       }
-
-//       // response token
-//       return new HttpSuccessResponse<TokenType>(
-//         {
-//           accessToken: await firebaseAuth.getIdToken(user.user, true),
-//           refreshToken: user.user.refreshToken,
-//         },
-//         'Login successfully',
-//       );
-//     } catch (e) {
-//       if (e.code === 'auth/user-not-found') {
-//         throw new HttpBadRequest('Email not exists');
-//       } else if (e.code === 'auth/wrong-password') {
-//         throw new HttpBadRequest('Password is incorrect');
-//       } else if (e.code === 'auth/too-many-requests') {
-//         throw new HttpBadRequest('Too many requests, please try again later');
-//       } else if (e.code === 'auth/invalid-email') {
-//         throw new HttpBadRequest('Email is invalid');
-//       } else if (e.code === 'auth/user-disabled') {
-//         throw new HttpBadRequest('User is disabled');
-//       } else if (e.code === 'auth/operation-not-allowed') {
-//         throw new HttpBadRequest('Operation not allowed');
-//       } else if (e.code === 'auth/weak-password') {
-//         throw new HttpBadRequest('Password is too weak');
-//       } else if (e.code === 'auth/email-already-in-use') {
-//         throw new HttpBadRequest('Email already exists');
-//       }
-//       throw new HttpInternalServerError(e.message || 'Server error');
-//     }
-//   }
-
-//   async forgotPassword(forgotPassword: ForgotPasswordDTO) {
-//     try {
-//       let user: any;
-
-//       if (user == null) {
-//         throw new HttpBadRequest('Email not exists');
-//       }
-//       await firebaseAuth.sendPasswordResetEmail(this.firebaseAuth, forgotPassword.email);
-//       return new HttpOk('Send email successfully, please check your email');
-//     } catch (e) {
-//       throw new HttpInternalServerError('Server error');
-//     }
-//   }
-
-//   async loginWithGoogle(idToken: string, accessToken: string) {
-//     try {
-//       const credential = firebaseAuth.GoogleAuthProvider.credential(idToken, accessToken);
-//       const user = await firebaseAuth.signInWithCredential(this.firebaseAuth, credential);
-//       if (!user) {
-//         throw new HttpBadRequest('Login failed');
-//       }
-//       throw new HttpSuccessResponse<TokenType>(
-//         {
-//           accessToken: await firebaseAuth.getIdToken(user.user),
-//           refreshToken: user.user.refreshToken,
-//         },
-//         'Login successfully',
-//       );
-//     } catch (e) {
-//       throw new HttpInternalServerError('Server error');
-//     }
-//   }
-
-//   async refreshToken(refreshToken: string): Promise<Observable<AxiosResponse<any, any>>> {
-//     try {
-//       const data = this.httpService
-//         .post(
-//           FIREBASE_SECURE_TOKEN_URL + `=${FIREBASE_API_KEY}`,
-//           {
-//             grant_type: 'refresh_token',
-//             refresh_token: refreshToken,
-//           },
-//           {
-//             headers: {
-//               'Content-Type': 'x-www-form-urlencoded',
-//             },
-//           },
-//         )
-//         .pipe(map((res) => res.data))
-//         .pipe(
-//           catchError((e) => {
-//             if (e.code === 'ERR_BAD_REQUEST') {
-//               const error = new HttpUnauthorized('Refresh token is invalid');
-//               return throwError(() => error);
-//             } else if (e.code === 'TOKEN_EXPIRED') {
-//               const error = new HttpUnauthorized('Refresh token is invalid');
-//               return throwError(() => error);
-//             } else if (e.code === 'USER_DISABLED') {
-//               const error = new HttpUnauthorized('User is disabled');
-//               return throwError(() => error);
-//             } else if (e.code === 'USER_NOT_FOUND') {
-//               const error = new HttpUnauthorized('User not found');
-//               return throwError(() => error);
-//             } else if (e.code === 'INVALID_REFRESH_TOKEN') {
-//               const error = new HttpUnauthorized('Refresh token is invalid');
-//               return throwError(() => error);
-//             } else if (e.code === 'INVALID_GRANT_TYPE') {
-//               const error = new HttpUnauthorized('Refresh token is invalid');
-//               return throwError(() => error);
-//             } else if (e.code === 'MISSING_REFRESH_TOKEN') {
-//               const error = new HttpUnauthorized('Refresh token is invalid');
-//               return throwError(() => error);
-//             } else {
-//               const error = new HttpInternalServerError('Server error');
-//               return throwError(() => error);
-//             }
-//           }),
-//         );
-//       return data;
-//     } catch (e) {
-//       throw new HttpInternalServerError('Server error');
-//     }
-//   }
-// }
+      return null;
+    } catch (e) {
+      throw new HttpBadRequest(e.message);
+    }
+  }
+  signInFacebook(): Promise<any> {
+    throw new Error('Method not implemented.');
+  }
+  async signUpEmailAndPassword(signInEmailDTO: SignInEmailDTO): Promise<any> {
+    try {
+      const {deviceToken, deviceType, email, password, firstName, lastName} = signInEmailDTO;
+      const user: UserEntity = await this.userService.findByEmail(email);
+      console.log(user);
+      if (user) return new HttpBadRequest('Email already exists');
+      const createUserDTO: CreateUserDTO = {
+        email: email,
+        firstName: firstName,
+        lastName: lastName,
+      };
+      const newUser: UserEntity = await this.userService.createUser(createUserDTO);
+      const payload: JWTPayload = {
+        deviceToken: deviceToken,
+        deviceType: deviceType,
+        email: email,
+        role: RoleEnum.USER,
+        uuid: newUser.uuid,
+      };
+      const accessToken = await this.jwtService.signToken(payload, 'accessToken');
+      const refreshToken = await this.jwtService.signToken(payload, 'refreshToken');
+      return {
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+      };
+    } catch (e) {
+      throw new HttpBadRequest(e.message);
+    }
+  }
+  signInEmailAndPassword(): Promise<any> {
+    throw new Error('Method not implemented.');
+  }
+  signOut(): Promise<any> {
+    throw new Error('Method not implemented.');
+  }
+  forgotPassword(): Promise<any> {
+    throw new Error('Method not implemented.');
+  }
+}

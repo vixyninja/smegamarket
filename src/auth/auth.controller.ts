@@ -1,40 +1,24 @@
-// import {Body, Controller, Post, SetMetadata, UseGuards} from '@nestjs/common';
+import {Public} from '@/core';
+import {BadRequestException, Body, Controller, Injectable, Post} from '@nestjs/common';
+import {SkipThrottle} from '@nestjs/throttler';
+import {AuthService} from './auth.service';
+import {SignInEmailDTO, SignInGoogleDTO} from './dto';
 
-// import {IS_PUBLIC_KEY} from 'src/core';
-// import {AuthService} from './auth.service';
-// import {ForgotPasswordDTO, LoginDTO, RegisterDTO} from './dto';
-// import {FirebaseAuthGuard} from './firebase';
-// import {SkipThrottle} from '@nestjs/throttler';
+@Public()
+@SkipThrottle()
+@Controller('auth')
+export class AuthController {
+  constructor(private readonly authService: AuthService) {}
 
-// @SkipThrottle()
-// @UseGuards(FirebaseAuthGuard)
-// @Controller('auth')
-// export class AuthController {
-//   constructor(private readonly authService: AuthService) {}
+  @Post('google')
+  async signInGoogle(@Body() signInGoogleDTO: SignInGoogleDTO): Promise<any> {
+    return await this.authService.signInGoogle(signInGoogleDTO);
+  }
 
-//   @SetMetadata(IS_PUBLIC_KEY, true)
-//   @Post('register')
-//   async register(@Body() registerDTO: any) {
-//     const dto = new RegisterDTO(registerDTO);
-//     return await this.authService.register(dto);
-//   }
-
-//   @SetMetadata(IS_PUBLIC_KEY, true)
-//   @Post('login')
-//   async login(@Body() loginDTO: LoginDTO) {
-//     return await this.authService.login(loginDTO);
-//   }
-
-//   @SetMetadata(IS_PUBLIC_KEY, true)
-//   @Post('forgot-password')
-//   async forgotPassword(@Body() forgotPasswordDTO: any) {
-//     const dto = new ForgotPasswordDTO(forgotPasswordDTO);
-//     return await this.authService.forgotPassword(dto);
-//   }
-
-//   @SetMetadata(IS_PUBLIC_KEY, true)
-//   @Post('refresh-token')
-//   async refreshToken(@Body() {refreshToken}) {
-//     return await this.authService.refreshToken(refreshToken);
-//   }
-// }
+  @Post('sign-up')
+  async signUpEmailAndPassword(@Body() signInEmailDTO: SignInEmailDTO): Promise<any> {
+    if (signInEmailDTO.password !== signInEmailDTO.confirmPassword)
+      throw new BadRequestException('Password and confirm password not match');
+    return await this.authService.signUpEmailAndPassword(signInEmailDTO);
+  }
+}
