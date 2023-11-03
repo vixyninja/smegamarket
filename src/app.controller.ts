@@ -8,11 +8,13 @@ export class AppController {
   @Public()
   getHello(): Object {
     return {
-      timestamp: new Date().toISOString(),
-      version: '1.0.0',
-      env: process.env.NODE_ENV,
-      port: process.env.PORT,
-      host: process.env.HOST,
+      data: {
+        timestamp: new Date().toISOString(),
+        version: '1.0.0',
+        env: process.env.NODE_ENV,
+        port: process.env.PORT,
+        host: process.env.HOST,
+      },
     };
   }
 }

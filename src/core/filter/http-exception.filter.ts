@@ -11,8 +11,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
     response.status(HttpStatus.OK).json({
       statusCode: status,
       message: exception.message,
-      name: exception.name,
-      path: request.url,
+      data: {
+        name: exception.name,
+        path: request.url,
+      },
     });
   }
 }

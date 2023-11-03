@@ -1,7 +1,4 @@
-import {
-  RedisModuleOptions,
-  RedisModuleOptionsFactory,
-} from '@nestjs-modules/ioredis';
+import {RedisModuleOptions, RedisModuleOptionsFactory} from '@nestjs-modules/ioredis';
 import {Injectable} from '@nestjs/common';
 import {Environment} from '@/configs/environments';
 

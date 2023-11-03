@@ -6,17 +6,13 @@ import {
   FormatResponseInterceptor,
   HttpExceptionFilter,
   LogsInterceptor,
+  StatusInterceptor,
   TimeoutInterceptor,
   ValidationPipe,
 } from './core';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    bodyParser: true,
-    cors: true,
-    bufferLogs: true,
-    snapshot: true,
-  });
+  const app = await NestFactory.create(AppModule);
 
   const prefix = 'api/v1';
   const port = process.env.PORT;
@@ -32,9 +28,14 @@ async function bootstrap() {
     exposedHeaders: ['Content-Range', 'X-Content-Range'],
   });
   app.setGlobalPrefix(prefix);
-  app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(new ValidationPipe());
-  app.useGlobalInterceptors(new TimeoutInterceptor(), new LogsInterceptor(), new FormatResponseInterceptor());
+  app.useGlobalInterceptors(
+    new TimeoutInterceptor(),
+    new LogsInterceptor(),
+    new FormatResponseInterceptor(),
+    new StatusInterceptor(),
+  );
+  app.useGlobalFilters(new HttpExceptionFilter());
   await app.listen(port);
 }
 bootstrap().then(() =>

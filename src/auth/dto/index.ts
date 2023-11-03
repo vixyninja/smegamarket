@@ -1,2 +1,6 @@
 export * from './signin-google.dto';
+export * from './signup-email.dto';
 export * from './signin-email.dto';
+export * from './forgot-password.dto';
+export * from './signout-email.dto';
+export * from './reset-password-otp.dto';

@@ -22,10 +22,11 @@ export class FormatResponseInterceptor<T> implements NestInterceptor<T, Response
             meta: res.meta,
             data: res.data || null,
           };
+
         return {
-          statusCode: HttpStatus.OK,
-          message: 'Response successfully',
-          data: res || null,
+          statusCode: res?.status || HttpStatus.OK,
+          message: res?.message || 'Response successfully',
+          data: res?.data || null,
         };
       }),
     );

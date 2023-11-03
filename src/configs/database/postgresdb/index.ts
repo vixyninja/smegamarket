@@ -4,7 +4,7 @@ import {TypeOrmModuleOptions, TypeOrmOptionsFactory} from '@nestjs/typeorm';
 
 @Injectable()
 export class PostgresDBService implements TypeOrmOptionsFactory {
-  createTypeOrmOptions(): TypeOrmModuleOptions {
+  async createTypeOrmOptions(): Promise<TypeOrmModuleOptions> {
     return {
       host: Environment.POSTGRES_HOST,
       port: Environment.POSTGRES_PORT,
@@ -15,6 +15,7 @@ export class PostgresDBService implements TypeOrmOptionsFactory {
       entities: ['dist/**/*.entity{.ts,.js}'],
       synchronize: true,
       autoLoadEntities: true,
+      keepConnectionAlive: true,
     };
   }
 }

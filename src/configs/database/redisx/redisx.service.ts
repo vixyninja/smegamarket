@@ -6,7 +6,7 @@ export class RedisxService {
   constructor(@InjectRedis() private readonly redis: Redis) {}
 
   async setKey(key: string, value: string, expire?: number) {
-    return await this.redis.set(key, value, 'EX', expire || 60 * 60 * 24 * 30);
+    return await this.redis.set(key, value, 'EX', expire || 60 * 60);
   }
 
   async getKey(key: string) {
