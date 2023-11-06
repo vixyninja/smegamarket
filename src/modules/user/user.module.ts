@@ -5,9 +5,10 @@ import {TypeOrmModule} from '@nestjs/typeorm';
 import {UserController} from './user.controller';
 import {UserEntity} from './user.entity';
 import {UserService} from './user.service';
+import {FileModule} from '../file';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity]), RedisxModule],
+  imports: [TypeOrmModule.forFeature([UserEntity]), RedisxModule, FileModule],
   controllers: [UserController],
   providers: [UserService, JwtService, JWTService],
   exports: [UserService],

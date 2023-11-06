@@ -1,10 +1,12 @@
-import {RedisxService} from '@/configs';
+import {CloudinaryService, RedisxService} from '@/configs';
 import {HttpBadRequest} from '@/core';
 import {Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
 import {CreateUserDTO, UpdateUserDTO} from './dto';
 import {UserEntity} from './user.entity';
+import * as faker from '@faker-js/faker';
+import {FileEntity, FileService} from '../file';
 
 interface UserServiceInterface {
   createUser(createUserDTO: CreateUserDTO): Promise<UserEntity>;
@@ -12,6 +14,7 @@ interface UserServiceInterface {
   readUsers(): Promise<UserEntity[]>;
   updateUser(uuid: string, updateUserDTO: UpdateUserDTO): Promise<UserEntity>;
   updateUserPassword(uuid: string, password: string): Promise<UserEntity>;
+  updateUserAvatar(uuid: string, avatar: Express.Multer.File): Promise<UserEntity>;
   deleteUser(uuid: string): Promise<UserEntity>;
   findByEmail(email: string): Promise<UserEntity>;
 }
@@ -21,7 +24,30 @@ export class UserService implements UserServiceInterface {
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
     private readonly redisxService: RedisxService,
+    private readonly fileService: FileService,
   ) {}
+
+  async importUsers(): Promise<any> {
+    try {
+      faker.fakerVI.seed(124);
+
+      for (let i = 0; i < 10; i++) {
+        const user: CreateUserDTO = {
+          firstName: faker.fakerVI.person.firstName(),
+          lastName: faker.fakerVI.person.lastName(),
+          email: faker.fakerVI.internet.email(),
+          password: 'password',
+        };
+        await this.createUser(user);
+      }
+
+      return {
+        message: 'Import users successfully',
+      };
+    } catch (e) {
+      throw new HttpBadRequest(e.message);
+    }
+  }
 
   async findByEmail(email: string): Promise<UserEntity> {
     try {
@@ -68,7 +94,14 @@ export class UserService implements UserServiceInterface {
       const isExist = await this.redisxService.getKey(uuid);
       if (isExist) await this.redisxService.delKey(uuid);
       const user = await this.userRepository.findOne({where: {uuid: uuid}});
-      this.userRepository.merge(user, updateUserDTO);
+      const {deviceToken, deviceType, firstName, lastName} = updateUserDTO;
+      this.userRepository.merge(user, {
+        deviceToken,
+        deviceType,
+        firstName,
+        lastName,
+      });
+
       return await this.userRepository.save(user);
     } catch (e) {
       throw new HttpBadRequest(e.message);
@@ -81,6 +114,28 @@ export class UserService implements UserServiceInterface {
       if (isExist) await this.redisxService.delKey(uuid);
       const user = await this.userRepository.findOne({where: {uuid: uuid}});
       user.setHashPassword(password);
+      return await this.userRepository.save(user);
+    } catch (e) {
+      throw new HttpBadRequest(e.message);
+    }
+  }
+
+  async updateUserAvatar(uuid: string, avatar: Express.Multer.File): Promise<UserEntity> {
+    try {
+      const isExist = await this.redisxService.getKey(uuid);
+      if (isExist) await this.redisxService.delKey(uuid);
+      const user = await this.userRepository.findOne({where: {uuid: uuid}});
+      if (user.avatarId) {
+        await this.fileService.findFile(user.avatarId).then((res) => {
+          this.fileService.deleteFile(res.publicId);
+          return res;
+        });
+      }
+      const file: FileEntity = await this.fileService.uploadFile(avatar);
+
+      console.log(file);
+
+      user.avatarId = file.uuid;
       return await this.userRepository.save(user);
     } catch (e) {
       throw new HttpBadRequest(e.message);

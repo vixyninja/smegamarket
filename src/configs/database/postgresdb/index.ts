@@ -11,6 +11,7 @@ export class PostgresDBService implements TypeOrmOptionsFactory {
       username: Environment.POSTGRES_USER,
       password: Environment.POSTGRES_PASSWORD,
       database: Environment.POSTGRES_DB,
+      ssl: true,
       type: 'postgres',
       entities: ['dist/**/*.entity{.ts,.js}'],
       synchronize: true,

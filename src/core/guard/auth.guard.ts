@@ -26,7 +26,6 @@ export class AuthGuard implements CanActivate {
       request['user'] = decoded;
       return true;
     } catch (error) {
-      console.log(error.toString());
       throw new HttpUnauthorized();
     }
   }

@@ -3,8 +3,10 @@ import {Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
 import {FileEntity} from './file.entity';
+import {HttpBadRequest} from '@/core';
 
 interface FileServiceInterface {
+  findFile(publicId: string): Promise<FileEntity>;
   uploadFile(file: any): Promise<any>;
   deleteFile(publicId: string): Promise<any>;
   uploadFiles(files: any[]): Promise<any>;
@@ -18,88 +20,88 @@ export class FileService implements FileServiceInterface {
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
-  async uploadFile(file: Express.Multer.File): Promise<any> {
-    const result = await this.cloudinaryService.uploadFileImage(file);
-    if (result) {
-      const fileEntity = new FileEntity();
-      fileEntity.publicId = result.public_id;
-      fileEntity.signature = result.signature;
-      fileEntity.version = result.version;
-      fileEntity.width = result.width;
-      fileEntity.height = result.height;
-      fileEntity.format = result.format;
-      fileEntity.resourceType = result.resource_type;
-      fileEntity.url = result.url;
-      fileEntity.secureUrl = result.secure_url;
-      fileEntity.bytes = result.bytes;
-      fileEntity.assetId = result.asset_id;
-      fileEntity.versionId = result.version_id;
-      fileEntity.tags = result.tags;
-      fileEntity.etag = result.etag;
-      fileEntity.placeholder = result.placeholder;
-      fileEntity.originalFilename = result.original_filename;
-      fileEntity.apiKey = result.api_key;
-      fileEntity.folder = result.folder;
-      await this.fileRepository.save(fileEntity);
-      return {
-        data: result,
-        message: 'Upload file successfully',
-      };
+  async findFile(uuid: string): Promise<FileEntity> {
+    try {
+      return await this.fileRepository.findOne({where: {uuid: uuid}});
+    } catch (e) {
+      throw new HttpBadRequest(e.message);
     }
-    return {
-      data: null,
-      message: 'Upload file failed',
-    };
+  }
+
+  async uploadFile(file: Express.Multer.File): Promise<any> {
+    try {
+      const result = await this.cloudinaryService.uploadFileImage(file);
+      if (result) {
+        const fileEntity = new FileEntity();
+        fileEntity.publicId = result.public_id;
+        fileEntity.signature = result.signature;
+        fileEntity.version = result.version;
+        fileEntity.width = result.width;
+        fileEntity.height = result.height;
+        fileEntity.format = result.format;
+        fileEntity.resourceType = result.resource_type;
+        fileEntity.url = result.url;
+        fileEntity.secureUrl = result.secure_url;
+        fileEntity.bytes = result.bytes;
+        fileEntity.assetId = result.asset_id;
+        fileEntity.versionId = result.version_id;
+        fileEntity.tags = result.tags;
+        fileEntity.etag = result.etag;
+        fileEntity.placeholder = result.placeholder;
+        fileEntity.originalFilename = result.original_filename;
+        fileEntity.apiKey = result.api_key;
+        fileEntity.folder = result.folder;
+        const fileUpLoad = await this.fileRepository.save(fileEntity);
+        return fileUpLoad;
+      }
+      return null;
+    } catch (e) {
+      throw new HttpBadRequest(e.message);
+    }
   }
 
   async deleteFile(publicId: string): Promise<any> {
-    const result = await this.cloudinaryService.deleteFileImage(publicId);
-    if (result) {
+    try {
+      await this.cloudinaryService.deleteFileImage(publicId);
       await this.fileRepository.delete({publicId});
-      return {
-        message: 'Delete file successfully',
-      };
+    } catch (e) {
+      throw new HttpBadRequest(e.message);
     }
-    return {
-      message: 'Delete file failed',
-    };
   }
 
   async uploadFiles(files: Express.Multer.File[]): Promise<any> {
-    const result = await this.cloudinaryService.uploadMultipleFileImage(files);
-    if (result) {
-      const fileEntities = [];
-      result.forEach((item) => {
-        const fileEntity = new FileEntity();
-        fileEntity.publicId = item.public_id;
-        fileEntity.signature = item.signature;
-        fileEntity.version = item.version;
-        fileEntity.width = item.width;
-        fileEntity.height = item.height;
-        fileEntity.format = item.format;
-        fileEntity.resourceType = item.resource_type;
-        fileEntity.url = item.url;
-        fileEntity.secureUrl = item.secure_url;
-        fileEntity.bytes = item.bytes;
-        fileEntity.assetId = item.asset_id;
-        fileEntity.versionId = item.version_id;
-        fileEntity.tags = item.tags;
-        fileEntity.etag = item.etag;
-        fileEntity.placeholder = item.placeholder;
-        fileEntity.originalFilename = item.original_filename;
-        fileEntity.apiKey = item.api_key;
-        fileEntity.folder = item.folder;
-        fileEntities.push(fileEntity);
-      });
-      await this.fileRepository.save(fileEntities);
-      return {
-        data: result,
-        message: 'Upload files successfully',
-      };
+    try {
+      const result = await this.cloudinaryService.uploadMultipleFileImage(files);
+      if (result) {
+        const fileEntities = [];
+        result.forEach((item) => {
+          const fileEntity = new FileEntity();
+          fileEntity.publicId = item.public_id;
+          fileEntity.signature = item.signature;
+          fileEntity.version = item.version;
+          fileEntity.width = item.width;
+          fileEntity.height = item.height;
+          fileEntity.format = item.format;
+          fileEntity.resourceType = item.resource_type;
+          fileEntity.url = item.url;
+          fileEntity.secureUrl = item.secure_url;
+          fileEntity.bytes = item.bytes;
+          fileEntity.assetId = item.asset_id;
+          fileEntity.versionId = item.version_id;
+          fileEntity.tags = item.tags;
+          fileEntity.etag = item.etag;
+          fileEntity.placeholder = item.placeholder;
+          fileEntity.originalFilename = item.original_filename;
+          fileEntity.apiKey = item.api_key;
+          fileEntity.folder = item.folder;
+          fileEntities.push(fileEntity);
+        });
+        const fileUploads = await this.fileRepository.save(fileEntities);
+        return fileUploads;
+      }
+      return null;
+    } catch (e) {
+      throw new HttpBadRequest(e.message);
     }
-    return {
-      data: null,
-      message: 'Upload files failed',
-    };
   }
 }

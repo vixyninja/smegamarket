@@ -98,7 +98,7 @@ export class AuthService implements AuthServiceInterface {
         deviceType: deviceType,
         email: user.email,
         uuid: user.uuid,
-        role: RoleEnum.USER,
+        role: user.role,
       };
       const isMatchPassword = await user.validatePassword(password);
 

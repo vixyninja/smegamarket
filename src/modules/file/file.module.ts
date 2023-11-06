@@ -10,5 +10,6 @@ import {FileService} from './file.service';
   imports: [TypeOrmModule.forFeature([FileEntity]), CloudinaryModule],
   controllers: [FileController],
   providers: [FileService, JwtService, JWTService],
+  exports: [FileService],
 })
 export class FileModule {}
