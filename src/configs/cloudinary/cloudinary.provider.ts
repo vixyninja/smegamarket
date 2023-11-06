@@ -9,6 +9,7 @@ export const CloudinaryProvider: Provider = {
       cloud_name: Environment.CLOUD_NAME,
       api_key: Environment.API_KEY,
       api_secret: Environment.API_SECRET,
+      secure: true,
     });
   },
 };
