@@ -10,13 +10,13 @@ import {FileEntity, FileService} from '../file';
 
 interface UserServiceInterface {
   createUser(createUserDTO: CreateUserDTO): Promise<UserEntity>;
+  findByEmail(email: string): Promise<UserEntity>;
   readUser(uuid: string): Promise<UserEntity>;
   readUsers(): Promise<UserEntity[]>;
   updateUser(uuid: string, updateUserDTO: UpdateUserDTO): Promise<UserEntity>;
   updateUserPassword(uuid: string, password: string): Promise<UserEntity>;
   updateUserAvatar(uuid: string, avatar: Express.Multer.File): Promise<UserEntity>;
   deleteUser(uuid: string): Promise<UserEntity>;
-  findByEmail(email: string): Promise<UserEntity>;
 }
 @Injectable()
 export class UserService implements UserServiceInterface {
