@@ -1,5 +1,5 @@
 import {BaseEntity} from '@/core';
-import {Column, Entity, JoinColumn, OneToOne} from 'typeorm';
+import {Column, Entity, JoinColumn, ManyToMany, OneToOne} from 'typeorm';
 import {FileEntity} from '../file';
 
 @Entity()
@@ -27,6 +27,6 @@ export class BrandEntity extends BaseEntity {
     referencedColumnName: 'uuid',
     foreignKeyConstraintName: 'FK_brand_image',
   })
-  @OneToOne(() => FileEntity, (file) => file.uuid, {cascade: true})
+  @ManyToMany(() => FileEntity, (file) => file.uuid, {cascade: true})
   imageId: string;
 }

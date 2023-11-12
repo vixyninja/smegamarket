@@ -1,6 +1,18 @@
 import {AuthGuard} from '@/core';
-import {Body, Controller, Delete, Get, Post, Req, UploadedFile, UseGuards, UseInterceptors} from '@nestjs/common';
-import {FileInterceptor} from '@nestjs/platform-express';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  UploadedFile,
+  UploadedFiles,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import {FileInterceptor, FilesInterceptor} from '@nestjs/platform-express';
+import {isUUID} from 'class-validator';
 import {FileService} from './file.service';
 
 @UseGuards(AuthGuard)
@@ -8,25 +20,55 @@ import {FileService} from './file.service';
 export class FileController {
   constructor(private readonly fileService: FileService) {}
 
-  @Get()
-  async getFiles(@Body() uuid: string): Promise<any> {
-    return await this.fileService.findFile(uuid);
+  @Get(':fileId')
+  async getFile(@Param('fileId') fileId: string): Promise<any> {
+    if (isUUID(fileId) === false) {
+      return {
+        message: 'File id is invalid',
+        data: null,
+      };
+    }
+    const result = await this.fileService.findFile(fileId);
+    if (result) {
+      return {
+        message: 'Get file successfully',
+        data: result,
+      };
+    }
   }
 
-  @Post('upload')
+  @Post()
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(@UploadedFile() file: Express.Multer.File): Promise<any> {
-    return await this.fileService.uploadFile(file);
+    const result = await this.fileService.uploadFile(file);
+    if (result) {
+      return {
+        message: 'Upload file successfully',
+        data: result,
+      };
+    }
   }
 
-  @Delete('delete')
-  async deleteFile(@Body() publicId: string): Promise<any> {
-    return await this.fileService.deleteFile(publicId);
+  @Delete(':fileId')
+  async deleteFile(@Param('fileId') fileId: string): Promise<any> {
+    const result = await this.fileService.deleteFile(fileId);
+    if (result) {
+      return {
+        message: 'Delete file successfully',
+        data: null,
+      };
+    }
   }
 
   @Post('upload-multiple')
-  @UseInterceptors(FileInterceptor('files'))
-  async uploadFiles(@UploadedFile() files: Express.Multer.File[]): Promise<any> {
-    return await this.fileService.uploadFiles(files);
+  @UseInterceptors(FilesInterceptor('files'))
+  async uploadFiles(@UploadedFiles() files: Express.Multer.File[]): Promise<any> {
+    const result = await this.fileService.uploadFiles(files);
+    if (result) {
+      return {
+        message: 'Upload files successfully',
+        data: result,
+      };
+    }
   }
 }

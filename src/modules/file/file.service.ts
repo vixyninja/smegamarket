@@ -8,7 +8,7 @@ import {HttpBadRequest} from '@/core';
 interface FileServiceInterface {
   findFile(publicId: string): Promise<FileEntity>;
   uploadFile(file: any): Promise<any>;
-  deleteFile(publicId: string): Promise<any>;
+  deleteFile(fileId: string): Promise<any>;
   uploadFiles(files: any[]): Promise<any>;
 }
 
@@ -60,15 +60,6 @@ export class FileService implements FileServiceInterface {
     }
   }
 
-  async deleteFile(publicId: string): Promise<any> {
-    try {
-      await this.cloudinaryService.deleteFileImage(publicId);
-      await this.fileRepository.delete({publicId});
-    } catch (e) {
-      throw new HttpBadRequest(e.message);
-    }
-  }
-
   async uploadFiles(files: Express.Multer.File[]): Promise<any> {
     try {
       const result = await this.cloudinaryService.uploadMultipleFileImage(files);
@@ -100,6 +91,20 @@ export class FileService implements FileServiceInterface {
         return fileUploads;
       }
       return null;
+    } catch (e) {
+      throw new HttpBadRequest(e.message);
+    }
+  }
+
+  async deleteFile(fileId: string): Promise<boolean> {
+    try {
+      const file = await this.fileRepository.findOne({where: {uuid: fileId}});
+      if (!file) {
+        return false;
+      }
+      await this.cloudinaryService.deleteFileImage(file.publicId);
+      await this.fileRepository.delete(file.uuid);
+      return true;
     } catch (e) {
       throw new HttpBadRequest(e.message);
     }
