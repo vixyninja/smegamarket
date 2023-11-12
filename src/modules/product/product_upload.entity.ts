@@ -1,7 +1,7 @@
 import {BaseEntity} from '@/core';
 import {Entity, JoinColumn, ManyToOne} from 'typeorm';
 import {FileEntity} from '../file';
-import {ProductEntity} from '../product';
+import {ProductEntity} from '.';
 
 @Entity()
 export class ProductUpload extends BaseEntity {

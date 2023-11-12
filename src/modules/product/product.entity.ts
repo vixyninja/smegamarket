@@ -1,40 +1,14 @@
 import {BaseEntity} from '@/core';
 import {Column, Entity, JoinColumn, OneToOne} from 'typeorm';
 import {BrandEntity} from '../brand';
-
-export enum ProductEnum {
-  'Vegetable' = 'Vegetable',
-  'Fruit' = 'Fruit',
-  'Meat' = 'Meat',
-  'Fish' = 'Fish',
-  'Etc' = 'Etc',
-}
-
-export enum StatusEnum {
-  'Active' = 'Active',
-  'Inactive' = 'Inactive',
-  'Deleted' = 'Deleted',
-}
-
-export enum SizeEnum {
-  'Small' = 'Small',
-  'Medium' = 'Medium',
-  'Large' = 'Large',
-}
-
-export enum SaleEnum {
-  'Not Sale' = 'Not Sale',
-  'One' = '5',
-  'Two' = '10',
-  'Three' = '15',
-}
+import {ProductEnum, SaleEnum, SizeEnum, StatusEnum} from './enum';
 
 @Entity()
 export class ProductEntity extends BaseEntity {
   @Column({type: 'varchar', length: 225, nullable: false})
   name: string;
 
-  @Column({type: 'numeric', length: 225, nullable: false})
+  @Column({type: 'numeric', nullable: false})
   price: number;
 
   @Column({type: 'enum', enum: ProductEnum, default: ProductEnum.Etc})
@@ -46,7 +20,7 @@ export class ProductEntity extends BaseEntity {
   @Column({type: 'enum', enum: SizeEnum, default: SizeEnum.Medium})
   size: SizeEnum;
 
-  @Column({type: 'array', length: 225, nullable: true})
+  @Column({type: 'varchar', array: true, nullable: true})
   detail: string[];
 
   @Column({type: 'varchar', length: 225, nullable: true})
@@ -55,7 +29,7 @@ export class ProductEntity extends BaseEntity {
   @Column({type: 'varchar', length: 225, nullable: true})
   caution: string;
 
-  @Column({type: 'enum', length: 225, enum: SaleEnum, default: SaleEnum['Not Sale']})
+  @Column({type: 'enum', enum: SaleEnum, default: SaleEnum.None})
   sale: SaleEnum;
 
   @Column({type: 'varchar', length: 225, nullable: true})

@@ -3,9 +3,9 @@ import {Column, Entity} from 'typeorm';
 
 @Entity()
 export class CategoryEntity extends BaseEntity {
-  @Column({type: 'varchar', length: 50, unique: true})
+  @Column({type: 'varchar', length: 100, unique: true})
   name: string;
 
-  @Column({type: 'varchar', length: 100, nullable: true})
+  @Column({type: 'varchar', length: 225, nullable: true})
   description: string;
 }
