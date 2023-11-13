@@ -2,7 +2,7 @@ export interface IQueryOptions {
   _page?: number;
   _limit?: number;
   _sort?: string;
-  _order?: string;
+  _order?: 'ASC' | 'DESC';
 }
 
 export class Meta {

@@ -3,6 +3,7 @@ import {Column, Entity, JoinColumn, JoinTable, ManyToMany, OneToOne} from 'typeo
 import {BrandEntity} from '../brand';
 import {ProductEnum, SaleEnum, SizeEnum, StatusEnum} from './enum';
 import {CategoryEntity} from '../category';
+import {FileEntity} from '../file';
 
 @Entity()
 export class ProductEntity extends BaseEntity {
@@ -58,5 +59,21 @@ export class ProductEntity extends BaseEntity {
       foreignKeyConstraintName: 'FK_category_product',
     },
   })
-  categoryId: string;
+  category: CategoryEntity[];
+
+  @ManyToMany(() => FileEntity, (file) => file.uuid, {cascade: true})
+  @JoinTable({
+    name: 'product_image',
+    joinColumn: {
+      name: 'product_id',
+      referencedColumnName: 'uuid',
+      foreignKeyConstraintName: 'FK_product_image',
+    },
+    inverseJoinColumn: {
+      name: 'image_id',
+      referencedColumnName: 'uuid',
+      foreignKeyConstraintName: 'FK_image_product',
+    },
+  })
+  image: FileEntity[];
 }

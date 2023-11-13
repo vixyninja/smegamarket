@@ -3,9 +3,9 @@ import {IsNotEmpty, IsString} from 'class-validator';
 export class CreateCategoryDTO {
   @IsNotEmpty()
   @IsString()
-  name: string;
+  readonly name: string;
 
   @IsNotEmpty()
   @IsString()
-  description: string;
+  readonly description: string;
 }

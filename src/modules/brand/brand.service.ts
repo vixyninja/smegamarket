@@ -6,9 +6,10 @@ import {FileService} from '../file';
 import {BrandEntity} from './brand.entity';
 import {CreateBrandDTO, UpdateBrandDTO} from './dto';
 import * as faker from '@faker-js/faker';
+import {IQueryOptions, Meta} from '@/core/interface';
 
 interface BrandServiceInterface {
-  findAll(): Promise<any>;
+  findAll(query: IQueryOptions): Promise<any>;
   findOne(brandId: string): Promise<any>;
   create(createBrandDTO: CreateBrandDTO): Promise<any>;
   update(brandId: string, updateBrandDTO: UpdateBrandDTO): Promise<any>;
@@ -48,12 +49,27 @@ export class BrandService implements BrandServiceInterface {
     }
   }
 
-  async findAll(): Promise<any> {
+  async findAll(query: IQueryOptions): Promise<any> {
     try {
-      const brands = await this.brandRepository.find();
+      let {_limit, _order, _page, _sort} = query;
+
+      _page = _page ? Number(_page) : 1;
+      _limit = _limit ? Number(_limit) : 10;
+      _sort = _sort ? _sort : 'createdAt';
+      _order = _order ? _order : 'DESC';
+
+      const brands = await this.brandRepository
+        .createQueryBuilder('brand')
+        .leftJoinAndSelect('brand.imageId', 'image')
+        .skip(_limit * (_page - 1))
+        .take(_limit)
+        .orderBy(`brand.${_sort}`, _order)
+        .getMany();
+
       return {
         message: 'Brands found successfully',
         data: brands,
+        meta: new Meta(_page, _limit, brands.length, Math.ceil(brands.length / _limit), query),
       };
     } catch (e) {
       throw new HttpBadRequest(e.message);
@@ -62,13 +78,13 @@ export class BrandService implements BrandServiceInterface {
 
   async findOne(brandId: string): Promise<any> {
     try {
-      const result = await this.brandRepository.findOne({where: {uuid: brandId}});
-      if (!result) {
+      const brand = await this.brandRepository.findOne({where: {uuid: brandId}});
+      if (!brand) {
         return new HttpBadRequest('Brand not found');
       }
       return {
         message: 'Brand found successfully',
-        data: result,
+        data: brand,
       };
     } catch (e) {
       throw new HttpBadRequest(e.message);
@@ -122,6 +138,7 @@ export class BrandService implements BrandServiceInterface {
   async updateImageId(brandId: string, image: Express.Multer.File): Promise<any> {
     try {
       const brand = await this.brandRepository.findOne({where: {uuid: brandId}});
+
       if (!brand) {
         return new HttpBadRequest('Brand not found');
       }

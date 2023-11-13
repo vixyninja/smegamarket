@@ -22,17 +22,11 @@ export class BrandEntity extends BaseEntity {
   @Column({type: 'varchar', length: 225, unique: true})
   email: string;
 
-  @ManyToMany(() => FileEntity, (file) => file.uuid, {cascade: true})
-  @JoinTable({
-    name: 'brand_image',
-    joinColumn: {
-      name: 'brandId',
-      referencedColumnName: 'uuid',
-    },
-    inverseJoinColumn: {
-      name: 'imageId',
-      referencedColumnName: 'uuid',
-    },
+  @JoinColumn({
+    name: 'imageId',
+    foreignKeyConstraintName: 'FK_brand_image_id',
+    referencedColumnName: 'uuid',
   })
+  @OneToOne(() => FileEntity, (file) => file.uuid, {cascade: true})
   imageId: string;
 }

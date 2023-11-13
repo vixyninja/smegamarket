@@ -7,6 +7,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -15,6 +16,7 @@ import {isUUID} from 'class-validator';
 import {BrandService} from './brand.service';
 import {CreateBrandDTO, UpdateBrandDTO} from './dto';
 import {FileInterceptor} from '@nestjs/platform-express';
+import {IQueryOptions} from '@/core/interface';
 
 @UseGuards(AuthGuard)
 @Controller('brand')
@@ -29,8 +31,8 @@ export class BrandController {
   }
 
   @Get()
-  async findAll(): Promise<any> {
-    return await this.brandService.findAll();
+  async findAll(@Query() query: IQueryOptions): Promise<any> {
+    return await this.brandService.findAll(query);
   }
 
   @Get(':brandId')
