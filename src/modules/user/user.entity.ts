@@ -1,29 +1,24 @@
 import {BaseEntity, RoleEnum} from '@/core';
 import * as bcryptjs from 'bcryptjs';
-import {BeforeInsert, BeforeUpdate, Column, Entity, JoinColumn, OneToOne} from 'typeorm';
+import {BeforeInsert, Column, Entity, JoinColumn, JoinTable, ManyToMany, OneToOne} from 'typeorm';
 import {FileEntity} from '../file';
-
-export enum StatusUser {
-  'ACTIVE' = 'ACTIVE',
-  'INACTIVE' = 'INACTIVE',
-  'BLOCKED' = 'BLOCKED',
-}
+import {StatusUser} from './enum';
 
 @Entity()
 export class UserEntity extends BaseEntity {
-  @Column({type: 'varchar', length: 50, nullable: false})
+  @Column({type: 'varchar', length: 225, nullable: false})
   firstName: string;
 
-  @Column({type: 'varchar', length: 50, nullable: false})
+  @Column({type: 'varchar', length: 225, nullable: false})
   lastName: string;
 
-  @Column({type: 'varchar', length: 100, nullable: false, unique: true})
+  @Column({type: 'varchar', length: 225, nullable: false, unique: true})
   email: string;
 
-  @Column({type: 'varchar', length: 100, nullable: false})
+  @Column({type: 'varchar', length: 225, nullable: false})
   private hashPassword: string;
 
-  @Column({type: 'varchar', length: 100, nullable: false})
+  @Column({type: 'varchar', length: 225, nullable: false})
   private salt: string;
 
   @Column({type: 'enum', enum: RoleEnum, default: RoleEnum.USER})
@@ -32,14 +27,26 @@ export class UserEntity extends BaseEntity {
   @Column({type: 'enum', enum: StatusUser, default: StatusUser.INACTIVE})
   status: StatusUser;
 
-  @Column({type: 'varchar', length: 100, default: null})
+  @Column({type: 'varchar', length: 225, default: null})
   deviceToken: string;
 
-  @Column({type: 'varchar', length: 100, default: null})
+  @Column({type: 'varchar', length: 225, default: null})
   deviceType: string;
 
-  @JoinColumn({name: 'avatarId', referencedColumnName: 'uuid', foreignKeyConstraintName: 'FK_USER_AVATAR'})
-  @OneToOne(() => FileEntity, (file) => file.uuid, {nullable: true})
+  @ManyToMany(() => FileEntity, (file) => file.uuid, {cascade: true, nullable: true})
+  @JoinTable({
+    name: 'user_file',
+    joinColumn: {
+      name: 'user_id',
+      referencedColumnName: 'uuid',
+      foreignKeyConstraintName: 'FK_user_file',
+    },
+    inverseJoinColumn: {
+      name: 'file_id',
+      referencedColumnName: 'uuid',
+      foreignKeyConstraintName: 'FK_file_user',
+    },
+  })
   avatarId: string;
 
   getHashPassword(): string {

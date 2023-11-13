@@ -1,4 +1,4 @@
-import {IsEmail, IsNotEmpty} from 'class-validator';
+import {IsEmail, IsNotEmpty, IsPhoneNumber} from 'class-validator';
 
 export class CreateBrandDTO {
   @IsNotEmpty()
@@ -11,6 +11,7 @@ export class CreateBrandDTO {
   address: string;
 
   @IsNotEmpty()
+  @IsPhoneNumber('VN')
   phoneNumber: string;
 
   @IsNotEmpty()
