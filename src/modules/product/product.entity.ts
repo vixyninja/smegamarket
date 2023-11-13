@@ -1,7 +1,8 @@
 import {BaseEntity} from '@/core';
-import {Column, Entity, JoinColumn, OneToOne} from 'typeorm';
+import {Column, Entity, JoinColumn, JoinTable, ManyToMany, OneToOne} from 'typeorm';
 import {BrandEntity} from '../brand';
 import {ProductEnum, SaleEnum, SizeEnum, StatusEnum} from './enum';
+import {CategoryEntity} from '../category';
 
 @Entity()
 export class ProductEntity extends BaseEntity {
@@ -42,4 +43,20 @@ export class ProductEntity extends BaseEntity {
   })
   @OneToOne(() => BrandEntity, (brand) => brand.uuid, {cascade: true})
   brandId: string;
+
+  @ManyToMany(() => CategoryEntity, (category) => category.uuid, {cascade: true})
+  @JoinTable({
+    name: 'product_category',
+    joinColumn: {
+      name: 'product_id',
+      referencedColumnName: 'uuid',
+      foreignKeyConstraintName: 'FK_product_category',
+    },
+    inverseJoinColumn: {
+      name: 'category_id',
+      referencedColumnName: 'uuid',
+      foreignKeyConstraintName: 'FK_category_product',
+    },
+  })
+  categoryId: string;
 }

@@ -112,7 +112,6 @@ export class AuthService implements AuthServiceInterface {
           refreshToken: refreshToken,
         },
       };
-      //   compare
     } catch (e) {
       throw new HttpBadRequest(e.message);
     }

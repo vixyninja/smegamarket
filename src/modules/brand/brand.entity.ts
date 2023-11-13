@@ -1,5 +1,5 @@
 import {BaseEntity} from '@/core';
-import {Column, Entity, JoinColumn, ManyToMany, OneToOne} from 'typeorm';
+import {Column, Entity, JoinColumn, JoinTable, ManyToMany, OneToOne} from 'typeorm';
 import {FileEntity} from '../file';
 
 @Entity()
@@ -22,11 +22,17 @@ export class BrandEntity extends BaseEntity {
   @Column({type: 'varchar', length: 225, unique: true})
   email: string;
 
-  @JoinColumn({
-    name: 'imageId',
-    referencedColumnName: 'uuid',
-    foreignKeyConstraintName: 'FK_brand_image',
-  })
   @ManyToMany(() => FileEntity, (file) => file.uuid, {cascade: true})
+  @JoinTable({
+    name: 'brand_image',
+    joinColumn: {
+      name: 'brandId',
+      referencedColumnName: 'uuid',
+    },
+    inverseJoinColumn: {
+      name: 'imageId',
+      referencedColumnName: 'uuid',
+    },
+  })
   imageId: string;
 }

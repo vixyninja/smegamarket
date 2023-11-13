@@ -1,12 +1,12 @@
-import {CloudinaryService, RedisxService} from '@/configs';
+import {RedisxService} from '@/configs';
 import {HttpBadRequest} from '@/core';
+import * as faker from '@faker-js/faker';
 import {Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
+import {FileService} from '../file';
 import {CreateUserDTO, UpdateUserDTO} from './dto';
 import {UserEntity} from './user.entity';
-import * as faker from '@faker-js/faker';
-import {FileEntity, FileService} from '../file';
 
 interface UserServiceInterface {
   createUser(createUserDTO: CreateUserDTO): Promise<UserEntity>;
@@ -51,7 +51,9 @@ export class UserService implements UserServiceInterface {
 
   async findByEmail(email: string): Promise<UserEntity> {
     try {
-      return await this.userRepository.findOne({where: {email: email}});
+      const user = await this.userRepository.findOne({where: {email: email}});
+      if (!user) throw new HttpBadRequest('Email is not exist');
+      return user;
     } catch (e) {
       throw new HttpBadRequest(e.message);
     }
@@ -125,19 +127,11 @@ export class UserService implements UserServiceInterface {
       const isExist = await this.redisxService.getKey(uuid);
       if (isExist) await this.redisxService.delKey(uuid);
       const user = await this.userRepository.findOne({where: {uuid: uuid}});
-      if (user.avatarId) {
-        await this.fileService.findFile(user.avatarId).then((res) => {
-          this.fileService.deleteFile(res.publicId);
-          return res;
-        });
-      }
-      const file: FileEntity = await this.fileService.uploadFile(avatar);
-
-      console.log(file);
-
-      user.avatarId = file.uuid;
+      const newAvatar = await this.fileService.uploadFile(avatar);
+      user.avatarId = newAvatar.uuid;
       return await this.userRepository.save(user);
     } catch (e) {
+      console.log(e);
       throw new HttpBadRequest(e.message);
     }
   }
