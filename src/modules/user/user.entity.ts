@@ -33,21 +33,13 @@ export class UserEntity extends BaseEntity {
   @Column({type: 'varchar', length: 225, default: null})
   deviceType: string;
 
-  @ManyToMany(() => FileEntity, (file) => file.uuid, {cascade: true, nullable: true})
-  @JoinTable({
-    name: 'user_file',
-    joinColumn: {
-      name: 'user_id',
-      referencedColumnName: 'uuid',
-      foreignKeyConstraintName: 'FK_user_file',
-    },
-    inverseJoinColumn: {
-      name: 'file_id',
-      referencedColumnName: 'uuid',
-      foreignKeyConstraintName: 'FK_file_user',
-    },
+  @JoinColumn({
+    name: 'avatar',
+    referencedColumnName: 'uuid',
+    foreignKeyConstraintName: 'FK_USER_FILE',
   })
-  avatarId: string;
+  @OneToOne(() => FileEntity, (file) => file.uuid, {onDelete: 'CASCADE'})
+  avatar: string;
 
   getHashPassword(): string {
     return this.hashPassword;

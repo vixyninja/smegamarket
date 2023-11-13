@@ -51,9 +51,7 @@ export class UserService implements UserServiceInterface {
 
   async findByEmail(email: string): Promise<UserEntity> {
     try {
-      const user = await this.userRepository.findOne({where: {email: email}});
-      if (!user) throw new HttpBadRequest('Email is not exist');
-      return user;
+      return await this.userRepository.findOne({where: {email: email}});
     } catch (e) {
       throw new HttpBadRequest(e.message);
     }
@@ -128,7 +126,7 @@ export class UserService implements UserServiceInterface {
       if (isExist) await this.redisxService.delKey(uuid);
       const user = await this.userRepository.findOne({where: {uuid: uuid}});
       const newAvatar = await this.fileService.uploadFile(avatar);
-      user.avatarId = newAvatar.uuid;
+      user.avatar = newAvatar.uuid;
       return await this.userRepository.save(user);
     } catch (e) {
       console.log(e);
