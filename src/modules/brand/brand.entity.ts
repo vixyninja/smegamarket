@@ -23,10 +23,10 @@ export class BrandEntity extends BaseEntity {
   email: string;
 
   @JoinColumn({
-    name: 'imageId',
+    name: 'avatar',
     foreignKeyConstraintName: 'FK_brand_image_id',
     referencedColumnName: 'uuid',
   })
   @OneToOne(() => FileEntity, (file) => file.uuid, {cascade: true})
-  imageId: string;
+  avatar: FileEntity;
 }

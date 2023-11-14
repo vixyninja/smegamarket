@@ -70,6 +70,7 @@ export class FileService implements FileServiceInterface {
   async uploadFiles(files: Express.Multer.File[]): Promise<any> {
     try {
       const result = await this.cloudinaryService.uploadMultipleFileImage(files);
+      const fileArray = [];
       for (const file of result) {
         const fileEntity = new FileEntity();
         fileEntity.publicId = file.public_id;
@@ -90,9 +91,10 @@ export class FileService implements FileServiceInterface {
         fileEntity.originalFilename = file.original_filename;
         fileEntity.apiKey = file.api_key;
         fileEntity.folder = file.folder;
-        await this.fileRepository.save(fileEntity);
+        fileArray.push(fileEntity);
       }
-      return result;
+      const fileResult = await this.fileRepository.save(fileArray);
+      return fileResult;
     } catch (e) {
       throw new HttpBadRequest(e.message);
     }
