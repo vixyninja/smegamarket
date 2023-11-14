@@ -1,5 +1,5 @@
 import {BaseEntity} from '@/core';
-import {Column, Entity, JoinColumn, JoinTable, ManyToMany, OneToOne} from 'typeorm';
+import {Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToOne} from 'typeorm';
 import {BrandEntity} from '../brand';
 import {ProductEnum, SaleEnum, SizeEnum, StatusEnum} from './enum';
 import {CategoryEntity} from '../category';
@@ -7,7 +7,7 @@ import {FileEntity} from '../file';
 
 @Entity()
 export class ProductEntity extends BaseEntity {
-  @Column({type: 'varchar', length: 225, nullable: false})
+  @Column({type: 'varchar', length: 225, nullable: false, unique: true})
   name: string;
 
   @Column({type: 'numeric', nullable: false})
@@ -22,8 +22,8 @@ export class ProductEntity extends BaseEntity {
   @Column({type: 'enum', enum: SizeEnum, default: SizeEnum.Medium})
   size: SizeEnum;
 
-  @Column({type: 'varchar', array: true, nullable: true})
-  detail: string[];
+  @Column({type: 'varchar', nullable: true})
+  detail: string;
 
   @Column({type: 'varchar', length: 225, nullable: true})
   benefit: string;
@@ -42,8 +42,8 @@ export class ProductEntity extends BaseEntity {
     foreignKeyConstraintName: 'FK_product_brand_id',
     referencedColumnName: 'uuid',
   })
-  @OneToOne(() => BrandEntity, (brand) => brand.uuid, {cascade: true})
-  brandId: string;
+  @ManyToOne(() => BrandEntity, (brand) => brand.uuid, {cascade: true})
+  brand: BrandEntity;
 
   @ManyToMany(() => CategoryEntity, (category) => category.uuid, {cascade: true})
   @JoinTable({
@@ -75,5 +75,5 @@ export class ProductEntity extends BaseEntity {
       foreignKeyConstraintName: 'FK_image_product',
     },
   })
-  image: FileEntity[];
+  images: FileEntity[];
 }

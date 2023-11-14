@@ -64,7 +64,7 @@ export class BrandController {
   @Put(':brandId/logo')
   @UseInterceptors(FileInterceptor('file'))
   async updateImageId(@Param('brandId') brandId: string, @UploadedFile() file: Express.Multer.File): Promise<any> {
-    return await this.brandService.updateImageId(brandId, file);
+    return await this.brandService.updateImage(brandId, file);
   }
 
   @Roles([RoleEnum.ADMIN])
