@@ -23,26 +23,34 @@ export class AuthController {
   }
 
   @Post('sign-up')
-  async signUpEmailAndPassword(@Body() signUpEmailDTO: SignUpEmailDTO): Promise<any> {
+  async signUpEmailAndPassword(
+    @Body() signUpEmailDTO: SignUpEmailDTO,
+  ): Promise<any> {
     if (signUpEmailDTO.password !== signUpEmailDTO.confirmPassword)
       return new BadRequestException('Password and confirm password not match');
     return await this.authService.signUpEmailAndPassword(signUpEmailDTO);
   }
 
   @Post('sign-in')
-  async signInEmailAndPassword(@Body() signInEmailDTO: SignInEmailDTO): Promise<any> {
+  async signInEmailAndPassword(
+    @Body() signInEmailDTO: SignInEmailDTO,
+  ): Promise<any> {
     if (signInEmailDTO.password !== signInEmailDTO.confirmPassword)
       return new BadRequestException('Password and confirm password not match');
     return await this.authService.signInEmailAndPassword(signInEmailDTO);
   }
 
   @Post('forgot-password')
-  async forgotPassword(@Body() forgotPasswordDTO: ForgotPasswordDTO): Promise<any> {
+  async forgotPassword(
+    @Body() forgotPasswordDTO: ForgotPasswordDTO,
+  ): Promise<any> {
     return await this.authService.forgotPassword(forgotPasswordDTO);
   }
 
   @Post('reset-password-otp')
-  async resetPasswordOtp(@Body() resetPasswordOtpDTO: ResetPasswordOtpDTO): Promise<any> {
+  async resetPasswordOtp(
+    @Body() resetPasswordOtpDTO: ResetPasswordOtpDTO,
+  ): Promise<any> {
     if (resetPasswordOtpDTO.password !== resetPasswordOtpDTO.confirmPassword)
       return new BadRequestException('Password and confirm password not match');
     return await this.authService.resetPasswordOtp(resetPasswordOtpDTO);

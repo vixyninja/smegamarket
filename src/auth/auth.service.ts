@@ -41,7 +41,9 @@ export class AuthService implements AuthServiceInterface {
   async signInGoogle(signInGoogleDTO: SignInGoogleDTO): Promise<any> {
     try {
       const {deviceToken, deviceType, idToken} = signInGoogleDTO;
-      const client: OAuth2Client = new OAuth2Client(Environment.GOOGLE_CLIENT_ID);
+      const client: OAuth2Client = new OAuth2Client(
+        Environment.GOOGLE_CLIENT_ID,
+      );
       const ticker: LoginTicket = await client.verifyIdToken({
         idToken: idToken,
         audience: Environment.GOOGLE_CLIENT_ID,
@@ -58,7 +60,8 @@ export class AuthService implements AuthServiceInterface {
   }
   async signUpEmailAndPassword(signUpEmailDTO: SignUpEmailDTO): Promise<any> {
     try {
-      const {deviceToken, deviceType, email, password, firstName, lastName} = signUpEmailDTO;
+      const {deviceToken, deviceType, email, password, firstName, lastName} =
+        signUpEmailDTO;
       const user: UserEntity = await this.userService.findByEmail(email);
       if (user) return new HttpBadRequest('Email already exists');
       const createUserDTO: CreateUserDTO = {
@@ -67,7 +70,9 @@ export class AuthService implements AuthServiceInterface {
         lastName: lastName,
         password: password,
       };
-      const newUser: UserEntity = await this.userService.createUser(createUserDTO);
+      const newUser: UserEntity = await this.userService.createUser(
+        createUserDTO,
+      );
       const payload: JWTPayload = {
         deviceToken: deviceToken,
         deviceType: deviceType,
@@ -75,8 +80,14 @@ export class AuthService implements AuthServiceInterface {
         uuid: newUser.uuid,
         role: RoleEnum.USER,
       };
-      const accessToken = await this.jwtService.signToken(payload, 'accessToken');
-      const refreshToken = await this.jwtService.signToken(payload, 'refreshToken');
+      const accessToken = await this.jwtService.signToken(
+        payload,
+        'accessToken',
+      );
+      const refreshToken = await this.jwtService.signToken(
+        payload,
+        'refreshToken',
+      );
       return {
         data: {
           accessToken: accessToken,
@@ -103,8 +114,14 @@ export class AuthService implements AuthServiceInterface {
       const isMatchPassword = await user.validatePassword(password);
 
       if (!isMatchPassword) return new HttpBadRequest('Password not match');
-      const accessToken = await this.jwtService.signToken(payload, 'accessToken');
-      const refreshToken = await this.jwtService.signToken(payload, 'refreshToken');
+      const accessToken = await this.jwtService.signToken(
+        payload,
+        'accessToken',
+      );
+      const refreshToken = await this.jwtService.signToken(
+        payload,
+        'refreshToken',
+      );
       return {
         message: 'Login successfully !!!',
         data: {
@@ -137,7 +154,11 @@ export class AuthService implements AuthServiceInterface {
       let code = Math.floor(Math.random() * 1000000).toString();
       await this.redisService.delKey(email + secret);
       await this.redisService.setKey(email + secret, code);
-      await this.mailService.sendUserResetPassword(user.firstName + ' ' + user.lastName, email, code);
+      await this.mailService.sendUserResetPassword(
+        user.firstName + ' ' + user.lastName,
+        email,
+        code,
+      );
       return {
         message: 'Forgot password successfully !!!',
       };
@@ -146,14 +167,17 @@ export class AuthService implements AuthServiceInterface {
     }
   }
 
-  async resetPasswordOtp(resetPasswordOtpDTO: ResetPasswordOtpDTO): Promise<any> {
+  async resetPasswordOtp(
+    resetPasswordOtpDTO: ResetPasswordOtpDTO,
+  ): Promise<any> {
     try {
       const {email, password, code} = resetPasswordOtpDTO;
       const user: UserEntity = await this.userService.findByEmail(email);
       if (!user) return new HttpBadRequest('Email not found');
       const isMatchCode = await this.redisService.getKey(email + secret);
       if (!isMatchCode) return new HttpBadRequest('Request not found');
-      if (JSON.stringify(isMatchCode.toString()) === code.toString()) return new HttpBadRequest('Code not match');
+      if (JSON.stringify(isMatchCode.toString()) === code.toString())
+        return new HttpBadRequest('Code not match');
       await this.userService.updateUserPassword(user.uuid, password);
       await this.redisService.delKey(email + secret);
       return {

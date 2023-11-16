@@ -42,7 +42,10 @@ export class ProductController {
   @Roles([RoleEnum.ADMIN])
   @UseGuards(RolesGuard)
   @Put(':productId')
-  async update(@Body() updateProductDTO: UpdateProductDTO, @Param('productId') productId: string) {
+  async update(
+    @Body() updateProductDTO: UpdateProductDTO,
+    @Param('productId') productId: string,
+  ) {
     return await this.productService.update(productId, updateProductDTO);
   }
 
@@ -50,7 +53,10 @@ export class ProductController {
   @UseGuards(RolesGuard)
   @Put(':productId/images')
   @UseInterceptors(FilesInterceptor('images'))
-  async updateImage(@Param('productId') productId: string, @UploadedFiles() files: Express.Multer.File[]) {
+  async updateImage(
+    @Param('productId') productId: string,
+    @UploadedFiles() files: Express.Multer.File[],
+  ) {
     return await this.productService.updateImage(productId, files);
   }
 }

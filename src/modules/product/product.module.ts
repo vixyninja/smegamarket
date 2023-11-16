@@ -10,7 +10,10 @@ import {ProductService} from './product.service';
 import {FileModule} from '../file';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ProductEntity, BrandEntity, CategoryEntity]), FileModule],
+  imports: [
+    TypeOrmModule.forFeature([ProductEntity, BrandEntity, CategoryEntity]),
+    FileModule,
+  ],
   controllers: [ProductController],
   providers: [ProductService, JwtService, JWTService],
   exports: [ProductService],

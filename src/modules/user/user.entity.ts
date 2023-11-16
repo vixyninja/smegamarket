@@ -1,6 +1,14 @@
 import {BaseEntity, RoleEnum} from '@/core';
 import * as bcryptjs from 'bcryptjs';
-import {BeforeInsert, Column, Entity, JoinColumn, JoinTable, ManyToMany, OneToOne} from 'typeorm';
+import {
+  BeforeInsert,
+  Column,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  OneToOne,
+} from 'typeorm';
 import {FileEntity} from '../file';
 import {StatusUser} from './enum';
 

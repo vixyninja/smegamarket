@@ -6,10 +6,10 @@ import {FileEntity} from './file.entity';
 import {HttpBadRequest} from '@/core';
 
 interface FileServiceInterface {
-  findFile(fileId: string): Promise<any>;
-  uploadFile(file: Express.Multer.File): Promise<any>;
+  findFile(fileId: string): Promise<FileEntity>;
+  uploadFile(file: Express.Multer.File): Promise<FileEntity>;
   deleteFile(fileId: string): Promise<any>;
-  uploadFiles(files: Express.Multer.File[]): Promise<any>;
+  uploadFiles(files: Express.Multer.File[]): Promise<FileEntity[]>;
 }
 
 @Injectable()
@@ -19,7 +19,8 @@ export class FileService implements FileServiceInterface {
     private readonly fileRepository: Repository<FileEntity>,
     private readonly cloudinaryService: CloudinaryService,
   ) {}
-  async findFile(fileId: string): Promise<any> {
+
+  async findFile(fileId: string): Promise<FileEntity> {
     try {
       const file = await this.fileRepository.findOne({where: {uuid: fileId}});
       if (!file) throw new HttpBadRequest('File is not exist');
@@ -28,7 +29,7 @@ export class FileService implements FileServiceInterface {
       throw new HttpBadRequest(e.message);
     }
   }
-  async uploadFile(file: Express.Multer.File): Promise<any> {
+  async uploadFile(file: Express.Multer.File): Promise<FileEntity> {
     try {
       const result = await this.cloudinaryService.uploadFileImage(file);
       const fileEntity = new FileEntity();
@@ -56,6 +57,7 @@ export class FileService implements FileServiceInterface {
       throw new HttpBadRequest(e.message);
     }
   }
+
   async deleteFile(fileId: string): Promise<any> {
     try {
       const file = await this.fileRepository.findOne({where: {uuid: fileId}});
@@ -67,9 +69,12 @@ export class FileService implements FileServiceInterface {
       throw new HttpBadRequest(e.message);
     }
   }
-  async uploadFiles(files: Express.Multer.File[]): Promise<any> {
+
+  async uploadFiles(files: Express.Multer.File[]): Promise<FileEntity[]> {
     try {
-      const result = await this.cloudinaryService.uploadMultipleFileImage(files);
+      const result = await this.cloudinaryService.uploadMultipleFileImage(
+        files,
+      );
       const fileArray = [];
       for (const file of result) {
         const fileEntity = new FileEntity();
