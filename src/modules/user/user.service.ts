@@ -15,7 +15,10 @@ interface UserServiceInterface {
   readUsers(): Promise<UserEntity[]>;
   updateUser(uuid: string, updateUserDTO: UpdateUserDTO): Promise<UserEntity>;
   updateUserPassword(uuid: string, password: string): Promise<UserEntity>;
-  updateUserAvatar(uuid: string, avatar: Express.Multer.File): Promise<UserEntity>;
+  updateUserAvatar(
+    uuid: string,
+    avatar: Express.Multer.File,
+  ): Promise<UserEntity>;
   deleteUser(uuid: string): Promise<UserEntity>;
 }
 @Injectable()
@@ -73,7 +76,9 @@ export class UserService implements UserServiceInterface {
     try {
       const isExist = await this.redisxService.getKey(uuid);
       if (isExist) return JSON.parse(isExist);
-      const user: UserEntity = await this.userRepository.findOne({where: {uuid: uuid}});
+      const user: UserEntity = await this.userRepository.findOne({
+        where: {uuid: uuid},
+      });
       await this.redisxService.setKey(uuid, JSON.stringify(user));
       return user;
     } catch (e) {
@@ -89,12 +94,19 @@ export class UserService implements UserServiceInterface {
     }
   }
 
-  async updateUser(uuid: string, updateUserDTO: UpdateUserDTO): Promise<UserEntity> {
+  async updateUser(
+    uuid: string,
+    updateUserDTO: UpdateUserDTO,
+  ): Promise<UserEntity> {
     try {
       const isExist = await this.redisxService.getKey(uuid);
+
       if (isExist) await this.redisxService.delKey(uuid);
+
       const user = await this.userRepository.findOne({where: {uuid: uuid}});
+
       const {deviceToken, deviceType, firstName, lastName} = updateUserDTO;
+
       this.userRepository.merge(user, {
         deviceToken,
         deviceType,
@@ -108,28 +120,42 @@ export class UserService implements UserServiceInterface {
     }
   }
 
-  async updateUserPassword(uuid: string, password: string): Promise<UserEntity> {
+  async updateUserPassword(
+    uuid: string,
+    password: string,
+  ): Promise<UserEntity> {
     try {
       const isExist = await this.redisxService.getKey(uuid);
+
       if (isExist) await this.redisxService.delKey(uuid);
+
       const user = await this.userRepository.findOne({where: {uuid: uuid}});
+
       user.setHashPassword(password);
+
       return await this.userRepository.save(user);
     } catch (e) {
       throw new HttpBadRequest(e.message);
     }
   }
 
-  async updateUserAvatar(uuid: string, avatar: Express.Multer.File): Promise<UserEntity> {
+  async updateUserAvatar(
+    uuid: string,
+    avatar: Express.Multer.File,
+  ): Promise<UserEntity> {
     try {
       const isExist = await this.redisxService.getKey(uuid);
+
       if (isExist) await this.redisxService.delKey(uuid);
+
       const user = await this.userRepository.findOne({where: {uuid: uuid}});
+
       const newAvatar = await this.fileService.uploadFile(avatar);
+
       user.avatar = newAvatar.uuid;
+
       return await this.userRepository.save(user);
     } catch (e) {
-      console.log(e);
       throw new HttpBadRequest(e.message);
     }
   }
@@ -137,6 +163,7 @@ export class UserService implements UserServiceInterface {
   async deleteUser(uuid: string): Promise<UserEntity> {
     try {
       const user = await this.userRepository.findOne({where: {uuid: uuid}});
+
       return await this.userRepository.remove(user);
     } catch (e) {
       throw new HttpBadRequest(e.message);

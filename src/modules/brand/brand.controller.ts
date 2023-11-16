@@ -47,15 +47,22 @@ export class BrandController {
 
   @Roles([RoleEnum.ADMIN])
   @UseGuards(RolesGuard)
+  @UseInterceptors(FileInterceptor('file'))
   @Post()
-  async create(@Body() createBrandDTO: CreateBrandDTO): Promise<any> {
-    return await this.brandService.create(createBrandDTO);
+  async create(
+    @Body() createBrandDTO: CreateBrandDTO,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<any> {
+    return await this.brandService.create(createBrandDTO, file);
   }
 
   @Roles([RoleEnum.ADMIN])
   @UseGuards(RolesGuard)
   @Put(':brandId')
-  async update(@Body() updateBrandDTO: UpdateBrandDTO, @Param('brandId') brandId: string): Promise<any> {
+  async update(
+    @Body() updateBrandDTO: UpdateBrandDTO,
+    @Param('brandId') brandId: string,
+  ): Promise<any> {
     return await this.brandService.update(brandId, updateBrandDTO);
   }
 
@@ -63,7 +70,10 @@ export class BrandController {
   @UseGuards(RolesGuard)
   @Put(':brandId/logo')
   @UseInterceptors(FileInterceptor('file'))
-  async updateImageId(@Param('brandId') brandId: string, @UploadedFile() file: Express.Multer.File): Promise<any> {
+  async updateImageId(
+    @Param('brandId') brandId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<any> {
     return await this.brandService.updateImage(brandId, file);
   }
 

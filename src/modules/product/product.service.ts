@@ -5,10 +5,10 @@ import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
 import {BrandEntity} from '../brand';
 import {CategoryEntity} from '../category';
-import {FileEntity, FileService} from '../file';
+import {FileService} from '../file';
 import {CreateProductDTO} from './dto';
-import {ProductEntity} from './product.entity';
 import {UpdateProductDTO} from './dto/updateProduct.dto';
+import {ProductEntity} from './product.entity';
 
 interface ProductServiceInterface {
   findAll(query: IQueryOptions): Promise<any>;
@@ -53,13 +53,20 @@ export class ProductService implements ProductServiceInterface {
       const total = await this.productRepository.count();
 
       return {
-        meta: new Meta(_page, _limit, response.length, Math.ceil(total / _limit), query),
+        meta: new Meta(
+          _page,
+          _limit,
+          response.length,
+          Math.ceil(total / _limit),
+          query,
+        ),
         data: response,
       };
     } catch (e) {
       throw new HttpBadRequest(e.message);
     }
   }
+
   async findOne(productId: string): Promise<any> {
     try {
       const product = await this.productRepository.findOne({
@@ -80,6 +87,7 @@ export class ProductService implements ProductServiceInterface {
       throw new HttpBadRequest(e.message);
     }
   }
+
   async create(createProductDTO: CreateProductDTO): Promise<any> {
     try {
       const isExist = await this.productRepository.findOne({
@@ -136,6 +144,7 @@ export class ProductService implements ProductServiceInterface {
       if (!response) {
         return new HttpBadRequest('Create product failed');
       }
+
       return {
         message: 'Create product success',
         data: response,
@@ -144,7 +153,11 @@ export class ProductService implements ProductServiceInterface {
       throw new HttpBadRequest(e.message);
     }
   }
-  async update(productId: string, updateProductDTO: UpdateProductDTO): Promise<any> {
+
+  async update(
+    productId: string,
+    updateProductDTO: UpdateProductDTO,
+  ): Promise<any> {
     try {
       const isExist = await this.productRepository.findOne({
         where: {
@@ -178,43 +191,81 @@ export class ProductService implements ProductServiceInterface {
         return new HttpBadRequest('Update product failed');
       }
 
+      const result = await this.productRepository.findOne({
+        where: {uuid: productId},
+      });
+
       return {
         message: 'Update product success',
-        data: await this.productRepository.findOne({where: {uuid: productId}}),
+        data: result,
       };
     } catch (e) {
       throw new HttpBadRequest(e.message);
     }
   }
-  async updateImage(productId: string, files: Express.Multer.File[]): Promise<any> {
+
+  async updateImage(
+    productId: string,
+    files: Express.Multer.File[],
+  ): Promise<any> {
     try {
-      const isExist = await this.productRepository.findOne({where: {uuid: productId}});
+      const isExist = await this.productRepository.findOne({
+        where: {uuid: productId},
+      });
+
       if (!isExist) {
         return new HttpBadRequest('Product is not exist');
       }
+
       const file = await this.fileService.uploadFiles(files);
 
       if (!file) {
         return new HttpBadRequest('Upload file failed');
       }
 
-      const mergeProduct = this.productRepository.merge(isExist, {images: file});
-
-      await this.productRepository.save(mergeProduct);
+      const mergeProduct = this.productRepository.merge(isExist, {
+        images: file,
+      });
 
       if (!mergeProduct) {
         return new HttpBadRequest('Update product failed');
       }
+      const response = await this.productRepository.save(mergeProduct);
+
+      if (!response) {
+        return new HttpBadRequest('Update product failed');
+      }
+
+      const result = await this.productRepository.findOne({
+        where: {uuid: productId},
+      });
 
       return {
         message: 'Update product success',
-        data: await this.productRepository.findOne({where: {uuid: productId}}),
+        data: result,
       };
     } catch (e) {
       throw new HttpBadRequest(e.message);
     }
   }
-  delete(): Promise<any> {
-    throw new Error('Method not implemented.');
+
+  async delete(): Promise<any> {
+    try {
+      const response = await this.productRepository
+        .createQueryBuilder()
+        .delete()
+        .from(ProductEntity)
+        .execute();
+
+      if (!response) {
+        return new HttpBadRequest('Delete product failed');
+      }
+
+      return {
+        message: 'Delete product success',
+      };
+    } catch (e) {
+      throw new HttpBadRequest(e.message);
+    }
   }
 }

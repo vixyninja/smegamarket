@@ -1,5 +1,5 @@
 import {BaseEntity} from '@/core';
-import {Column, Entity, JoinColumn, JoinTable, ManyToMany, OneToOne} from 'typeorm';
+import {Column, Entity, JoinColumn, OneToOne} from 'typeorm';
 import {FileEntity} from '../file';
 
 @Entity()

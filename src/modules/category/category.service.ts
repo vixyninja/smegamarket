@@ -10,7 +10,10 @@ interface CategoryServiceInterface {
   findAll(): Promise<any>;
   findOne(categoryId: string): Promise<any>;
   create(createCategoryDTO: CreateCategoryDTO): Promise<any>;
-  update(categoryId: string, updateCategoryDTO: UpdateCategoryDTO): Promise<any>;
+  update(
+    categoryId: string,
+    updateCategoryDTO: UpdateCategoryDTO,
+  ): Promise<any>;
   delete(categoryId: string): Promise<any>;
 }
 
@@ -58,7 +61,9 @@ export class CategoryService implements CategoryServiceInterface {
   }
   async findOne(categoryId: string): Promise<any> {
     try {
-      const category = await this.categoryRepository.findOne({where: {uuid: categoryId}});
+      const category = await this.categoryRepository.findOne({
+        where: {uuid: categoryId},
+      });
 
       if (!category) {
         return new HttpBadRequest('Category not found');
@@ -74,7 +79,9 @@ export class CategoryService implements CategoryServiceInterface {
   }
   async create(createCategoryDTO: CreateCategoryDTO): Promise<any> {
     try {
-      const nameExist = await this.categoryRepository.findOne({where: {name: createCategoryDTO.name.trim()}});
+      const nameExist = await this.categoryRepository.findOne({
+        where: {name: createCategoryDTO.name.trim()},
+      });
 
       if (nameExist) {
         return new HttpBadRequest('Category name already exist');
@@ -89,17 +96,31 @@ export class CategoryService implements CategoryServiceInterface {
       throw new HttpBadRequest(e.message);
     }
   }
-  async update(categoryId: string, updateCategoryDTO: UpdateCategoryDTO): Promise<any> {
+  async update(
+    categoryId: string,
+    updateCategoryDTO: UpdateCategoryDTO,
+  ): Promise<any> {
     try {
-      const category = await this.categoryRepository.findOne({where: {uuid: categoryId}});
+      const category = await this.categoryRepository.findOne({
+        where: {uuid: categoryId},
+      });
 
       if (!category) {
         return new HttpBadRequest('Category not found');
       }
 
-      await this.categoryRepository.update(categoryId, updateCategoryDTO);
+      const updateCategory = await this.categoryRepository.update(
+        categoryId,
+        updateCategoryDTO,
+      );
 
-      const result = await this.categoryRepository.findOne({where: {uuid: categoryId}});
+      if (!updateCategory) {
+        return new HttpBadRequest('Error updating category');
+      }
+
+      const result = await this.categoryRepository.findOne({
+        where: {uuid: categoryId},
+      });
 
       return {
         message: 'Update category success',
@@ -111,13 +132,19 @@ export class CategoryService implements CategoryServiceInterface {
   }
   async delete(categoryId: string): Promise<any> {
     try {
-      const category = await this.categoryRepository.findOne({where: {uuid: categoryId}});
+      const category = await this.categoryRepository.findOne({
+        where: {uuid: categoryId},
+      });
 
       if (!category) {
         return new HttpBadRequest('Category not found');
       }
 
-      await this.categoryRepository.delete(categoryId);
+      const deleteCategory = await this.categoryRepository.delete(categoryId);
+
+      if (!deleteCategory) {
+        return new HttpBadRequest('Error deleting category');
+      }
 
       return {
         message: 'Delete category success',

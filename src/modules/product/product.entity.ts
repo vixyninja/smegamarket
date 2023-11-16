@@ -1,9 +1,16 @@
 import {BaseEntity} from '@/core';
-import {Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToOne} from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+} from 'typeorm';
 import {BrandEntity} from '../brand';
-import {ProductEnum, SaleEnum, SizeEnum, StatusEnum} from './enum';
 import {CategoryEntity} from '../category';
 import {FileEntity} from '../file';
+import {ProductEnum, SaleEnum, SizeEnum, StatusEnum} from './enum';
 
 @Entity()
 export class ProductEntity extends BaseEntity {
@@ -45,7 +52,9 @@ export class ProductEntity extends BaseEntity {
   @ManyToOne(() => BrandEntity, (brand) => brand.uuid, {cascade: true})
   brand: BrandEntity;
 
-  @ManyToMany(() => CategoryEntity, (category) => category.uuid, {cascade: true})
+  @ManyToMany(() => CategoryEntity, (category) => category.uuid, {
+    cascade: true,
+  })
   @JoinTable({
     name: 'product_category',
     joinColumn: {
