@@ -13,9 +13,13 @@ import {ProductEntity} from './product.entity';
 interface ProductServiceInterface {
   findAll(query: IQueryOptions): Promise<any>;
   findOne(productId: string): Promise<any>;
+  findAllByBrand(brandId: string, query: IQueryOptions): Promise<any>;
+  findAllByCategory(categoryId: string, query: IQueryOptions): Promise<any>;
   create(createProductDTO: CreateProductDTO): Promise<any>;
   update(productId: string, updateProductDTO: UpdateProductDTO): Promise<any>;
   updateImage(productId: string, files: Express.Multer.File[]): Promise<any>;
+  updateProductBrand(productId: string, brandId: string): Promise<any>;
+  updateProductCategory(productId: string, categoryId: string): Promise<any>;
   delete(): Promise<any>;
 }
 
@@ -30,6 +34,21 @@ export class ProductService implements ProductServiceInterface {
     private readonly categoryRepository: Repository<CategoryEntity>,
     private readonly fileService: FileService,
   ) {}
+  updateProductBrand(productId: string, brandId: string): Promise<any> {
+    throw new Error('Method not implemented.');
+  }
+  updateProductCategory(productId: string, categoryId: string): Promise<any> {
+    throw new Error('Method not implemented.');
+  }
+  updateBrand(productId: string, brandId: string): Promise<any> {
+    throw new Error('Method not implemented.');
+  }
+  findAllByCategory(categoryId: string, query: IQueryOptions): Promise<any> {
+    throw new Error('Method not implemented.');
+  }
+  findAllByBrand(brandId: string, query: IQueryOptions): Promise<any> {
+    throw new Error('Method not implemented.');
+  }
 
   async findAll(query: IQueryOptions): Promise<any> {
     try {

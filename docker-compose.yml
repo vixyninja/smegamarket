@@ -2,7 +2,7 @@ version: '3.1'
 services:
   postgres:
     container_name: postgres
-    image: postgres:16.0-alpine
+    image: postgres
     restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -19,9 +19,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
+      target: development
+    restart: always
     environment:
       POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -29,10 +28,39 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_PORT: ${POSTGRES_PORT}
     ports:
-      - 4000:4000
+      - ${PORT}:${PORT}
     command: npm run start:dev
     depends_on:
       - postgres
+      - redis
+    env_file:
+      - .env
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+
+  redis:
+    container_name: redis
+    image: redis
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}
+    volumes:
+      - redis:/data
+    restart: always
+    environment:
+      REDIS_HOST: ${REDIS_HOST}
+
+  redis-insight:
+    container_name: redis-insight
+    image: redislabs/redisinsight:latest
+    ports:
+      - ${REDIS_INSIGHT_PORT}:${REDIS_INSIGHT_PORT}
+    restart: always
+    environment:
+      REDIS_INSIGHT_PORT: ${REDIS_INSIGHT_PORT}
+      REDIS_HOSTS: ${REDIS_HOST}:${REDIS_PORT}
+    depends_on:
+      - redis
 
   adminer:
     container_name: adminer
@@ -47,3 +75,7 @@ volumes:
   postgres:
   docker-nest-postgres:
   adminer:
+  redis:
+    driver: local
+  redis-insight:
+    driver: local

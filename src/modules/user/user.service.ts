@@ -32,20 +32,35 @@ export class UserService implements UserServiceInterface {
 
   async importUsers(): Promise<any> {
     try {
-      faker.fakerVI.seed(124);
+      faker.fakerVI.seed(Date.now());
 
       for (let i = 0; i < 10; i++) {
+        let firstName = faker.fakerVI.person.firstName();
+
+        let lastName = faker.fakerVI.person.lastName();
+
+        let email = faker.fakerVI.internet.email({
+          firstName: firstName,
+          lastName: lastName,
+          provider: 'gmail',
+          allowSpecialCharacters: false,
+        });
+
         const user: CreateUserDTO = {
-          firstName: faker.fakerVI.person.firstName(),
-          lastName: faker.fakerVI.person.lastName(),
-          email: faker.fakerVI.internet.email(),
-          password: 'password',
+          firstName: firstName,
+          lastName: lastName,
+          email: email,
+          password: 'mega123456',
         };
+
         await this.createUser(user);
       }
 
+      const users = await this.readUsers();
+
       return {
         message: 'Import users successfully',
+        data: users,
       };
     } catch (e) {
       throw new HttpBadRequest(e.message);

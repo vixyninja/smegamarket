@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import {FileEntity} from '../file';
 import {StatusUser} from './enum';
+import {Exclude} from 'class-transformer';
 
 @Entity()
 export class UserEntity extends BaseEntity {
@@ -24,10 +25,12 @@ export class UserEntity extends BaseEntity {
   email: string;
 
   @Column({type: 'varchar', length: 225, nullable: false})
-  private hashPassword: string;
+  @Exclude()
+  hashPassword: string;
 
   @Column({type: 'varchar', length: 225, nullable: false})
-  private salt: string;
+  @Exclude()
+  salt: string;
 
   @Column({type: 'enum', enum: RoleEnum, default: RoleEnum.USER})
   role: RoleEnum;
@@ -48,14 +51,6 @@ export class UserEntity extends BaseEntity {
   })
   @OneToOne(() => FileEntity, (file) => file.uuid, {onDelete: 'CASCADE'})
   avatar: string;
-
-  getHashPassword(): string {
-    return this.hashPassword;
-  }
-
-  getSalt(): string {
-    return this.salt;
-  }
 
   setHashPassword(hashPassword: string): void {
     this.hashPassword = hashPassword;

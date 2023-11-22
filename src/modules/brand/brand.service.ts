@@ -64,6 +64,7 @@ export class BrandService implements BrandServiceInterface {
       const brands = await this.brandRepository
         .createQueryBuilder('brand')
         .leftJoinAndSelect('brand.avatar', 'avatar')
+        .select(['brand', 'avatar'])
         .skip(_limit * (_page - 1))
         .take(_limit)
         .orderBy(`brand.${_sort}`, _order)
@@ -106,7 +107,7 @@ export class BrandService implements BrandServiceInterface {
 
   async create(
     createBrandDTO: CreateBrandDTO,
-    file: Express.Multer.File,
+    avatar: Express.Multer.File,
   ): Promise<any> {
     try {
       const brandExist = await this.brandRepository.findOne({
@@ -117,7 +118,7 @@ export class BrandService implements BrandServiceInterface {
         return new HttpBadRequest('Brand already exist');
       }
 
-      const avatarUpload = await this.fileService.uploadFile(file);
+      const avatarUpload = await this.fileService.uploadFile(avatar);
 
       if (!avatarUpload) {
         return new HttpBadRequest('Error uploading image');

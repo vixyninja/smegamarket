@@ -67,7 +67,6 @@ export class UserController {
   @UseGuards(RolesGuard)
   @Post('import')
   async importUsers(): Promise<any> {
-    await this.userService.importUsers();
-    return {message: 'Import users successfully'};
+    return await this.userService.importUsers();
   }
 }

@@ -36,8 +36,8 @@ async function bootstrap() {
   app.setGlobalPrefix(prefix);
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(
-    new TimeoutInterceptor(),
     new LogsInterceptor(),
+    new TimeoutInterceptor(),
     new FormatResponseInterceptor(),
     new StatusInterceptor(),
   );
