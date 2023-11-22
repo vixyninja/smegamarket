@@ -2,6 +2,7 @@ import {
   CallHandler,
   ExecutionContext,
   Injectable,
+  Logger,
   NestInterceptor,
 } from '@nestjs/common';
 import {Observable, tap} from 'rxjs';
@@ -10,17 +11,19 @@ import {Observable, tap} from 'rxjs';
 export class LogsInterceptor implements NestInterceptor {
   constructor() {}
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    const ctx = context.switchToHttp();
-    const response = ctx.getResponse();
-    const request = ctx.getRequest();
     const now = Date.now();
-    return next.handle().pipe(
-      tap(() => {
-        console.log('REQUEST: ', request.method, request.url);
-        console.log('RESPONSE: ', response.statusCode);
-        console.log(`After... ${Date.now() - now}ms`);
-        return next;
-      }),
+    const req = context.switchToHttp().getRequest();
+    const method = req.method;
+    const url = req.url;
+    const res = context.switchToHttp().getResponse();
+    const delay = Date.now() - now;
+    Logger.debug(
+      `${req.ip} ${new Date()} ${method} ${url} ${req.protocol} ${
+        res.statusCode
+      } ${req.headers['content-length'] || '0'} *** ${
+        req.headers.host.split(':')[1]
+      } ${delay}ms`,
     );
+    return next.handle();
   }
 }

@@ -39,7 +39,7 @@ export class BrandController {
   async findOne(@Param('brandId') brandId: string): Promise<any> {
     if (isUUID(brandId) === false) {
       return {
-        message: 'Brand not found',
+        message: 'uuid is not valid',
       };
     }
     return await this.brandService.findOne(brandId);
@@ -47,13 +47,13 @@ export class BrandController {
 
   @Roles([RoleEnum.ADMIN])
   @UseGuards(RolesGuard)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('avatar'))
   @Post()
   async create(
     @Body() createBrandDTO: CreateBrandDTO,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() avatar: Express.Multer.File,
   ): Promise<any> {
-    return await this.brandService.create(createBrandDTO, file);
+    return await this.brandService.create(createBrandDTO, avatar);
   }
 
   @Roles([RoleEnum.ADMIN])

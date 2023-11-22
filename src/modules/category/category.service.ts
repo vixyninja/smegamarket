@@ -26,14 +26,33 @@ export class CategoryService implements CategoryServiceInterface {
 
   async import(): Promise<any> {
     try {
-      faker.fakerVI.seed(124);
+      faker.fakerVI.seed();
+
+      let cateRnd: string[] = ['Vegetables', 'Fruits', 'Meat', 'Others'];
 
       let categories = [];
 
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < cateRnd.length; i++) {
+        var des;
+        switch (i) {
+          case 0:
+            des =
+              'Vegetables are parts of plants that are consumed by humans or other animals as food.';
+            break;
+          case 1:
+            des =
+              'In botany, a fruit is the seed-bearing structure in flowering plants (also known as angiosperms) formed from the ovary after flowering.';
+            break;
+          case 2:
+            des = 'Meat is animal flesh that is eaten as food.';
+            break;
+          default:
+            des = 'Others';
+        }
+
         const category: CreateCategoryDTO = {
-          name: faker.fakerVI.commerce.department() + i,
-          description: faker.fakerVI.commerce.productDescription(),
+          name: cateRnd[i].toString(),
+          description: des,
         };
         categories.push(category);
       }
