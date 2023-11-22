@@ -17,8 +17,8 @@ services:
   api-client:
     container_name: api-client
     build:
-      context: .
       dockerfile: Dockerfile
+      context: .
       target: development
     restart: always
     environment:
@@ -53,6 +53,8 @@ services:
   redis-insight:
     container_name: redis-insight
     image: redislabs/redisinsight:latest
+    volumes:
+      - redis-insight:/db
     ports:
       - ${REDIS_INSIGHT_PORT}:${REDIS_INSIGHT_PORT}
     restart: always
@@ -65,6 +67,8 @@ services:
   adminer:
     container_name: adminer
     image: adminer
+    volumes:
+      - adminer:/sessions
     restart: always
     ports:
       - ${ADMINER_PORT}:${ADMINER_PORT}
@@ -72,10 +76,13 @@ services:
       - postgres
 
 volumes:
-  postgres:
+  api-client:
+    name: vapi-client
   docker-nest-postgres:
+    name: vdocker-nest-postgres
   adminer:
+    name: vadminer
   redis:
-    driver: local
+    name: vredis
   redis-insight:
-    driver: local
+    name: vredis-insight
