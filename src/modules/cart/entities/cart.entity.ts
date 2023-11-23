@@ -1,6 +1,6 @@
 import {BaseEntity} from '@/core';
 import {Column, Entity, JoinColumn, JoinTable, OneToOne} from 'typeorm';
-import {UserEntity} from '../user';
+import {UserEntity} from '../../user';
 
 @Entity()
 export class CartEntity extends BaseEntity {

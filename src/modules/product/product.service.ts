@@ -6,9 +6,8 @@ import {Repository} from 'typeorm';
 import {BrandEntity} from '../brand';
 import {CategoryEntity} from '../category';
 import {FileService} from '../file';
-import {CreateProductDTO} from './dto';
-import {UpdateProductDTO} from './dto/updateProduct.dto';
-import {ProductEntity} from './product.entity';
+import {CreateProductDTO, UpdateProductDTO} from './dto';
+import {ProductEntity} from './entities/product.entity';
 
 interface ProductServiceInterface {
   findAll(query: IQueryOptions): Promise<any>;

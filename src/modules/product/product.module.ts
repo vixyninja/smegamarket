@@ -4,10 +4,10 @@ import {JwtService} from '@nestjs/jwt';
 import {TypeOrmModule} from '@nestjs/typeorm';
 import {BrandEntity} from '../brand';
 import {CategoryEntity} from '../category';
-import {ProductController} from './product.controller';
-import {ProductEntity} from './product.entity';
-import {ProductService} from './product.service';
 import {FileModule} from '../file';
+import {ProductEntity} from './entities';
+import {ProductController} from './product.controller';
+import {ProductService} from './product.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([ProductEntity, BrandEntity, CategoryEntity]), FileModule],
