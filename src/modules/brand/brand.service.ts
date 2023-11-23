@@ -4,8 +4,8 @@ import {Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
 import {FileService} from '../file';
-import {BrandEntity} from './brand.entity';
 import {CreateBrandDTO, UpdateBrandDTO} from './dto';
+import {BrandEntity} from './entities';
 
 interface BrandServiceInterface {
   findAll(query: IQueryOptions): Promise<any>;

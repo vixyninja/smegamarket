@@ -1,5 +1,5 @@
 import {BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToOne} from 'typeorm';
-import {ProductEntity, SizeEnum, StatusEnum} from '../product';
+import {ProductEntity, SizeEnum, StatusEnum} from '../../product';
 import {CartEntity} from './cart.entity';
 
 @Entity()

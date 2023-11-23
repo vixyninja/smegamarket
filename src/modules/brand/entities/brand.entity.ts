@@ -1,6 +1,6 @@
 import {BaseEntity} from '@/core';
 import {Column, Entity, JoinColumn, OneToOne} from 'typeorm';
-import {FileEntity} from '../file';
+import {FileEntity} from '../../file';
 
 @Entity()
 export class BrandEntity extends BaseEntity {

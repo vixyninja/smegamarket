@@ -10,9 +10,9 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import {FileService} from './file.service';
-import {isUUID} from 'class-validator';
 import {FileInterceptor, FilesInterceptor} from '@nestjs/platform-express';
+import {isUUID} from 'class-validator';
+import {FileService} from './file.service';
 
 @UseGuards(AuthGuard)
 @Controller('file')

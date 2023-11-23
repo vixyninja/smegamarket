@@ -1,9 +1,9 @@
 import {BaseEntity} from '@/core';
 import {Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne} from 'typeorm';
-import {BrandEntity} from '../brand';
-import {CategoryEntity} from '../category';
-import {FileEntity} from '../file';
-import {ProductEnum, SaleEnum, SizeEnum, StatusEnum} from './enum';
+import {BrandEntity} from '../../brand';
+import {CategoryEntity} from '../../category';
+import {FileEntity} from '../../file';
+import {ProductEnum, SaleEnum, SizeEnum, StatusEnum} from '../enum';
 
 @Entity()
 export class ProductEntity extends BaseEntity {

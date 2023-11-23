@@ -2,8 +2,8 @@ import {HttpBadRequest, HttpInternalServerError} from '@/core';
 import {Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
-import {CategoryEntity} from './category.entity';
 import {CreateCategoryDTO, UpdateCategoryDTO} from './dto';
+import {CategoryEntity} from './entities';
 
 interface CategoryServiceInterface {
   findAll(): Promise<any>;

@@ -16,7 +16,7 @@ import {
 } from '@nestjs/common';
 import {FileInterceptor} from '@nestjs/platform-express';
 import {isUUID} from 'class-validator';
-import {BrandEntity} from './brand.entity';
+import {BrandEntity} from './entities/brand.entity';
 import {BrandService} from './brand.service';
 import {CreateBrandDTO, UpdateBrandDTO} from './dto';
 
