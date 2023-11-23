@@ -1,11 +1,16 @@
 import {BaseEntity} from '@/core';
 import {Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne} from 'typeorm';
-import {BrandEntity} from '../../brand';
-import {CategoryEntity} from '../../category';
-import {FileEntity} from '../../file';
 import {ProductEnum, SaleEnum, SizeEnum, StatusEnum} from '../enum';
+import {BrandEntity} from '@/modules/brand';
+import {CategoryEntity} from '@/modules/category';
+import {FileEntity} from '@/modules/file';
 
-@Entity()
+@Entity({
+  name: 'product',
+  orderBy: {
+    createdAt: 'DESC',
+  },
+})
 export class ProductEntity extends BaseEntity {
   @Column({type: 'varchar', length: 225, nullable: false, unique: true})
   name: string;

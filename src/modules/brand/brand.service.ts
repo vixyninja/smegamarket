@@ -45,7 +45,6 @@ export class BrandService implements BrandServiceInterface {
       const total = await this.brandRepository.count();
 
       return {
-        message: 'Brands found successfully',
         data: brands,
         meta: new Meta(_page, _limit, brands.length, Math.ceil(total / _limit), query),
       };
@@ -64,10 +63,7 @@ export class BrandService implements BrandServiceInterface {
         return new HttpForbidden('Brand not found');
       }
 
-      return {
-        message: 'Brand found successfully',
-        data: brand,
-      };
+      return brand;
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
@@ -118,10 +114,7 @@ export class BrandService implements BrandServiceInterface {
         return new HttpBadRequest('Error creating brand');
       }
 
-      return {
-        message: 'Brand created successfully',
-        data: result,
-      };
+      return result;
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
@@ -175,10 +168,7 @@ export class BrandService implements BrandServiceInterface {
         return new HttpBadRequest('Error updating brand');
       }
 
-      return {
-        message: 'Brand updated successfully',
-        data: result,
-      };
+      return result;
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
@@ -218,10 +208,7 @@ export class BrandService implements BrandServiceInterface {
         return new HttpBadRequest('Error updating brand');
       }
 
-      return {
-        message: 'Brand image updated successfully',
-        data: result,
-      };
+      return result;
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
@@ -235,9 +222,7 @@ export class BrandService implements BrandServiceInterface {
         return new HttpBadRequest('Error deleting brand');
       }
 
-      return {
-        message: 'Brand deleted successfully',
-      };
+      return 'Brand deleted successfully';
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }

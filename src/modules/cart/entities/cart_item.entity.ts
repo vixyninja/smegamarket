@@ -1,8 +1,13 @@
 import {BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToOne} from 'typeorm';
-import {ProductEntity, SizeEnum, StatusEnum} from '../../product';
 import {CartEntity} from './cart.entity';
+import {ProductEntity, SizeEnum} from '@/modules/product';
 
-@Entity()
+@Entity({
+  name: 'cart_item',
+  orderBy: {
+    createdAt: 'DESC',
+  },
+})
 export class CartItemEntity extends BaseEntity {
   @JoinColumn({
     name: 'cartId',

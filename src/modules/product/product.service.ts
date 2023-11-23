@@ -10,10 +10,10 @@ import {CreateProductDTO, UpdateProductDTO} from './dto';
 import {ProductEntity} from './entities/product.entity';
 
 interface ProductServiceInterface {
-  findAll(query: IQueryOptions): Promise<any>;
-  findOne(productId: string): Promise<any>;
-  findAllByBrand(brandId: string, query: IQueryOptions): Promise<any>;
-  findAllByCategory(categoryId: string, query: IQueryOptions): Promise<any>;
+  readAll(query: IQueryOptions): Promise<any>;
+  readOne(productId: string): Promise<any>;
+  readAllByBrand(brandId: string, query: IQueryOptions): Promise<any>;
+  readAllByCategory(categoryId: string, query: IQueryOptions): Promise<any>;
   create(createProductDTO: CreateProductDTO): Promise<any>;
   update(productId: string, updateProductDTO: UpdateProductDTO): Promise<any>;
   updateImage(productId: string, files: Express.Multer.File[]): Promise<any>;
@@ -42,14 +42,14 @@ export class ProductService implements ProductServiceInterface {
   updateBrand(productId: string, brandId: string): Promise<any> {
     throw new Error('Method not implemented.');
   }
-  findAllByCategory(categoryId: string, query: IQueryOptions): Promise<any> {
+  readAllByCategory(categoryId: string, query: IQueryOptions): Promise<any> {
     throw new Error('Method not implemented.');
   }
-  findAllByBrand(brandId: string, query: IQueryOptions): Promise<any> {
+  readAllByBrand(brandId: string, query: IQueryOptions): Promise<any> {
     throw new Error('Method not implemented.');
   }
 
-  async findAll(query: IQueryOptions): Promise<any> {
+  async readAll(query: IQueryOptions): Promise<any> {
     try {
       let {_page, _limit, _order, _sort} = query;
 
@@ -79,7 +79,7 @@ export class ProductService implements ProductServiceInterface {
     }
   }
 
-  async findOne(productId: string): Promise<any> {
+  async readOne(productId: string): Promise<any> {
     try {
       const product = await this.productRepository.findOne({
         where: {
@@ -91,10 +91,7 @@ export class ProductService implements ProductServiceInterface {
         return new HttpBadRequest('Product is not exist');
       }
 
-      return {
-        message: 'Get product success',
-        data: product,
-      };
+      return product;
     } catch (e) {
       throw new HttpBadRequest(e.message);
     }
@@ -157,10 +154,7 @@ export class ProductService implements ProductServiceInterface {
         return new HttpBadRequest('Create product failed');
       }
 
-      return {
-        message: 'Create product success',
-        data: response,
-      };
+      return response;
     } catch (e) {
       throw new HttpBadRequest(e.message);
     }
@@ -200,14 +194,11 @@ export class ProductService implements ProductServiceInterface {
         return new HttpBadRequest('Update product failed');
       }
 
-      const result = await this.productRepository.findOne({
+      const response = await this.productRepository.findOne({
         where: {uuid: productId},
       });
 
-      return {
-        message: 'Update product success',
-        data: result,
-      };
+      return response;
     } catch (e) {
       throw new HttpBadRequest(e.message);
     }
@@ -246,10 +237,7 @@ export class ProductService implements ProductServiceInterface {
         where: {uuid: productId},
       });
 
-      return {
-        message: 'Update product success',
-        data: result,
-      };
+      return result;
     } catch (e) {
       throw new HttpBadRequest(e.message);
     }

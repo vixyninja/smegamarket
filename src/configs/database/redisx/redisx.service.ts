@@ -1,12 +1,13 @@
 import {Injectable} from '@nestjs/common';
 import {InjectRedis, Redis} from '@nestjs-modules/ioredis';
+import {CACHE_TTL} from '@/core';
 
 @Injectable()
 export class RedisxService {
   constructor(@InjectRedis() private readonly redis: Redis) {}
 
   async setKey(key: string, value: string, expire?: number) {
-    return await this.redis.set(key, value, 'EX', expire || 60 * 60);
+    return await this.redis.set(key, value, 'EX', expire || CACHE_TTL);
   }
 
   async getKey(key: string) {

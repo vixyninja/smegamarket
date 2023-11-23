@@ -4,7 +4,12 @@ import {BeforeInsert, Column, Entity, JoinColumn, OneToOne} from 'typeorm';
 import {FileEntity} from '../file';
 import {StatusUser} from './enum';
 
-@Entity()
+@Entity({
+  name: 'user',
+  orderBy: {
+    createdAt: 'DESC',
+  },
+})
 export class UserEntity extends BaseEntity {
   @Column({type: 'varchar', length: 225, nullable: false})
   firstName: string;

@@ -38,14 +38,22 @@ export class AuthController {
   async signInEmailAndPassword(@Body() signInEmailDTO: SignInEmailDTO): Promise<any> {
     if (signInEmailDTO.password !== signInEmailDTO.confirmPassword)
       return new BadRequestException('Password and confirm password not match');
-    return await this.authService.signInEmailAndPassword(signInEmailDTO);
+    const credentials = await this.authService.signInEmailAndPassword(signInEmailDTO);
+    return {
+      message: 'Sign in successfully',
+      data: credentials,
+    };
   }
 
   @Post('sign-up')
   async signUpEmailAndPassword(@Body() signUpEmailDTO: SignUpEmailDTO): Promise<any> {
     if (signUpEmailDTO.password !== signUpEmailDTO.confirmPassword)
       return new BadRequestException('Password and confirm password not match');
-    return await this.authService.signUpEmailAndPassword(signUpEmailDTO);
+    const credentials = await this.authService.signUpEmailAndPassword(signUpEmailDTO);
+    return {
+      message: 'Sign up successfully',
+      data: credentials,
+    };
   }
 
   @Post('sign-in-with-google')
@@ -56,38 +64,60 @@ export class AuthController {
   @Post('refresh-token')
   async refreshToken(@Body() refreshToken: {refreshToken: string}): Promise<any> {
     if (!refreshToken.refreshToken) return new BadRequestException('Refresh token is required');
-    return await this.authService.refreshToken(refreshToken.refreshToken);
+    const credentials = await this.authService.refreshToken(refreshToken.refreshToken);
+    return {
+      message: 'Refresh token successfully',
+      data: credentials,
+    };
   }
 
   @Post('log-out')
   async signOut(@Body() signOutEmailDTO: SignOutEmailDTO): Promise<any> {
-    return await this.authService.logOut(signOutEmailDTO);
+    await this.authService.logOut(signOutEmailDTO);
+    return {
+      message: 'Log out successfully',
+    };
   }
 
   @Post('forgot-password')
   async forgotPassword(@Body() forgotPasswordDTO: ForgotPasswordDTO): Promise<any> {
-    return await this.authService.forgotPassword(forgotPasswordDTO);
+    const message = await this.authService.forgotPassword(forgotPasswordDTO);
+    return {
+      message: message,
+    };
   }
 
   @Post('reset-password-otp')
   async resetPasswordOtp(@Body() resetPasswordOtpDTO: ResetPasswordOtpDTO): Promise<any> {
     if (resetPasswordOtpDTO.password !== resetPasswordOtpDTO.confirmPassword)
       return new BadRequestException('Password and confirm password not match');
-    return await this.authService.resetPasswordOtp(resetPasswordOtpDTO);
+    const message = await this.authService.resetPasswordOtp(resetPasswordOtpDTO);
+    return {
+      message: message,
+    };
   }
 
   @Post('verify-email')
   async verifyEmail(@Body() verifyEmailDTO: VerifyEmailDTO): Promise<any> {
-    return await this.authService.verifyEmail(verifyEmailDTO);
+    const message = await this.authService.verifyEmail(verifyEmailDTO);
+    return {
+      message: message,
+    };
   }
 
   @Post('verify-phone')
   async verifyPhone(@Body() verifyPhoneDTO: VerifyPhoneDTO): Promise<any> {
-    return await this.authService.verifyPhone(verifyPhoneDTO);
+    const message = await this.authService.verifyPhone(verifyPhoneDTO);
+    return {
+      message: message,
+    };
   }
 
   @Post('verify-otp')
   async verifyOTP(@Body() verifyOtpDTO: VerifyOtpDTO): Promise<any> {
-    return await this.authService.verifyOtp(verifyOtpDTO);
+    const message = await this.authService.verifyOtp(verifyOtpDTO);
+    return {
+      message: message,
+    };
   }
 }

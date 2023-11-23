@@ -1,7 +1,12 @@
 import {BaseEntity} from '@/core';
 import {Column, Entity} from 'typeorm';
 
-@Entity()
+@Entity({
+  name: 'file',
+  orderBy: {
+    createdAt: 'DESC',
+  },
+})
 export class FileEntity extends BaseEntity {
   @Column({type: 'varchar', length: 255})
   publicId: string;

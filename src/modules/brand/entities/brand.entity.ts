@@ -2,7 +2,12 @@ import {BaseEntity} from '@/core';
 import {Column, Entity, JoinColumn, OneToOne} from 'typeorm';
 import {FileEntity} from '../../file';
 
-@Entity()
+@Entity({
+  name: 'brand',
+  orderBy: {
+    createdAt: 'DESC',
+  },
+})
 export class BrandEntity extends BaseEntity {
   @Column({type: 'varchar', length: 225, unique: true})
   name: string;

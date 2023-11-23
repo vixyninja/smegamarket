@@ -73,11 +73,8 @@ export class AuthService implements AuthServiceInterface {
       const refreshToken = await this.jwtService.signToken(payload, 'refreshToken');
 
       return {
-        message: 'Login successfully !!!',
-        data: {
-          accessToken: accessToken,
-          refreshToken: refreshToken,
-        },
+        accessToken: accessToken,
+        refreshToken: refreshToken,
       };
     } catch (e) {
       throw new HttpInternalServerError(e.message);
@@ -114,11 +111,8 @@ export class AuthService implements AuthServiceInterface {
       const refreshToken = await this.jwtService.signToken(payload, 'refreshToken');
 
       return {
-        message: 'Register successfully !!!',
-        data: {
-          accessToken: accessToken,
-          refreshToken: refreshToken,
-        },
+        accessToken: accessToken,
+        refreshToken: refreshToken,
       };
     } catch (e) {
       throw new HttpInternalServerError(e.message);
@@ -168,11 +162,8 @@ export class AuthService implements AuthServiceInterface {
       const refreshToken = await this.jwtService.signToken(newPayload, 'refreshToken');
 
       return {
-        message: 'Refresh token successfully !!!',
-        data: {
-          accessToken: accessToken,
-          refreshToken: refreshToken,
-        },
+        accessToken: accessToken,
+        refreshToken: refreshToken,
       };
     } catch (e) {
       throw new HttpInternalServerError(e.message);
@@ -184,10 +175,6 @@ export class AuthService implements AuthServiceInterface {
       const {uuid} = signOutEmailDTO;
 
       await this.redisService.delKey(uuid);
-
-      return {
-        message: 'Sign out successfully !!!',
-      };
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
@@ -208,9 +195,8 @@ export class AuthService implements AuthServiceInterface {
       await this.redisService.setKey(email + secret, code, 60 * 5);
 
       await this.mailService.sendUserResetPasswordOtp(user.firstName + ' ' + user.lastName, email, code);
-      return {
-        message: 'OTP sent to your email, you have 5 minutes to reset password !!!',
-      };
+
+      return 'OTP sent to your email, you have 5 minutes to reset password !!!';
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
@@ -235,9 +221,7 @@ export class AuthService implements AuthServiceInterface {
 
       await this.redisService.delKey(email + secret);
 
-      return {
-        message: 'Reset password successfully, please login again !!!',
-      };
+      return 'Reset password successfully, please login again !!!';
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
@@ -281,9 +265,7 @@ export class AuthService implements AuthServiceInterface {
 
       await this.mailService.sendUserVerifyCode(user.firstName + ' ' + user.lastName, email, code);
 
-      return {
-        message: 'OTP sent to your email, you have 5 minutes to verify !!!',
-      };
+      return 'OTP sent to your email, you have 5 minutes to verify !!!';
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
@@ -304,9 +286,7 @@ export class AuthService implements AuthServiceInterface {
 
       // TODO: send sms
 
-      return {
-        message: 'OTP sent to your phone, you have 5 minutes to verify !!!',
-      };
+      return 'OTP sent to your phone, you have 5 minutes to verify !!!';
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
@@ -338,9 +318,7 @@ export class AuthService implements AuthServiceInterface {
 
       await this.redisService.delKey(information + secret);
 
-      return {
-        message: 'Verify successfully !!!',
-      };
+      return 'Verify successfully !!!';
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }

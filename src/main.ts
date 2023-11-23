@@ -12,7 +12,9 @@ import {
 } from './core';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    preview: true,
+  });
 
   const prefix = 'api/v1';
   const port = process.env.PORT;
@@ -27,19 +29,28 @@ async function bootstrap() {
     maxAge: 3600,
     exposedHeaders: ['Content-Range', 'X-Content-Range'],
   });
+
   app.setGlobalPrefix(prefix);
+
   app.useGlobalPipes(new ValidationPipe());
+
   app.useGlobalInterceptors(
     new LogsInterceptor(),
     new TimeoutInterceptor(),
     new FormatResponseInterceptor(),
     new StatusInterceptor(),
   );
+
   app.useGlobalFilters(new HttpExceptionFilter());
+
   await app.listen(port);
 }
-bootstrap().then(() =>
-  Logger.debug(
-    `🌚 🌚 Application is listening on port ${process.env.PORT} 👀 👀 , ${process.env.NODE_ENV} 😈 😈 😈 😈 `,
-  ),
-);
+
+bootstrap()
+  .then(() =>
+    Logger.verbose(`🌚 Application is listening on port ${process.env.PORT} , ${process.env.NODE_ENV} 👀 😈 `),
+  )
+  .catch((error) => Logger.error(error))
+  .finally(() => {
+    Logger.verbose('🌚 Application is closing');
+  });
