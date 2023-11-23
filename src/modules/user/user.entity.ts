@@ -1,9 +1,8 @@
 import {BaseEntity, RoleEnum} from '@/core';
 import * as bcryptjs from 'bcryptjs';
-import {BeforeInsert, Column, Entity, JoinColumn, JoinTable, ManyToMany, OneToOne} from 'typeorm';
+import {BeforeInsert, Column, Entity, JoinColumn, OneToOne} from 'typeorm';
 import {FileEntity} from '../file';
 import {StatusUser} from './enum';
-import {Exclude} from 'class-transformer';
 
 @Entity()
 export class UserEntity extends BaseEntity {
@@ -20,11 +19,9 @@ export class UserEntity extends BaseEntity {
   phone: string;
 
   @Column({type: 'varchar', length: 225, nullable: false})
-  @Exclude()
   hashPassword: string;
 
   @Column({type: 'varchar', length: 225, nullable: false})
-  @Exclude()
   salt: string;
 
   @Column({type: 'enum', enum: RoleEnum, default: RoleEnum.USER})
@@ -42,10 +39,18 @@ export class UserEntity extends BaseEntity {
   @JoinColumn({
     name: 'avatar',
     referencedColumnName: 'uuid',
-    foreignKeyConstraintName: 'FK_USER_FILE',
+    foreignKeyConstraintName: 'FK_USER_AVATAR',
   })
   @OneToOne(() => FileEntity, (file) => file.uuid, {onDelete: 'CASCADE'})
-  avatar: string;
+  avatar: FileEntity;
+
+  @JoinColumn({
+    name: 'cover',
+    referencedColumnName: 'uuid',
+    foreignKeyConstraintName: 'FK_USER_COVER',
+  })
+  @OneToOne(() => FileEntity, (file) => file.uuid, {onDelete: 'CASCADE'})
+  cover: FileEntity;
 
   setHashPassword(hashPassword: string): void {
     this.hashPassword = hashPassword;

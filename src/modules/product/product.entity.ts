@@ -39,7 +39,7 @@ export class ProductEntity extends BaseEntity {
 
   @JoinColumn({
     name: 'brandId',
-    foreignKeyConstraintName: 'FK_product_brand_id',
+    foreignKeyConstraintName: 'FK_PRODUCT_BRAND',
     referencedColumnName: 'uuid',
   })
   @ManyToOne(() => BrandEntity, (brand) => brand.uuid, {cascade: true})
@@ -51,14 +51,14 @@ export class ProductEntity extends BaseEntity {
   @JoinTable({
     name: 'product_category',
     joinColumn: {
-      name: 'product_id',
+      name: 'productId',
       referencedColumnName: 'uuid',
-      foreignKeyConstraintName: 'FK_product_category',
+      foreignKeyConstraintName: 'FK_PRODUCT_CATEGORY',
     },
     inverseJoinColumn: {
-      name: 'category_id',
+      name: 'categoryId',
       referencedColumnName: 'uuid',
-      foreignKeyConstraintName: 'FK_category_product',
+      foreignKeyConstraintName: 'FK_CATEGORY_PRODUCT',
     },
   })
   category: CategoryEntity[];
@@ -67,14 +67,14 @@ export class ProductEntity extends BaseEntity {
   @JoinTable({
     name: 'product_image',
     joinColumn: {
-      name: 'product_id',
+      name: 'productId',
       referencedColumnName: 'uuid',
-      foreignKeyConstraintName: 'FK_product_image',
+      foreignKeyConstraintName: 'FK_PRODUCT_IMAGE',
     },
     inverseJoinColumn: {
-      name: 'image_id',
+      name: 'imageId',
       referencedColumnName: 'uuid',
-      foreignKeyConstraintName: 'FK_image_product',
+      foreignKeyConstraintName: 'FK_IMAGE_PRODUCT',
     },
   })
   images: FileEntity[];

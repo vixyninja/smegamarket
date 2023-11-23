@@ -1,4 +1,6 @@
-import {AuthGuard, RoleEnum, Roles, RolesGuard} from '@/core';
+import {AuthGuard, HttpInternalServerError, RoleEnum, Roles, RolesGuard} from '@/core';
+import {IQueryOptions} from '@/core/interface';
+import * as faker from '@faker-js/faker';
 import {
   Body,
   Controller,
@@ -12,11 +14,11 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import {FileInterceptor} from '@nestjs/platform-express';
 import {isUUID} from 'class-validator';
+import {BrandEntity} from './brand.entity';
 import {BrandService} from './brand.service';
 import {CreateBrandDTO, UpdateBrandDTO} from './dto';
-import {FileInterceptor} from '@nestjs/platform-express';
-import {IQueryOptions} from '@/core/interface';
 
 @UseGuards(AuthGuard)
 @Controller('brand')
@@ -27,7 +29,24 @@ export class BrandController {
   @UseGuards(RolesGuard)
   @Post('import')
   async import(): Promise<any> {
-    return await this.brandService.import();
+    try {
+      faker.fakerVI.seed(124);
+      for (let i = 0; i < 8; i++) {
+        const brand = new BrandEntity();
+        brand.name = faker.fakerVI.commerce.department() + i;
+        brand.description = faker.fakerVI.lorem.paragraph();
+        brand.address = faker.fakerVI.location.streetAddress();
+        brand.phoneNumber = faker.fakerVI.phone.number();
+        brand.email = faker.fakerVI.internet.email();
+        brand.website = faker.fakerVI.internet.url();
+        await this.brandService.create(brand, null);
+      }
+      return {
+        message: 'Brands imported successfully',
+      };
+    } catch (e) {
+      throw new HttpInternalServerError(e.message);
+    }
   }
 
   @Get()
@@ -57,6 +76,11 @@ export class BrandController {
   @UseGuards(RolesGuard)
   @Put(':brandId')
   async update(@Body() updateBrandDTO: UpdateBrandDTO, @Param('brandId') brandId: string): Promise<any> {
+    if (isUUID(brandId) === false) {
+      return {
+        message: 'uuid is not valid',
+      };
+    }
     return await this.brandService.update(brandId, updateBrandDTO);
   }
 
@@ -65,13 +89,23 @@ export class BrandController {
   @Put(':brandId/logo')
   @UseInterceptors(FileInterceptor('file'))
   async updateImageId(@Param('brandId') brandId: string, @UploadedFile() file: Express.Multer.File): Promise<any> {
+    if (isUUID(brandId) === false) {
+      return {
+        message: 'uuid is not valid',
+      };
+    }
     return await this.brandService.updateImage(brandId, file);
   }
 
   @Roles([RoleEnum.ADMIN])
   @UseGuards(RolesGuard)
-  @Delete(':brandId')
-  async delete(@Param('brandId') brandId: string): Promise<any> {
-    return await this.brandService.delete(brandId);
+  @Delete()
+  async delete(@Body() brandId: {brandId: string}): Promise<any> {
+    if (isUUID(brandId.brandId) === false) {
+      return {
+        message: 'uuid is not valid',
+      };
+    }
+    return await this.brandService.delete(brandId.brandId);
   }
 }
