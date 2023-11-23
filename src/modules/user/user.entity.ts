@@ -1,14 +1,6 @@
 import {BaseEntity, RoleEnum} from '@/core';
 import * as bcryptjs from 'bcryptjs';
-import {
-  BeforeInsert,
-  Column,
-  Entity,
-  JoinColumn,
-  JoinTable,
-  ManyToMany,
-  OneToOne,
-} from 'typeorm';
+import {BeforeInsert, Column, Entity, JoinColumn, JoinTable, ManyToMany, OneToOne} from 'typeorm';
 import {FileEntity} from '../file';
 import {StatusUser} from './enum';
 import {Exclude} from 'class-transformer';
@@ -23,6 +15,9 @@ export class UserEntity extends BaseEntity {
 
   @Column({type: 'varchar', length: 225, nullable: false, unique: true})
   email: string;
+
+  @Column({type: 'varchar', length: 225, nullable: true, unique: true, default: null})
+  phone: string;
 
   @Column({type: 'varchar', length: 225, nullable: false})
   @Exclude()

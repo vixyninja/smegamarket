@@ -25,7 +25,7 @@ export class MailService {
     }
   }
 
-  async sendUserResetPassword(name: string, email: string, code: string) {
+  async sendUserResetPasswordOtp(name: string, email: string, code: string) {
     try {
       await this.mailerService.sendMail({
         to: GROUP_EMAIL,
@@ -34,6 +34,41 @@ export class MailService {
         context: {
           name,
           email,
+          code,
+        },
+        date: new Date(),
+      });
+    } catch (e) {
+      throw new HttpInternalServerError(e.message);
+    }
+  }
+
+  async sendUserResetPasswordSuccess(name: string, email: string) {
+    try {
+      await this.mailerService.sendMail({
+        to: GROUP_EMAIL,
+        subject: 'Reset password successfully',
+        template: './reset-password-success',
+        context: {
+          name,
+          email,
+        },
+        date: new Date(),
+      });
+    } catch (e) {
+      throw new HttpInternalServerError(e.message);
+    }
+  }
+
+  async sendUserVerifyCode(name: string, information: string, code: string) {
+    try {
+      await this.mailerService.sendMail({
+        to: GROUP_EMAIL,
+        subject: 'Verify code for Mega Market',
+        template: './verify-code',
+        context: {
+          name,
+          information,
           code,
         },
         date: new Date(),
