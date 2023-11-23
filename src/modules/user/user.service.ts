@@ -3,6 +3,7 @@ import {HttpBadRequest, HttpInternalServerError} from '@/core';
 import {Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
+import {CartService} from '../cart';
 import {FileService} from '../file';
 import {CreateUserDTO, UpdateUserDTO} from './dto';
 import {StatusUser} from './enum';
@@ -30,6 +31,7 @@ export class UserService implements UserServiceInterface {
     private readonly userRepository: Repository<UserEntity>,
     private readonly redisxService: RedisxService,
     private readonly fileService: FileService,
+    private readonly cartService: CartService,
     private readonly mailService: MailService,
   ) {}
 

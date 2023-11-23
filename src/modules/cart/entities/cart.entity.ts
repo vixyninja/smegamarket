@@ -2,7 +2,12 @@ import {BaseEntity} from '@/core';
 import {Column, Entity, JoinColumn, JoinTable, OneToOne} from 'typeorm';
 import {UserEntity} from '../../user';
 
-@Entity()
+@Entity({
+  name: 'cart',
+  orderBy: {
+    createdAt: 'DESC',
+  },
+})
 export class CartEntity extends BaseEntity {
   @JoinColumn({
     name: 'userId',

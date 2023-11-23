@@ -1,9 +1,7 @@
 import {MailerService} from '@nestjs-modules/mailer';
 import {Injectable} from '@nestjs/common';
 
-import {HttpInternalServerError} from 'src/core';
-
-const GROUP_EMAIL = 'hhvy2003.dev@gmail.com';
+import {GROUP_EMAIL, HttpInternalServerError} from 'src/core';
 
 @Injectable()
 export class MailService {

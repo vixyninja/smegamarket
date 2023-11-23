@@ -16,6 +16,7 @@ import {CreateProductDTO} from './dto';
 import {ProductService} from './product.service';
 import {UpdateProductDTO} from './dto/updateProduct.dto';
 import {FilesInterceptor} from '@nestjs/platform-express';
+import {ProductEntity} from './entities';
 
 @UseGuards(AuthGuard)
 @Controller('product')
@@ -23,27 +24,44 @@ export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Get()
-  async findAll(@Query() query: IQueryOptions) {
-    return await this.productService.findAll(query);
+  async readAll(@Query() query: IQueryOptions) {
+    const products: any = await this.productService.readAll(query);
+    return {
+      message: 'Get products successfully',
+      data: products.data,
+      meta: products.meta,
+    };
   }
 
   @Get(':productId')
-  async findOne(@Param('productId') productId: string) {
-    return await this.productService.findOne(productId);
+  async readOne(@Param('productId') productId: string) {
+    const product: ProductEntity = await this.productService.readOne(productId);
+    return {
+      message: 'Get product successfully',
+      data: product,
+    };
   }
 
   @Roles([RoleEnum.ADMIN])
   @UseGuards(RolesGuard)
   @Post()
   async create(@Body() createProductDTO: CreateProductDTO) {
-    return await this.productService.create(createProductDTO);
+    const product: ProductEntity = await this.productService.create(createProductDTO);
+    return {
+      message: 'Create product successfully',
+      data: product,
+    };
   }
 
   @Roles([RoleEnum.ADMIN])
   @UseGuards(RolesGuard)
   @Put(':productId')
   async update(@Body() updateProductDTO: UpdateProductDTO, @Param('productId') productId: string) {
-    return await this.productService.update(productId, updateProductDTO);
+    const product: ProductEntity = await this.productService.update(productId, updateProductDTO);
+    return {
+      message: 'Update product successfully',
+      data: product,
+    };
   }
 
   @Roles([RoleEnum.ADMIN])
@@ -51,6 +69,10 @@ export class ProductController {
   @Put(':productId/images')
   @UseInterceptors(FilesInterceptor('images'))
   async updateImage(@Param('productId') productId: string, @UploadedFiles() files: Express.Multer.File[]) {
-    return await this.productService.updateImage(productId, files);
+    const product: ProductEntity = await this.productService.updateImage(productId, files);
+    return {
+      message: 'Update product image successfully',
+      data: product,
+    };
   }
 }

@@ -51,7 +51,12 @@ export class BrandController {
 
   @Get()
   async findAll(@Query() query: IQueryOptions): Promise<any> {
-    return await this.brandService.findAll(query);
+    const brands = await this.brandService.findAll(query);
+    return {
+      message: 'Get brands successfully',
+      data: brands.data,
+      meta: brands.meta,
+    };
   }
 
   @Get(':brandId')
@@ -61,7 +66,12 @@ export class BrandController {
         message: 'uuid is not valid',
       };
     }
-    return await this.brandService.findOne(brandId);
+    const brand = await this.brandService.findOne(brandId);
+
+    return {
+      message: 'Get brand successfully',
+      data: brand,
+    };
   }
 
   @Roles([RoleEnum.ADMIN])
@@ -69,7 +79,11 @@ export class BrandController {
   @UseInterceptors(FileInterceptor('avatar'))
   @Post()
   async create(@Body() createBrandDTO: CreateBrandDTO, @UploadedFile() avatar: Express.Multer.File): Promise<any> {
-    return await this.brandService.create(createBrandDTO, avatar);
+    const brand = await this.brandService.create(createBrandDTO, avatar);
+    return {
+      message: 'Create brand successfully',
+      data: brand,
+    };
   }
 
   @Roles([RoleEnum.ADMIN])
@@ -81,7 +95,11 @@ export class BrandController {
         message: 'uuid is not valid',
       };
     }
-    return await this.brandService.update(brandId, updateBrandDTO);
+    const brand = await this.brandService.update(brandId, updateBrandDTO);
+    return {
+      message: 'Update brand successfully',
+      data: brand,
+    };
   }
 
   @Roles([RoleEnum.ADMIN])
@@ -94,7 +112,11 @@ export class BrandController {
         message: 'uuid is not valid',
       };
     }
-    return await this.brandService.updateImage(brandId, file);
+    const brand = await this.brandService.updateImage(brandId, file);
+    return {
+      message: 'Update brand logo successfully',
+      data: brand,
+    };
   }
 
   @Roles([RoleEnum.ADMIN])
@@ -106,6 +128,9 @@ export class BrandController {
         message: 'uuid is not valid',
       };
     }
-    return await this.brandService.delete(brandId.brandId);
+    const message = await this.brandService.delete(brandId.brandId);
+    return {
+      message: message,
+    };
   }
 }

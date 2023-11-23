@@ -7,9 +7,9 @@ const streamifier = require('streamifier');
 
 @Injectable()
 export class CloudinaryService {
-  async uploadFileImage(file: Express.Multer.File): Promise<CloudinaryResponse> {
+  async uploadFileImage(file: Express.Multer.File, folder: string = 'mega-storage'): Promise<CloudinaryResponse> {
     const options: UploadApiOptions = {
-      folder: 'mega-storage',
+      folder: folder,
       timestamp: Math.floor(Date.now() / 1000),
       unique_filename: true,
     };
@@ -45,5 +45,17 @@ export class CloudinaryService {
     // }
     // return result;
     return Promise.all(files.map(async (file) => await this.uploadFileImage(file)));
+  }
+
+  async deleteFolder(folder: string): Promise<CloudinaryResponse> {
+    return new Promise((resolve, rejects) => {
+      cloudinary.api.delete_resources_by_prefix(folder, (error, result) => {
+        if (result) {
+          resolve(result);
+        } else {
+          rejects(new HttpBadRequest(error.message));
+        }
+      });
+    });
   }
 }
