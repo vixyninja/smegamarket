@@ -54,8 +54,9 @@ export class AuthController {
   }
 
   @Post('refresh-token')
-  async refreshToken(@Body() refreshToken: string): Promise<any> {
-    return await this.authService.refreshToken(refreshToken);
+  async refreshToken(@Body() refreshToken: {refreshToken: string}): Promise<any> {
+    if (!refreshToken.refreshToken) return new BadRequestException('Refresh token is required');
+    return await this.authService.refreshToken(refreshToken.refreshToken);
   }
 
   @Post('log-out')

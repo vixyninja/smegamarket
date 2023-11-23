@@ -1,7 +1,7 @@
 export interface IQueryOptions {
   _page?: number;
   _limit?: number;
-  _sort?: string;
+  _sort?: 'createdAt' | 'updatedAt';
   _order?: 'ASC' | 'DESC';
 }
 

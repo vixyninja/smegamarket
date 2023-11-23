@@ -1,6 +1,5 @@
-import {HttpBadRequest} from '@/core';
+import {HttpBadRequest, HttpForbidden, HttpInternalServerError} from '@/core';
 import {IQueryOptions, Meta} from '@/core/interface';
-import * as faker from '@faker-js/faker';
 import {Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
@@ -24,30 +23,6 @@ export class BrandService implements BrandServiceInterface {
     private readonly brandRepository: Repository<BrandEntity>,
     private readonly fileService: FileService,
   ) {}
-
-  async import(): Promise<any> {
-    try {
-      faker.fakerVI.seed(124);
-
-      const brands: BrandEntity[] = [];
-      for (let i = 0; i < 8; i++) {
-        const brand = new BrandEntity();
-        brand.name = faker.fakerVI.commerce.department() + i;
-        brand.description = faker.fakerVI.lorem.paragraph();
-        brand.address = faker.fakerVI.location.streetAddress();
-        brand.phoneNumber = faker.fakerVI.phone.number();
-        brand.email = faker.fakerVI.internet.email();
-        brand.website = faker.fakerVI.internet.url();
-        brands.push(brand);
-      }
-      await this.brandRepository.save(brands);
-      return {
-        message: 'Brands imported successfully',
-      };
-    } catch (e) {
-      throw new HttpBadRequest(e.message);
-    }
-  }
 
   async findAll(query: IQueryOptions): Promise<any> {
     try {
@@ -75,7 +50,7 @@ export class BrandService implements BrandServiceInterface {
         meta: new Meta(_page, _limit, brands.length, Math.ceil(total / _limit), query),
       };
     } catch (e) {
-      throw new HttpBadRequest(e.message);
+      throw new HttpInternalServerError(e.message);
     }
   }
 
@@ -84,22 +59,26 @@ export class BrandService implements BrandServiceInterface {
       const brand = await this.brandRepository.findOne({
         where: {uuid: brandId},
       });
+
       if (!brand) {
-        return new HttpBadRequest('Brand not found');
+        return new HttpForbidden('Brand not found');
       }
+
       return {
         message: 'Brand found successfully',
         data: brand,
       };
     } catch (e) {
-      throw new HttpBadRequest(e.message);
+      throw new HttpInternalServerError(e.message);
     }
   }
 
-  async create(createBrandDTO: CreateBrandDTO, avatar: Express.Multer.File): Promise<any> {
+  async create(arg: CreateBrandDTO, avatar: Express.Multer.File): Promise<any> {
     try {
+      const {address, description, email, name, phoneNumber, website} = arg;
+
       const brandExist = await this.brandRepository.findOne({
-        where: {name: createBrandDTO.name},
+        where: {name: name},
       });
 
       if (brandExist) {
@@ -116,7 +95,15 @@ export class BrandService implements BrandServiceInterface {
         .createQueryBuilder('brand')
         .insert()
         .into(BrandEntity)
-        .values({...createBrandDTO, avatar: avatarUpload})
+        .values({
+          address: address,
+          description: description,
+          email: email,
+          name: name,
+          phoneNumber: phoneNumber,
+          website: website,
+          avatar: avatarUpload,
+        })
         .execute();
 
       if (!brand) {
@@ -127,35 +114,52 @@ export class BrandService implements BrandServiceInterface {
         where: {uuid: brand.raw.insertId},
       });
 
+      if (!result) {
+        return new HttpBadRequest('Error creating brand');
+      }
+
       return {
         message: 'Brand created successfully',
         data: result,
       };
     } catch (e) {
-      throw new HttpBadRequest(e.message);
+      throw new HttpInternalServerError(e.message);
     }
   }
 
-  async update(brandId: string, updateBrandDTO: UpdateBrandDTO): Promise<any> {
+  async update(brandId: string, arg: UpdateBrandDTO): Promise<any> {
     try {
-      const brand = await this.brandRepository.findOne({
-        where: {uuid: brandId},
-      });
+      const {address, description, email, name, phoneNumber, website} = arg;
+
+      const brand = await this.brandRepository.findOne({where: {uuid: brandId}});
+
       if (!brand) {
         return new HttpBadRequest('Brand not found');
       }
 
-      const brandExist = await this.brandRepository.findOne({
-        where: {name: updateBrandDTO.name},
-      });
-      if (brandExist) {
-        return new HttpBadRequest('Brand already exist');
+      const brandExistValue = await this.brandRepository
+        .createQueryBuilder('brand')
+        .where({name: name})
+        .orWhere({email: email})
+        .orWhere({phoneNumber: phoneNumber})
+        .orWhere({website: website})
+        .getOne();
+
+      if (brandExistValue) {
+        return new HttpBadRequest("Brand's value already exist");
       }
 
       const updatedBrand = await this.brandRepository
         .createQueryBuilder('brand')
         .update()
-        .set(updateBrandDTO)
+        .set({
+          address: address ?? brand.address,
+          description: description ?? brand.description,
+          email: email ?? brand.email,
+          name: name ?? brand.name,
+          phoneNumber: phoneNumber ?? brand.phoneNumber,
+          website: website ?? brand.website,
+        })
         .where({uuid: brandId})
         .execute();
 
@@ -167,12 +171,16 @@ export class BrandService implements BrandServiceInterface {
         where: {uuid: brandId},
       });
 
+      if (!result) {
+        return new HttpBadRequest('Error updating brand');
+      }
+
       return {
         message: 'Brand updated successfully',
         data: result,
       };
     } catch (e) {
-      throw new HttpBadRequest(e.message);
+      throw new HttpInternalServerError(e.message);
     }
   }
 
@@ -191,7 +199,12 @@ export class BrandService implements BrandServiceInterface {
         return new HttpBadRequest('Error uploading image');
       }
 
-      const updatedBrand = await this.brandRepository.update({uuid: brandId}, {avatar: file});
+      const updatedBrand = await this.brandRepository
+        .createQueryBuilder('brand')
+        .update()
+        .set({avatar: file})
+        .where({uuid: brandId})
+        .execute();
 
       if (!updatedBrand) {
         return new HttpBadRequest('Error updating brand');
@@ -201,12 +214,16 @@ export class BrandService implements BrandServiceInterface {
         where: {uuid: brandId},
       });
 
+      if (!result) {
+        return new HttpBadRequest('Error updating brand');
+      }
+
       return {
         message: 'Brand image updated successfully',
         data: result,
       };
     } catch (e) {
-      throw new HttpBadRequest(e.message);
+      throw new HttpInternalServerError(e.message);
     }
   }
 
@@ -222,7 +239,7 @@ export class BrandService implements BrandServiceInterface {
         message: 'Brand deleted successfully',
       };
     } catch (e) {
-      throw new HttpBadRequest(e.message);
+      throw new HttpInternalServerError(e.message);
     }
   }
 }

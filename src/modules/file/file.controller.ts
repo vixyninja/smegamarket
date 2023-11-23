@@ -50,6 +50,13 @@ export class FileController {
 
   @Delete(':fileId')
   async deleteFile(@Param('fileId') fileId: string): Promise<any> {
+    if (isUUID(fileId) === false) {
+      return {
+        message: 'File id is invalid',
+        data: null,
+      };
+    }
+
     const result = await this.fileService.deleteFile(fileId);
     if (result) {
       return {
