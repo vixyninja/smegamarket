@@ -7,13 +7,7 @@ import {AuthController} from './auth.controller';
 import {AuthService} from './auth.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([UserEntity]),
-    UserModule,
-    TypeOrmModule,
-    RedisxModule,
-    MailModule,
-  ],
+  imports: [TypeOrmModule.forFeature([UserEntity]), UserModule, TypeOrmModule, RedisxModule, MailModule],
   controllers: [AuthController],
   providers: [AuthService, JWTService, JwtService],
   exports: [AuthService, JWTService, JwtService],

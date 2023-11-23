@@ -41,18 +41,14 @@ const MONGO_URL: string = process.env.MONGO_URL;
 const MONGO_HOST: string = process.env.MONGO_HOST;
 const MONGO_PORT: number = +process.env.MONGO_PORT;
 const MONGO_INITDB_DATABASE: string = process.env.MONGO_INITDB_DATABASE;
-const MONGO_INITDB_ROOT_USERNAME: string =
-  process.env.MONGO_INITDB_ROOT_USERNAME;
-const MONGO_INITDB_ROOT_PASSWORD: string =
-  process.env.MONGO_INITDB_ROOT_PASSWORD;
+const MONGO_INITDB_ROOT_USERNAME: string = process.env.MONGO_INITDB_ROOT_USERNAME;
+const MONGO_INITDB_ROOT_PASSWORD: string = process.env.MONGO_INITDB_ROOT_PASSWORD;
 
 // jwt
 const ACCESS_TOKEN_SECRET: string = process.env.ACCESS_TOKEN_SECRET;
-const ACCESS_TOKEN_EXPIRATION_TIME: string =
-  process.env.ACCESS_TOKEN_EXPIRATION_TIME;
+const ACCESS_TOKEN_EXPIRATION_TIME: string = process.env.ACCESS_TOKEN_EXPIRATION_TIME;
 const REFRESH_TOKEN_SECRET: string = process.env.REFRESH_TOKEN_SECRET;
-const REFRESH_TOKEN_EXPIRATION_TIME: string =
-  process.env.REFRESH_TOKEN_EXPIRATION_TIME;
+const REFRESH_TOKEN_EXPIRATION_TIME: string = process.env.REFRESH_TOKEN_EXPIRATION_TIME;
 
 // cloud
 const FOLDER_NAME: string = process.env.FOLDER_NAME;

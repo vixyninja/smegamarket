@@ -1,11 +1,4 @@
-import {
-  ExceptionFilter,
-  Catch,
-  ArgumentsHost,
-  HttpException,
-  Logger,
-  HttpStatus,
-} from '@nestjs/common';
+import {ExceptionFilter, Catch, ArgumentsHost, HttpException, Logger, HttpStatus} from '@nestjs/common';
 import {Request, Response} from 'express';
 
 @Catch(HttpException)
@@ -21,9 +14,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const delay = Date.now() - now;
 
     Logger.warn(
-      `${request.ip} ${new Date()} ${method} ${url}  ${request.statusCode} ${
-        request.headers['user-agent']
-      } *** ${request.headers.host.split(':')[1]} ${delay}ms`,
+      `${request.ip} ${new Date()} ${method} ${url}  ${request.statusCode} ${request.headers['user-agent']} *** ${
+        request.headers.host.split(':')[1]
+      } ${delay}ms`,
     );
 
     response.status(HttpStatus.OK).json({

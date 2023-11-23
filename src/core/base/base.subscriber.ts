@@ -11,9 +11,7 @@ import {
 } from 'typeorm';
 
 @EventSubscriber()
-export class BaseEventSubscriber<T extends BaseEntity>
-  implements EntitySubscriberInterface<T>
-{
+export class BaseEventSubscriber<T extends BaseEntity> implements EntitySubscriberInterface<T> {
   constructor(dataSource: DataSource) {
     dataSource.subscribers.push(this);
   }
