@@ -3,7 +3,7 @@ import {TypeOrmModule} from '@nestjs/typeorm';
 import {AppController} from './app.controller';
 import {AuthModule} from './auth/auth.module';
 import {CloudinaryModule, MailModule, PostgresDBService, RedisxModule, ThrottlerxModule} from './configs';
-import {BrandModule, CategoryModule, FileModule, ProductModule, UserModule} from './modules';
+import {BrandModule, CartModule, CategoryModule, FileModule, OrderModule, ProductModule, UserModule} from './modules';
 
 @Module({
   imports: [
@@ -22,6 +22,8 @@ import {BrandModule, CategoryModule, FileModule, ProductModule, UserModule} from
     BrandModule,
     ProductModule,
     CategoryModule,
+    CartModule,
+    OrderModule,
   ],
   providers: [],
   controllers: [AppController],
