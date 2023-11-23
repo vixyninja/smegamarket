@@ -19,7 +19,7 @@ export class ProductEntity extends BaseEntity {
   @Column({type: 'enum', enum: StatusEnum, default: StatusEnum.Active})
   status: StatusEnum;
 
-  @Column({type: 'enum', enum: SizeEnum, default: SizeEnum.Medium})
+  @Column({type: 'enum', enum: SizeEnum, default: SizeEnum.None})
   size: SizeEnum;
 
   @Column({type: 'varchar', nullable: true})

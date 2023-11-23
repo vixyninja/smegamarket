@@ -13,6 +13,7 @@ export enum StatusEnum {
 }
 
 export enum SizeEnum {
+  'None' = 'None',
   'Small' = 'Small',
   'Medium' = 'Medium',
   'Large' = 'Large',
