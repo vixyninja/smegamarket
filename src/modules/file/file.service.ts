@@ -72,9 +72,7 @@ export class FileService implements FileServiceInterface {
 
   async uploadFiles(files: Express.Multer.File[]): Promise<FileEntity[]> {
     try {
-      const result = await this.cloudinaryService.uploadMultipleFileImage(
-        files,
-      );
+      const result = await this.cloudinaryService.uploadMultipleFileImage(files);
       const fileArray = [];
       for (const file of result) {
         const fileEntity = new FileEntity();

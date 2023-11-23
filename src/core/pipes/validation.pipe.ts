@@ -12,9 +12,7 @@ export class ValidationPipe implements PipeTransform<any> {
     const object = plainToInstance(metatype, value);
     const errors: ValidationError[] = await validate(object);
     if (errors.length > 0) {
-      throw new HttpBadRequest(
-        errors[0].constraints[Object.keys(errors[0].constraints)[0]],
-      );
+      throw new HttpBadRequest(errors[0].constraints[Object.keys(errors[0].constraints)[0]]);
     }
     return value;
   }

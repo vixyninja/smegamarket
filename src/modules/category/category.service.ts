@@ -10,10 +10,7 @@ interface CategoryServiceInterface {
   findAll(): Promise<any>;
   findOne(categoryId: string): Promise<any>;
   create(createCategoryDTO: CreateCategoryDTO): Promise<any>;
-  update(
-    categoryId: string,
-    updateCategoryDTO: UpdateCategoryDTO,
-  ): Promise<any>;
+  update(categoryId: string, updateCategoryDTO: UpdateCategoryDTO): Promise<any>;
   delete(categoryId: string): Promise<any>;
 }
 
@@ -36,8 +33,7 @@ export class CategoryService implements CategoryServiceInterface {
         var des;
         switch (i) {
           case 0:
-            des =
-              'Vegetables are parts of plants that are consumed by humans or other animals as food.';
+            des = 'Vegetables are parts of plants that are consumed by humans or other animals as food.';
             break;
           case 1:
             des =
@@ -115,10 +111,7 @@ export class CategoryService implements CategoryServiceInterface {
       throw new HttpBadRequest(e.message);
     }
   }
-  async update(
-    categoryId: string,
-    updateCategoryDTO: UpdateCategoryDTO,
-  ): Promise<any> {
+  async update(categoryId: string, updateCategoryDTO: UpdateCategoryDTO): Promise<any> {
     try {
       const category = await this.categoryRepository.findOne({
         where: {uuid: categoryId},
@@ -128,10 +121,7 @@ export class CategoryService implements CategoryServiceInterface {
         return new HttpBadRequest('Category not found');
       }
 
-      const updateCategory = await this.categoryRepository.update(
-        categoryId,
-        updateCategoryDTO,
-      );
+      const updateCategory = await this.categoryRepository.update(categoryId, updateCategoryDTO);
 
       if (!updateCategory) {
         return new HttpBadRequest('Error updating category');

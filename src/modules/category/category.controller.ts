@@ -1,14 +1,5 @@
 import {AuthGuard, RoleEnum, Roles, RolesGuard} from '@/core';
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  Put,
-  UseGuards,
-} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, Post, Put, UseGuards} from '@nestjs/common';
 import {isUUID} from 'class-validator';
 import {CategoryService} from './category.service';
 import {CreateCategoryDTO, UpdateCategoryDTO} from './dto';
@@ -44,9 +35,7 @@ export class CategoryController {
   @Roles([RoleEnum.ADMIN])
   @UseGuards(RolesGuard)
   @Post()
-  async createCategory(
-    @Body() createCategoryDTO: CreateCategoryDTO,
-  ): Promise<any> {
+  async createCategory(@Body() createCategoryDTO: CreateCategoryDTO): Promise<any> {
     return await this.categoryService.create(createCategoryDTO);
   }
 

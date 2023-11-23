@@ -72,13 +72,7 @@ export class ProductService implements ProductServiceInterface {
       const total = await this.productRepository.count();
 
       return {
-        meta: new Meta(
-          _page,
-          _limit,
-          response.length,
-          Math.ceil(total / _limit),
-          query,
-        ),
+        meta: new Meta(_page, _limit, response.length, Math.ceil(total / _limit), query),
         data: response,
       };
     } catch (e) {
@@ -173,10 +167,7 @@ export class ProductService implements ProductServiceInterface {
     }
   }
 
-  async update(
-    productId: string,
-    updateProductDTO: UpdateProductDTO,
-  ): Promise<any> {
+  async update(productId: string, updateProductDTO: UpdateProductDTO): Promise<any> {
     try {
       const isExist = await this.productRepository.findOne({
         where: {
@@ -223,10 +214,7 @@ export class ProductService implements ProductServiceInterface {
     }
   }
 
-  async updateImage(
-    productId: string,
-    files: Express.Multer.File[],
-  ): Promise<any> {
+  async updateImage(productId: string, files: Express.Multer.File[]): Promise<any> {
     try {
       const isExist = await this.productRepository.findOne({
         where: {uuid: productId},
@@ -270,11 +258,7 @@ export class ProductService implements ProductServiceInterface {
 
   async delete(): Promise<any> {
     try {
-      const response = await this.productRepository
-        .createQueryBuilder()
-        .delete()
-        .from(ProductEntity)
-        .execute();
+      const response = await this.productRepository.createQueryBuilder().delete().from(ProductEntity).execute();
 
       if (!response) {
         return new HttpBadRequest('Delete product failed');

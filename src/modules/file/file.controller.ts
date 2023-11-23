@@ -61,9 +61,7 @@ export class FileController {
 
   @Post('upload-multiple')
   @UseInterceptors(FilesInterceptor('files'))
-  async uploadFiles(
-    @UploadedFiles() files: Express.Multer.File[],
-  ): Promise<any> {
+  async uploadFiles(@UploadedFiles() files: Express.Multer.File[]): Promise<any> {
     const result = await this.fileService.uploadFiles(files);
     if (result) {
       return {

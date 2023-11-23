@@ -11,13 +11,7 @@ export class Meta {
   total: number;
   total_page: number;
   query?: IQueryOptions;
-  constructor(
-    page: number,
-    limit: number,
-    total: number,
-    total_page: number,
-    query?: IQueryOptions,
-  ) {
+  constructor(page: number, limit: number, total: number, total_page: number, query?: IQueryOptions) {
     this.page = page;
     this.limit = limit;
     this.total = total;

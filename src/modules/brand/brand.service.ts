@@ -11,10 +11,7 @@ import {CreateBrandDTO, UpdateBrandDTO} from './dto';
 interface BrandServiceInterface {
   findAll(query: IQueryOptions): Promise<any>;
   findOne(brandId: string): Promise<any>;
-  create(
-    createBrandDTO: CreateBrandDTO,
-    file: Express.Multer.File,
-  ): Promise<any>;
+  create(createBrandDTO: CreateBrandDTO, file: Express.Multer.File): Promise<any>;
   update(brandId: string, updateBrandDTO: UpdateBrandDTO): Promise<any>;
   updateImage(brandId: string, image: Express.Multer.File): Promise<any>;
   delete(brandId: string): Promise<any>;
@@ -75,13 +72,7 @@ export class BrandService implements BrandServiceInterface {
       return {
         message: 'Brands found successfully',
         data: brands,
-        meta: new Meta(
-          _page,
-          _limit,
-          brands.length,
-          Math.ceil(total / _limit),
-          query,
-        ),
+        meta: new Meta(_page, _limit, brands.length, Math.ceil(total / _limit), query),
       };
     } catch (e) {
       throw new HttpBadRequest(e.message);
@@ -105,10 +96,7 @@ export class BrandService implements BrandServiceInterface {
     }
   }
 
-  async create(
-    createBrandDTO: CreateBrandDTO,
-    avatar: Express.Multer.File,
-  ): Promise<any> {
+  async create(createBrandDTO: CreateBrandDTO, avatar: Express.Multer.File): Promise<any> {
     try {
       const brandExist = await this.brandRepository.findOne({
         where: {name: createBrandDTO.name},
@@ -203,10 +191,7 @@ export class BrandService implements BrandServiceInterface {
         return new HttpBadRequest('Error uploading image');
       }
 
-      const updatedBrand = await this.brandRepository.update(
-        {uuid: brandId},
-        {avatar: file},
-      );
+      const updatedBrand = await this.brandRepository.update({uuid: brandId}, {avatar: file});
 
       if (!updatedBrand) {
         return new HttpBadRequest('Error updating brand');
@@ -227,11 +212,7 @@ export class BrandService implements BrandServiceInterface {
 
   async delete(brandId: string): Promise<any> {
     try {
-      const response = await this.brandRepository
-        .createQueryBuilder('brand')
-        .delete()
-        .where({uuid: brandId})
-        .execute();
+      const response = await this.brandRepository.createQueryBuilder('brand').delete().where({uuid: brandId}).execute();
 
       if (!response) {
         return new HttpBadRequest('Error deleting brand');

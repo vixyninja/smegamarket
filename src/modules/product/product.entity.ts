@@ -1,12 +1,5 @@
 import {BaseEntity} from '@/core';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  JoinTable,
-  ManyToMany,
-  ManyToOne,
-} from 'typeorm';
+import {Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne} from 'typeorm';
 import {BrandEntity} from '../brand';
 import {CategoryEntity} from '../category';
 import {FileEntity} from '../file';
