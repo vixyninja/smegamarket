@@ -10,7 +10,7 @@ export class ResetPasswordOtpDTO {
   @IsNotEmpty()
   @MinLength(6)
   @MaxLength(6)
-  readonly code: string;
+  readonly otp: string;
 
   @IsEmail()
   readonly email: string;

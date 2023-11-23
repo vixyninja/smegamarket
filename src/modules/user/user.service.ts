@@ -7,18 +7,18 @@ import {Repository} from 'typeorm';
 import {FileService} from '../file';
 import {CreateUserDTO, UpdateUserDTO} from './dto';
 import {UserEntity} from './user.entity';
+import {StatusUser} from './enum';
 
 interface UserServiceInterface {
   createUser(createUserDTO: CreateUserDTO): Promise<UserEntity>;
   findByEmail(email: string): Promise<UserEntity>;
+  findByPhone(phone: string): Promise<UserEntity>;
   readUser(uuid: string): Promise<UserEntity>;
   readUsers(): Promise<UserEntity[]>;
   updateUser(uuid: string, updateUserDTO: UpdateUserDTO): Promise<UserEntity>;
   updateUserPassword(uuid: string, password: string): Promise<UserEntity>;
-  updateUserAvatar(
-    uuid: string,
-    avatar: Express.Multer.File,
-  ): Promise<UserEntity>;
+  updateUserAvatar(uuid: string, avatar: Express.Multer.File): Promise<UserEntity>;
+  updateStatusUser(uuid: string, status: StatusUser): Promise<UserEntity>;
   deleteUser(uuid: string): Promise<UserEntity>;
 }
 @Injectable()
@@ -29,6 +29,22 @@ export class UserService implements UserServiceInterface {
     private readonly redisxService: RedisxService,
     private readonly fileService: FileService,
   ) {}
+
+  async updateStatusUser(uuid: string, status: StatusUser): Promise<UserEntity> {
+    try {
+      return await this.userRepository.save({uuid: uuid, status: status});
+    } catch (e) {
+      throw new HttpBadRequest(e.message);
+    }
+  }
+
+  async findByPhone(phone: string): Promise<UserEntity> {
+    try {
+      return await this.userRepository.findOne({where: {phone: phone}});
+    } catch (e) {
+      throw new HttpBadRequest(e.message);
+    }
+  }
 
   async importUsers(): Promise<any> {
     try {
@@ -109,10 +125,7 @@ export class UserService implements UserServiceInterface {
     }
   }
 
-  async updateUser(
-    uuid: string,
-    updateUserDTO: UpdateUserDTO,
-  ): Promise<UserEntity> {
+  async updateUser(uuid: string, updateUserDTO: UpdateUserDTO): Promise<UserEntity> {
     try {
       const isExist = await this.redisxService.getKey(uuid);
 
@@ -135,10 +148,7 @@ export class UserService implements UserServiceInterface {
     }
   }
 
-  async updateUserPassword(
-    uuid: string,
-    password: string,
-  ): Promise<UserEntity> {
+  async updateUserPassword(uuid: string, password: string): Promise<UserEntity> {
     try {
       const isExist = await this.redisxService.getKey(uuid);
 
@@ -154,10 +164,7 @@ export class UserService implements UserServiceInterface {
     }
   }
 
-  async updateUserAvatar(
-    uuid: string,
-    avatar: Express.Multer.File,
-  ): Promise<UserEntity> {
+  async updateUserAvatar(uuid: string, avatar: Express.Multer.File): Promise<UserEntity> {
     try {
       const isExist = await this.redisxService.getKey(uuid);
 

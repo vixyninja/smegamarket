@@ -4,3 +4,4 @@ export * from './internalServer.filter';
 export * from './notFound.filter';
 export * from './unAuthorized.filter';
 export * from './custom.filter';
+export * from './forbidden.filter';

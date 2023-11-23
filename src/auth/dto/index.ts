@@ -4,3 +4,5 @@ export * from './signin-email.dto';
 export * from './forgot-password.dto';
 export * from './signout-email.dto';
 export * from './reset-password-otp.dto';
+export * from './verify.dto';
+export * from './change-password.dto';
