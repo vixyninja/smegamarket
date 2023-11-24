@@ -55,7 +55,7 @@ export class AuthService implements AuthServiceInterface {
     try {
       const {email, password, deviceToken, deviceType} = arg;
 
-      const user: UserEntity = await this.userService.findByEmail(email);
+      const user: UserEntity = await this.userService.findForAuth(email);
 
       if (!user) return new HttpForbidden('User not found');
 
@@ -92,7 +92,7 @@ export class AuthService implements AuthServiceInterface {
     try {
       const {deviceToken, deviceType, email, password, firstName, lastName} = arg;
 
-      const user: UserEntity = await this.userService.findByEmail(email);
+      const user: UserEntity = await this.userService.findForAuth(email);
 
       if (user) return new HttpBadRequest('User already exists');
 
@@ -154,7 +154,7 @@ export class AuthService implements AuthServiceInterface {
     try {
       const payload: JWTPayload = await this.jwtService.verifyToken(arg, 'refreshToken');
 
-      const user: UserEntity = await this.userService.findByEmail(payload.email);
+      const user: UserEntity = await this.userService.findForAuth(payload.email);
 
       const newPayload: JWTPayload = {
         email: user.email,
@@ -189,7 +189,7 @@ export class AuthService implements AuthServiceInterface {
     try {
       const {email} = forgotPasswordDTO;
 
-      const user: UserEntity = await this.userService.findByEmail(email);
+      const user: UserEntity = await this.userService.findForAuth(email);
 
       if (!user) return new HttpForbidden('User not found');
 
@@ -211,7 +211,7 @@ export class AuthService implements AuthServiceInterface {
     try {
       const {email, password, otp} = resetPasswordOtpDTO;
 
-      const user: UserEntity = await this.userService.findByEmail(email);
+      const user: UserEntity = await this.userService.findForAuth(email);
 
       if (!user) return new HttpForbidden('User not found');
 
@@ -236,7 +236,7 @@ export class AuthService implements AuthServiceInterface {
     try {
       const {email, password} = arg;
 
-      const user: UserEntity = await this.userService.findByEmail(email);
+      const user: UserEntity = await this.userService.findForAuth(email);
 
       if (!user) return new HttpForbidden('User not found');
 
@@ -256,7 +256,7 @@ export class AuthService implements AuthServiceInterface {
     try {
       const {email} = arg;
 
-      const user: UserEntity = await this.userService.findByEmail(email);
+      const user: UserEntity = await this.userService.findForAuth(email);
 
       if (!user) return new HttpForbidden('User not found');
 
@@ -280,7 +280,10 @@ export class AuthService implements AuthServiceInterface {
     try {
       const {phone} = arg;
 
-      const user: UserEntity = await this.userService.findByEmail(phone);
+      const user: UserEntity = await this.userService.findByPhone(phone);
+
+      delete user.hashPassword;
+      delete user.salt;
 
       if (!user) return new HttpForbidden('User not found');
 
@@ -306,8 +309,10 @@ export class AuthService implements AuthServiceInterface {
 
       if (isPhoneNumber(information)) {
         user = await this.userService.findByPhone(information);
+        delete user.hashPassword;
+        delete user.salt;
       } else if (isEmail(information)) {
-        user = await this.userService.findByEmail(information);
+        user = await this.userService.findForAuth(information);
       } else {
         return new HttpBadRequest('Information invalid !!!');
       }

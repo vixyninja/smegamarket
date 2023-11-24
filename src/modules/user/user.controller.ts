@@ -1,10 +1,20 @@
-import {AuthGuard, HttpInternalServerError, RoleEnum, Roles, RolesGuard, UserDynamic} from '@/core';
+import {
+  AuthGuard,
+  HandlerFilter,
+  HttpBadRequest,
+  HttpInternalServerError,
+  RoleEnum,
+  Roles,
+  RolesGuard,
+  UserDynamic,
+} from '@/core';
 import * as faker from '@faker-js/faker';
 import {Body, Controller, Get, Patch, Post, Put, UploadedFile, UseGuards, UseInterceptors} from '@nestjs/common';
 import {FileInterceptor} from '@nestjs/platform-express';
 import {CreateUserDTO, UpdateUserDTO} from './dto';
 import {UserEntity} from './user.entity';
 import {UserService} from './user.service';
+import {isUUID} from 'class-validator';
 
 @UseGuards(AuthGuard)
 @Controller('user')
@@ -13,28 +23,52 @@ export class UserController {
 
   @Get('/me')
   async getProfile(@UserDynamic('uuid') userUUID: string): Promise<any> {
-    const user: UserEntity = await this.userService.readUser(userUUID);
-    return {data: user};
+    if (!isUUID(userUUID)) {
+      return new HttpBadRequest('UserUUID is not valid');
+    }
+
+    const user = await this.userService.readUser(userUUID);
+    return HandlerFilter(user, {
+      message: 'Get profile successfully',
+      data: user,
+      status: 200,
+    });
   }
 
   @Put('/me')
   async updateProfile(@UserDynamic('uuid') userUUID: string, @Body() updateUserDTO: UpdateUserDTO): Promise<any> {
-    const user: UserEntity = await this.userService.updateUser(userUUID, updateUserDTO);
-    return {data: user, message: 'Update profile successfully'};
+    if (!isUUID(userUUID)) {
+      return new HttpBadRequest('UserUUID is not valid');
+    }
+
+    const user = await this.userService.updateUser(userUUID, updateUserDTO);
+    return HandlerFilter(user, {
+      message: 'Update profile successfully',
+      data: user,
+      status: 200,
+    });
   }
 
   @Put('/me/avatar')
   @UseInterceptors(FileInterceptor('avatar'))
   async updateAvatar(@UserDynamic('uuid') userUUID: string, @UploadedFile() file: Express.Multer.File): Promise<any> {
-    const user: UserEntity = await this.userService.updateUserAvatar(userUUID, file);
-    return {data: user, message: 'Update avatar successfully'};
+    const user = await this.userService.updateUserAvatar(userUUID, file);
+    return HandlerFilter(user, {
+      message: 'Update avatar successfully',
+      data: user,
+      status: 200,
+    });
   }
 
   @Put('/me/cover')
   @UseInterceptors(FileInterceptor('cover'))
   async updateCover(@UserDynamic('uuid') userUUID: string, @UploadedFile() file: Express.Multer.File): Promise<any> {
-    const user: UserEntity = await this.userService.updateUserCover(userUUID, file);
-    return {data: user, message: 'Update cover successfully'};
+    const user = await this.userService.updateUserCover(userUUID, file);
+    return HandlerFilter(user, {
+      message: 'Update cover successfully',
+      data: user,
+      status: 200,
+    });
   }
 
   @Put('/me/phone')
@@ -45,8 +79,12 @@ export class UserController {
 
   @Put('/me/email')
   async updateEmail(@UserDynamic('uuid') userUUID: string, @Body('email') email: string): Promise<any> {
-    const user: UserEntity = await this.userService.updateUserEmail(userUUID, email);
-    return {data: user, message: 'Update email successfully'};
+    const user = await this.userService.updateUserEmail(userUUID, email);
+    return HandlerFilter(user, {
+      message: 'Update email successfully',
+      data: user,
+      status: 200,
+    });
   }
 
   @Patch('/me/update-role')
@@ -57,7 +95,7 @@ export class UserController {
       role: RoleEnum;
     },
   ): Promise<any> {
-    const user: UserEntity = await this.userService.updateUserRole(userUUID, updateAdminDTO.role);
+    const user = await this.userService.updateUserRole(userUUID, updateAdminDTO.role);
     return {data: user, message: 'Update admin successfully'};
   }
 
@@ -96,8 +134,6 @@ export class UserController {
         message: 'Import users successfully',
         data: users,
       };
-    } catch (e) {
-      throw new HttpInternalServerError(e.message);
-    }
+    } catch (e) {}
   }
 }
