@@ -46,7 +46,7 @@ export class UserEntity extends BaseEntity {
     referencedColumnName: 'uuid',
     foreignKeyConstraintName: 'FK_USER_AVATAR',
   })
-  @OneToOne(() => FileEntity, (file) => file.uuid, {onDelete: 'CASCADE'})
+  @OneToOne(() => FileEntity, (file) => file.uuid, {cascade: true, nullable: true})
   avatar: FileEntity;
 
   @JoinColumn({
@@ -54,7 +54,7 @@ export class UserEntity extends BaseEntity {
     referencedColumnName: 'uuid',
     foreignKeyConstraintName: 'FK_USER_COVER',
   })
-  @OneToOne(() => FileEntity, (file) => file.uuid, {onDelete: 'CASCADE'})
+  @OneToOne(() => FileEntity, (file) => file.uuid, {cascade: true, nullable: true})
   cover: FileEntity;
 
   @BeforeInsert()
