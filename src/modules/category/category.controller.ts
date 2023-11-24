@@ -57,7 +57,11 @@ export class CategoryController {
 
   @Get()
   async findAll(): Promise<any> {
-    return await this.categoryService.findAll();
+    const categories = await this.categoryService.findAll();
+    return {
+      message: 'Get all categories successfully',
+      data: categories,
+    };
   }
 
   @Get(':categoryId')
@@ -68,14 +72,22 @@ export class CategoryController {
         data: null,
       };
     }
-    return await this.categoryService.findOne(categoryId);
+    const category = await this.categoryService.findOne(categoryId);
+    return {
+      message: 'Get category successfully',
+      data: category,
+    };
   }
 
   @Roles([RoleEnum.ADMIN])
   @UseGuards(RolesGuard)
   @Post()
   async createCategory(@Body() createCategoryDTO: CreateCategoryDTO): Promise<any> {
-    return await this.categoryService.create(createCategoryDTO);
+    const category = await this.categoryService.create(createCategoryDTO);
+    return {
+      message: 'Create category successfully',
+      data: category,
+    };
   }
 
   @Roles([RoleEnum.ADMIN])
@@ -92,7 +104,11 @@ export class CategoryController {
         data: null,
       };
     }
-    return await this.categoryService.update(categoryId, updateCategoryDTO);
+    const category = await this.categoryService.update(categoryId, updateCategoryDTO);
+    return {
+      message: 'Update category successfully',
+      data: category,
+    };
   }
 
   @Roles([RoleEnum.ADMIN])
@@ -105,6 +121,10 @@ export class CategoryController {
         data: null,
       };
     }
-    return await this.categoryService.delete(categoryId);
+    const category = await this.categoryService.delete(categoryId);
+    return {
+      message: 'Delete category successfully',
+      data: category,
+    };
   }
 }

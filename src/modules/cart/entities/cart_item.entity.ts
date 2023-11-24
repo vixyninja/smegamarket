@@ -1,6 +1,7 @@
-import {BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToOne} from 'typeorm';
+import {Column, Entity, JoinColumn, ManyToOne, OneToOne} from 'typeorm';
 import {CartEntity} from './cart.entity';
 import {ProductEntity, SizeEnum} from '@/modules/product';
+import {BaseEntity} from '@/core';
 
 @Entity({
   name: 'cart_item',

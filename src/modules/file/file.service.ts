@@ -22,8 +22,10 @@ export class FileService implements FileServiceInterface {
 
   async findFile(fileId: string): Promise<FileEntity> {
     try {
-      const file = await this.fileRepository.findOne({where: {uuid: fileId}});
+      const file = await this.fileRepository.createQueryBuilder('file').where({uuid: fileId}).getOne();
+
       if (!file) throw new HttpBadRequest('File is not exist');
+
       return file;
     } catch (e) {
       throw new HttpBadRequest(e.message);
@@ -32,7 +34,9 @@ export class FileService implements FileServiceInterface {
   async uploadFile(file: Express.Multer.File): Promise<FileEntity> {
     try {
       const result = await this.cloudinaryService.uploadFileImage(file);
+
       const fileEntity = new FileEntity();
+
       fileEntity.publicId = result.public_id;
       fileEntity.signature = result.signature;
       fileEntity.version = result.version;
@@ -51,8 +55,20 @@ export class FileService implements FileServiceInterface {
       fileEntity.originalFilename = result.original_filename;
       fileEntity.apiKey = result.api_key;
       fileEntity.folder = result.folder;
-      const fileResult = await this.fileRepository.save(fileEntity);
-      return fileResult;
+
+      const fileResult = await this.fileRepository
+        .createQueryBuilder()
+        .insert()
+        .into(FileEntity)
+        .values(fileEntity)
+        .execute();
+
+      const fileResponse = await this.fileRepository
+        .createQueryBuilder('file')
+        .where({uuid: fileResult.raw.insertId})
+        .getOne();
+
+      return fileResponse;
     } catch (e) {
       throw new HttpBadRequest(e.message);
     }
@@ -60,10 +76,14 @@ export class FileService implements FileServiceInterface {
 
   async deleteFile(fileId: string): Promise<any> {
     try {
-      const file = await this.fileRepository.findOne({where: {uuid: fileId}});
+      const file = await this.fileRepository.createQueryBuilder('file').where({uuid: fileId}).getOne();
+
       if (!file) throw new HttpBadRequest('File is not exist');
+
       await this.cloudinaryService.deleteFileImage(file.publicId);
+
       await this.fileRepository.delete(file.uuid);
+
       return true;
     } catch (e) {
       throw new HttpBadRequest(e.message);
@@ -73,9 +93,12 @@ export class FileService implements FileServiceInterface {
   async uploadFiles(files: Express.Multer.File[]): Promise<FileEntity[]> {
     try {
       const result = await this.cloudinaryService.uploadMultipleFileImage(files);
+
       const fileArray = [];
+
       for (const file of result) {
         const fileEntity = new FileEntity();
+
         fileEntity.publicId = file.public_id;
         fileEntity.signature = file.signature;
         fileEntity.version = file.version;
@@ -96,8 +119,20 @@ export class FileService implements FileServiceInterface {
         fileEntity.folder = file.folder;
         fileArray.push(fileEntity);
       }
-      const fileResult = await this.fileRepository.save(fileArray);
-      return fileResult;
+
+      const fileResult = await this.fileRepository
+        .createQueryBuilder()
+        .insert()
+        .into(FileEntity)
+        .values(fileArray)
+        .execute();
+
+      const fileResponse = await this.fileRepository
+        .createQueryBuilder('file')
+        .where('uuid IN (:...uuid)', {uuid: fileResult.raw.insertId})
+        .getMany();
+
+      return fileResponse;
     } catch (e) {
       throw new HttpBadRequest(e.message);
     }

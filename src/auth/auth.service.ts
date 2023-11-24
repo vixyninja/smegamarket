@@ -1,19 +1,24 @@
 import {Environment, JWTService, MailService, RedisxService} from '@/configs';
 import {JWTPayload} from '@/configs/jwt/typedef';
-import {HttpBadRequest, HttpForbidden, HttpInternalServerError, HttpUnauthorized, RoleEnum} from '@/core';
+import {
+  CACHE_KEY,
+  CACHE_KEY_TTL,
+  HttpBadRequest,
+  HttpForbidden,
+  HttpInternalServerError,
+  HttpUnauthorized,
+  RoleEnum,
+} from '@/core';
 import {CreateUserDTO, StatusUser, UserEntity, UserService} from '@/modules/user';
 import {Injectable} from '@nestjs/common';
-import {InjectRepository} from '@nestjs/typeorm';
 import {isEmail, isPhoneNumber} from 'class-validator';
 import {LoginTicket, OAuth2Client, TokenPayload} from 'google-auth-library';
-import {Repository} from 'typeorm';
 import {
   ChangePasswordDTO,
   ForgotPasswordDTO,
   ResetPasswordOtpDTO,
   SignInEmailDTO,
   SignInGoogleDTO,
-  SignOutEmailDTO,
   SignUpEmailDTO,
   VerifyEmailDTO,
   VerifyOtpDTO,
@@ -28,7 +33,7 @@ interface AuthServiceInterface {
   signInWithGoogle(arg: SignInGoogleDTO): Promise<any>;
   signInWithFacebook(): Promise<any>;
   refreshToken(arg: string): Promise<any>;
-  logOut(arg: SignOutEmailDTO): Promise<any>;
+  logOut(information: string): Promise<any>;
   forgotPassword(arg: ForgotPasswordDTO): Promise<any>;
   resetPasswordOtp(arg: ResetPasswordOtpDTO): Promise<any>;
   changePassword(arg: ChangePasswordDTO): Promise<any>;
@@ -40,8 +45,6 @@ interface AuthServiceInterface {
 @Injectable()
 export class AuthService implements AuthServiceInterface {
   constructor(
-    @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>,
     private readonly userService: UserService,
     private readonly redisService: RedisxService,
     private readonly jwtService: JWTService,
@@ -56,6 +59,14 @@ export class AuthService implements AuthServiceInterface {
 
       if (!user) return new HttpForbidden('User not found');
 
+      const userEntity = new UserEntity(user);
+
+      const isMatchPassword = await userEntity.validatePassword(password);
+
+      console.log(isMatchPassword);
+
+      if (!isMatchPassword) return new HttpUnauthorized('Password not match');
+
       const payload: JWTPayload = {
         deviceToken: deviceToken,
         deviceType: deviceType,
@@ -63,10 +74,6 @@ export class AuthService implements AuthServiceInterface {
         uuid: user.uuid,
         role: user.role,
       };
-
-      const isMatchPassword = await user.validatePassword(password);
-
-      if (!isMatchPassword) return new HttpUnauthorized('Password not match');
 
       const accessToken = await this.jwtService.signToken(payload, 'accessToken');
 
@@ -150,11 +157,11 @@ export class AuthService implements AuthServiceInterface {
       const user: UserEntity = await this.userService.findByEmail(payload.email);
 
       const newPayload: JWTPayload = {
-        ...payload,
         email: user.email,
         role: user.role,
         deviceToken: user.deviceToken,
         deviceType: user.deviceType,
+        uuid: user.uuid,
       };
 
       const accessToken = await this.jwtService.signToken(newPayload, 'accessToken');
@@ -170,11 +177,9 @@ export class AuthService implements AuthServiceInterface {
     }
   }
 
-  async logOut(signOutEmailDTO: SignOutEmailDTO): Promise<any> {
+  async logOut(information: string): Promise<any> {
     try {
-      const {uuid} = signOutEmailDTO;
-
-      await this.redisService.delKey(uuid);
+      await this.redisService.delKey(`${CACHE_KEY.user}:${information}`);
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
@@ -188,13 +193,13 @@ export class AuthService implements AuthServiceInterface {
 
       if (!user) return new HttpForbidden('User not found');
 
-      let code = Math.floor(Math.random() * 1000000).toString();
+      let code = Math.floor(100000 + Math.random() * 900000).toString();
 
-      await this.redisService.delKey(email + secret);
+      await this.redisService.delKey(`${CACHE_KEY.verifyAuthOTP}:${email}`);
 
-      await this.redisService.setKey(email + secret, code, 60 * 5);
+      await this.redisService.setKey(`${CACHE_KEY.verifyAuthOTP}:${email}`, code, CACHE_KEY_TTL.verifyAuthOTP);
 
-      await this.mailService.sendUserResetPasswordOtp(user.firstName + ' ' + user.lastName, email, code);
+      await this.mailService.sendUserResetPasswordOtp(`${user.firstName} ${user.lastName}`, email, code);
 
       return 'OTP sent to your email, you have 5 minutes to reset password !!!';
     } catch (e) {
@@ -210,16 +215,16 @@ export class AuthService implements AuthServiceInterface {
 
       if (!user) return new HttpForbidden('User not found');
 
-      const isMatchCode = await this.redisService.getKey(email + secret);
+      const isMatchCode = await this.redisService.getKey(`${CACHE_KEY.verifyAuthOTP}:${email}`);
 
       if (!isMatchCode) return new HttpBadRequest('Request invalid or expired !!!');
 
-      if (JSON.stringify(isMatchCode.toString()) === otp.toString())
+      if (isMatchCode.toString() !== otp.toString())
         return new HttpBadRequest('OTP not match !!!, please try again !!!');
 
       await this.userService.updateUserPassword(user.uuid, password);
 
-      await this.redisService.delKey(email + secret);
+      await this.redisService.delKey(`${CACHE_KEY.verifyAuthOTP}:${email}`);
 
       return 'Reset password successfully, please login again !!!';
     } catch (e) {
@@ -237,13 +242,11 @@ export class AuthService implements AuthServiceInterface {
 
       await this.userService.updateUserPassword(user.uuid, password);
 
-      await this.redisService.delKey(email + secret);
+      await this.redisService.delKey(`${CACHE_KEY.user}:${user.uuid}`);
 
-      await this.mailService.sendUserResetPasswordSuccess(user.firstName + ' ' + user.lastName, email);
+      await this.mailService.sendUserResetPasswordSuccess(`${user.firstName} ${user.lastName}`, email);
 
-      return {
-        message: 'Change password successfully !!!, please login again !!!',
-      };
+      return 'Change password successfully !!!, please login again !!!';
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
@@ -257,19 +260,22 @@ export class AuthService implements AuthServiceInterface {
 
       if (!user) return new HttpForbidden('User not found');
 
-      let code = Math.floor(Math.random() * 1000000).toString();
+      if (user.status === StatusUser.ACTIVE) return new HttpBadRequest('User already verified !!!');
 
-      await this.redisService.delKey(email + secret);
+      let code = Math.floor(100000 + Math.random() * 900000).toString();
 
-      await this.redisService.setKey(email + secret, code, 60 * 5);
+      await this.redisService.delKey(`${CACHE_KEY.verifyOtp}:${email}`);
 
-      await this.mailService.sendUserVerifyCode(user.firstName + ' ' + user.lastName, email, code);
+      await this.redisService.setKey(`${CACHE_KEY.verifyOtp}:${email}`, code, CACHE_KEY_TTL.verifyOtp);
+
+      await this.mailService.sendUserVerifyCode(`${user.firstName} ${user.lastName}`, email, code);
 
       return 'OTP sent to your email, you have 5 minutes to verify !!!';
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
   }
+
   async verifyPhone(arg: VerifyPhoneDTO): Promise<any> {
     try {
       const {phone} = arg;
@@ -278,11 +284,11 @@ export class AuthService implements AuthServiceInterface {
 
       if (!user) return new HttpForbidden('User not found');
 
-      let code = Math.floor(Math.random() * 1000000).toString();
+      let code = Math.floor(100000 + Math.random() * 900000).toString();
 
-      await this.redisService.delKey(phone + secret);
+      await this.redisService.delKey(`${CACHE_KEY.verifyOtp}:${phone}`);
 
-      await this.redisService.setKey(phone + secret, code, 60 * 5);
+      await this.redisService.setKey(`${CACHE_KEY.verifyOtp}:${phone}`, code, CACHE_KEY_TTL.verifyOtp);
 
       // TODO: send sms
 
@@ -291,6 +297,7 @@ export class AuthService implements AuthServiceInterface {
       throw new HttpInternalServerError(e.message);
     }
   }
+
   async verifyOtp(arg: VerifyOtpDTO): Promise<any> {
     try {
       const {otp, information} = arg;
@@ -307,16 +314,16 @@ export class AuthService implements AuthServiceInterface {
 
       if (!user) return new HttpForbidden('User not found');
 
-      const isMatchCode = await this.redisService.getKey(information + secret);
+      const isMatchCode = await this.redisService.getKey(`${CACHE_KEY.verifyOtp}:${information}`);
 
       if (!isMatchCode) return new HttpBadRequest('Request invalid or expired !!!');
 
-      if (JSON.stringify(isMatchCode.toString()) === otp.toString())
+      if (isMatchCode.toString() !== otp.toString())
         return new HttpBadRequest('OTP not match !!!, please try again !!!');
 
       await this.userService.updateStatusUser(user.uuid, StatusUser.ACTIVE);
 
-      await this.redisService.delKey(information + secret);
+      await this.redisService.delKey(`${CACHE_KEY.verifyOtp}:${information}`);
 
       return 'Verify successfully !!!';
     } catch (e) {

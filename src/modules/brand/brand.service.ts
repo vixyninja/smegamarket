@@ -55,9 +55,7 @@ export class BrandService implements BrandServiceInterface {
 
   async findOne(brandId: string): Promise<any> {
     try {
-      const brand = await this.brandRepository.findOne({
-        where: {uuid: brandId},
-      });
+      const brand = await this.brandRepository.createQueryBuilder('brand').where({uuid: brandId}).getOne();
 
       if (!brand) {
         return new HttpForbidden('Brand not found');
@@ -73,9 +71,7 @@ export class BrandService implements BrandServiceInterface {
     try {
       const {address, description, email, name, phoneNumber, website} = arg;
 
-      const brandExist = await this.brandRepository.findOne({
-        where: {name: name},
-      });
+      const brandExist = await this.brandRepository.createQueryBuilder('brand').where({name: name}).getOne();
 
       if (brandExist) {
         return new HttpBadRequest('Brand already exist');
@@ -106,9 +102,7 @@ export class BrandService implements BrandServiceInterface {
         return new HttpBadRequest('Error creating brand');
       }
 
-      const result = await this.brandRepository.findOne({
-        where: {uuid: brand.raw.insertId},
-      });
+      const result = await this.brandRepository.createQueryBuilder('brand').where({uuid: brand.raw.insertId}).getOne();
 
       if (!result) {
         return new HttpBadRequest('Error creating brand');
@@ -124,7 +118,7 @@ export class BrandService implements BrandServiceInterface {
     try {
       const {address, description, email, name, phoneNumber, website} = arg;
 
-      const brand = await this.brandRepository.findOne({where: {uuid: brandId}});
+      const brand = await this.brandRepository.createQueryBuilder('brand').where({uuid: brandId}).getOne();
 
       if (!brand) {
         return new HttpBadRequest('Brand not found');
@@ -160,9 +154,7 @@ export class BrandService implements BrandServiceInterface {
         return new HttpBadRequest('Error updating brand');
       }
 
-      const result = await this.brandRepository.findOne({
-        where: {uuid: brandId},
-      });
+      const result = await this.brandRepository.createQueryBuilder('brand').where({uuid: brandId}).getOne();
 
       if (!result) {
         return new HttpBadRequest('Error updating brand');
@@ -176,15 +168,14 @@ export class BrandService implements BrandServiceInterface {
 
   async updateImage(brandId: string, image: Express.Multer.File): Promise<any> {
     try {
-      const brand = await this.brandRepository.findOne({
-        where: {uuid: brandId},
-      });
+      const brand = await this.brandRepository.createQueryBuilder('brand').where({uuid: brandId}).getOne();
 
       if (!brand) {
         return new HttpBadRequest('Brand not found');
       }
 
       const file = await this.fileService.uploadFile(image);
+
       if (!file) {
         return new HttpBadRequest('Error uploading image');
       }
@@ -200,9 +191,7 @@ export class BrandService implements BrandServiceInterface {
         return new HttpBadRequest('Error updating brand');
       }
 
-      const result = await this.brandRepository.findOne({
-        where: {uuid: brandId},
-      });
+      const result = await this.brandRepository.createQueryBuilder('brand').where({uuid: brandId}).getOne();
 
       if (!result) {
         return new HttpBadRequest('Error updating brand');
