@@ -49,6 +49,18 @@ export class UserController {
     return {data: user, message: 'Update email successfully'};
   }
 
+  @Patch('/me/update-role')
+  async updateAdmin(
+    @UserDynamic('uuid') userUUID: string,
+    @Body()
+    updateAdminDTO: {
+      role: RoleEnum;
+    },
+  ): Promise<any> {
+    const user: UserEntity = await this.userService.updateUserRole(userUUID, updateAdminDTO.role);
+    return {data: user, message: 'Update admin successfully'};
+  }
+
   @Roles([RoleEnum.ADMIN])
   @UseGuards(RolesGuard)
   @Post('import')

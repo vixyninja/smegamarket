@@ -49,6 +49,7 @@ const ACCESS_TOKEN_SECRET: string = process.env.ACCESS_TOKEN_SECRET;
 const ACCESS_TOKEN_EXPIRATION_TIME: string = process.env.ACCESS_TOKEN_EXPIRATION_TIME;
 const REFRESH_TOKEN_SECRET: string = process.env.REFRESH_TOKEN_SECRET;
 const REFRESH_TOKEN_EXPIRATION_TIME: string = process.env.REFRESH_TOKEN_EXPIRATION_TIME;
+const TOKEN_BUFFER: string = process.env.TOKEN_BUFFER;
 
 // cloud
 const FOLDER_NAME: string = process.env.FOLDER_NAME;
@@ -63,6 +64,7 @@ export const Environment = {
   GOOGLE_CLIENT_ID,
   ACCESS_TOKEN_EXPIRATION_TIME,
   ACCESS_TOKEN_SECRET,
+  TOKEN_BUFFER,
   API_KEY,
   API_SECRET,
   CLOUD_NAME,

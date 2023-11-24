@@ -1,4 +1,4 @@
-import {HttpBadRequest, HttpInternalServerError} from '@/core';
+import {HttpBadRequest, HttpInternalServerError, HttpNotFound} from '@/core';
 import {Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
@@ -22,30 +22,25 @@ export class CategoryService implements CategoryServiceInterface {
 
   async findAll(): Promise<any> {
     try {
-      const categories = await this.categoryRepository.find();
+      const categories = await this.categoryRepository.createQueryBuilder('category').getMany();
 
-      return {
-        message: 'Get categories success',
-        data: categories ? categories : [],
-      };
+      return categories;
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
   }
   async findOne(categoryId: string): Promise<any> {
     try {
-      const category = await this.categoryRepository.findOne({
-        where: {uuid: categoryId},
-      });
+      const category = await this.categoryRepository
+        .createQueryBuilder('category')
+        .where('category.uuid = :uuid', {uuid: categoryId})
+        .getOne();
 
       if (!category) {
         return new HttpBadRequest('Category not found');
       }
 
-      return {
-        message: 'Get category success',
-        data: category,
-      };
+      return category;
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
@@ -63,19 +58,17 @@ export class CategoryService implements CategoryServiceInterface {
         return new HttpBadRequest('Category name already exist');
       }
 
-      const result = await this.categoryRepository.save({
-        name: name,
-        description: description,
-      });
+      const result = await this.categoryRepository
+        .createQueryBuilder('category')
+        .insert()
+        .into(CategoryEntity)
+        .values({
+          name: name,
+          description: description,
+        })
+        .execute();
 
-      if (!result) {
-        return new HttpBadRequest('Error creating category');
-      }
-
-      return {
-        message: 'Create category success',
-        data: result,
-      };
+      return result;
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
@@ -85,31 +78,29 @@ export class CategoryService implements CategoryServiceInterface {
     try {
       const {description, name} = arg;
 
-      const category = await this.categoryRepository.findOne({
+      const isExist = await this.categoryRepository.findOne({
         where: {uuid: categoryId},
       });
 
-      if (!category) {
-        return new HttpBadRequest('Category not found');
+      if (!isExist) {
+        return new HttpNotFound('Category not found');
       }
 
-      const updateCategory = await this.categoryRepository.update(categoryId, {
-        name: name ?? category.name,
-        description: description ?? category.description,
-      });
+      const result = await this.categoryRepository
+        .createQueryBuilder('category')
+        .update(CategoryEntity)
+        .set({
+          name: name ?? isExist.name,
+          description: description ?? isExist.description,
+        })
+        .where('uuid = :uuid', {uuid: categoryId})
+        .execute();
 
-      if (!updateCategory) {
+      if (!result) {
         return new HttpBadRequest('Error updating category');
       }
 
-      const result = await this.categoryRepository.findOne({
-        where: {uuid: categoryId},
-      });
-
-      return {
-        message: 'Update category success',
-        data: result,
-      };
+      return result;
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
@@ -117,23 +108,18 @@ export class CategoryService implements CategoryServiceInterface {
 
   async delete(categoryId: string): Promise<any> {
     try {
-      const category = await this.categoryRepository.findOne({
-        where: {uuid: categoryId},
-      });
+      const result = await this.categoryRepository
+        .createQueryBuilder()
+        .delete()
+        .from(CategoryEntity)
+        .where('uuid = :uuid', {uuid: categoryId})
+        .execute();
 
-      if (!category) {
-        return new HttpBadRequest('Category not found');
-      }
-
-      const deleteCategory = await this.categoryRepository.delete(categoryId);
-
-      if (!deleteCategory) {
+      if (!result) {
         return new HttpBadRequest('Error deleting category');
       }
 
-      return {
-        message: 'Delete category success',
-      };
+      return 'Deleted successfully';
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }

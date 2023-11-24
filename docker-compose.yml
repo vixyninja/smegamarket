@@ -50,19 +50,13 @@ services:
     environment:
       REDIS_HOST: ${REDIS_HOST}
 
-  redis-insight:
-    container_name: redis-insight
-    image: redislabs/redisinsight:latest
-    volumes:
-      - redis-insight:/db
+  regis-adminer:
+    image: patrikx3/p3x-redis-ui:latest
+    container_name: regis-adminer
     ports:
-      - ${REDIS_INSIGHT_PORT}:${REDIS_INSIGHT_PORT}
-    restart: always
-    environment:
-      REDIS_INSIGHT_PORT: ${REDIS_INSIGHT_PORT}
-      REDIS_HOSTS: ${REDIS_HOST}:${REDIS_PORT}
-    depends_on:
-      - redis
+      - 7843:7843
+    volumes:
+      - /home/user/p3x-redis-ui-settings:/settings
 
   adminer:
     container_name: adminer
@@ -78,11 +72,16 @@ services:
 volumes:
   api-client:
     name: vapi-client
+    driver: local
   docker-nest-postgres:
     name: vdocker-nest-postgres
+    driver: local
   adminer:
     name: vadminer
+    driver: local
   redis:
     name: vredis
-  redis-insight:
-    name: vredis-insight
+    driver: local
+  regis-adminer:
+    name: vregis-adminer
+    driver: local

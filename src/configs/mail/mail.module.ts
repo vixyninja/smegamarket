@@ -18,9 +18,6 @@ import {Environment} from '../environments';
             pass: Environment.MAIL_PASSWORD,
           },
         },
-        defaults: {
-          from: '"No Reply" <noreply@lms.com.vn>',
-        },
         template: {
           dir: join(__dirname, 'templates'),
           adapter: new HandlebarsAdapter(),

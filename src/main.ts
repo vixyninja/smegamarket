@@ -12,9 +12,7 @@ import {
 } from './core';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    preview: true,
-  });
+  const app = await NestFactory.create(AppModule);
 
   const prefix = 'api/v1';
   const port = process.env.PORT;
@@ -50,7 +48,4 @@ bootstrap()
   .then(() =>
     Logger.verbose(`🌚 Application is listening on port ${process.env.PORT} , ${process.env.NODE_ENV} 👀 😈 `),
   )
-  .catch((error) => Logger.error(error))
-  .finally(() => {
-    Logger.verbose('🌚 Application is closing');
-  });
+  .catch((error) => Logger.error(error));

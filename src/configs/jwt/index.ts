@@ -1,6 +1,7 @@
 import {Injectable} from '@nestjs/common';
 import {JwtService} from '@nestjs/jwt';
 import {JWTPayload, RecordType, TokenType} from './typedef';
+import {Environment} from '../environments';
 
 @Injectable()
 export class JWTService {
@@ -9,12 +10,17 @@ export class JWTService {
   signToken(payload: JWTPayload, type: TokenType): Promise<string> {
     return new Promise((resolve, reject) => {
       try {
-        const options = {
-          expiresIn: RecordType[type].expiration,
+        const token = this.jwtService.sign(payload, {
           secret: RecordType[type].secret,
-        };
-        const token = this.jwtService.sign(payload, options);
-        resolve(token);
+          expiresIn: RecordType[type].expiration,
+          audience: RecordType[type].audience,
+          issuer: RecordType[type].issuer,
+          algorithm: 'HS256',
+        });
+
+        const tokenBuffer = Buffer.from(token).toString(Environment.TOKEN_BUFFER as any);
+
+        resolve(tokenBuffer);
       } catch (error: any) {
         reject(error);
       }
@@ -23,12 +29,16 @@ export class JWTService {
 
   verifyToken(token: string, type: TokenType): Promise<JWTPayload> {
     return new Promise((resolve, reject) => {
-      const options = {
-        expiresIn: RecordType[type].expiration,
-        secret: RecordType[type].secret,
-      };
       try {
-        const payload = this.jwtService.verify(token, options);
+        const tokenDecoded = Buffer.from(token, Environment.TOKEN_BUFFER as any).toString();
+
+        const payload = this.jwtService.verify(tokenDecoded, {
+          secret: RecordType[type].secret,
+          audience: RecordType[type].audience,
+          issuer: RecordType[type].issuer,
+          algorithms: ['HS256'],
+        });
+
         resolve(payload);
       } catch (error: any) {
         reject(error);

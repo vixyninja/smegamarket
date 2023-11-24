@@ -57,14 +57,15 @@ export class UserEntity extends BaseEntity {
   @OneToOne(() => FileEntity, (file) => file.uuid, {onDelete: 'CASCADE'})
   cover: FileEntity;
 
-  setHashPassword(hashPassword: string): void {
-    this.hashPassword = hashPassword;
-  }
-
   @BeforeInsert()
   async hashPasswordBeforeInsert() {
     this.salt = await bcryptjs.genSalt(Math.round(Math.random() * 10));
     this.hashPassword = await bcryptjs.hash(this.hashPassword, this.salt);
+  }
+
+  async updatePassword(password: string) {
+    this.salt = await bcryptjs.genSalt(Math.round(Math.random() * 10));
+    this.hashPassword = await bcryptjs.hash(password, this.salt);
   }
 
   async validatePassword(password: string): Promise<boolean> {

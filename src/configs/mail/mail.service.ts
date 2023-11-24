@@ -10,7 +10,8 @@ export class MailService {
   async sendUserConfirmation(email: string, name: string) {
     try {
       await this.mailerService.sendMail({
-        to: GROUP_EMAIL,
+        from: GROUP_EMAIL,
+        to: email,
         subject: `Hello ${name}. Welcome to Mega Market!`,
         template: './user-information',
         context: {
@@ -26,7 +27,8 @@ export class MailService {
   async sendUserResetPasswordOtp(name: string, email: string, code: string) {
     try {
       await this.mailerService.sendMail({
-        to: GROUP_EMAIL,
+        from: GROUP_EMAIL,
+        to: email,
         subject: 'Reset password code for Mega Market',
         template: './reset-password',
         context: {
@@ -44,7 +46,8 @@ export class MailService {
   async sendUserResetPasswordSuccess(name: string, email: string) {
     try {
       await this.mailerService.sendMail({
-        to: GROUP_EMAIL,
+        from: GROUP_EMAIL,
+        to: email,
         subject: 'Reset password successfully',
         template: './reset-password-success',
         context: {
@@ -61,7 +64,8 @@ export class MailService {
   async sendUserVerifyCode(name: string, information: string, code: string) {
     try {
       await this.mailerService.sendMail({
-        to: GROUP_EMAIL,
+        from: GROUP_EMAIL,
+        to: information,
         subject: 'Verify code for Mega Market',
         template: './verify-code',
         context: {
