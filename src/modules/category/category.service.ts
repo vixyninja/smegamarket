@@ -4,6 +4,7 @@ import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
 import {CreateCategoryDTO, UpdateCategoryDTO} from './dto';
 import {CategoryEntity} from './entities';
+import {FileService} from '../file';
 
 interface CategoryServiceInterface {
   findAll(): Promise<any>;
@@ -18,21 +19,24 @@ export class CategoryService implements CategoryServiceInterface {
   constructor(
     @InjectRepository(CategoryEntity)
     private readonly categoryRepository: Repository<CategoryEntity>,
+    private readonly fileService: FileService,
   ) {}
 
   async findAll(): Promise<any> {
     try {
-      const categories = await this.categoryRepository.createQueryBuilder('category').getMany();
+      const categories = await this.categoryRepository.createQueryBuilder('category').loadAllRelationIds().getMany();
 
       return categories;
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
   }
+
   async findOne(categoryId: string): Promise<any> {
     try {
       const category = await this.categoryRepository
         .createQueryBuilder('category')
+        .loadAllRelationIds()
         .where('category.uuid = :uuid', {uuid: categoryId})
         .getOne();
 
@@ -58,6 +62,8 @@ export class CategoryService implements CategoryServiceInterface {
         return new HttpBadRequest('Category name already exist');
       }
 
+      const defaultIcon = await this.fileService.findFile('7fa8a45a-bdfe-4674-a497-fbbf7e670639');
+
       const result = await this.categoryRepository
         .createQueryBuilder('category')
         .insert()
@@ -65,6 +71,7 @@ export class CategoryService implements CategoryServiceInterface {
         .values({
           name: name,
           description: description,
+          icon: defaultIcon,
         })
         .execute();
 

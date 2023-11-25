@@ -14,7 +14,7 @@ import {FileInterceptor} from '@nestjs/platform-express';
 import {CreateUserDTO, UpdateUserDTO} from './dto';
 import {UserEntity} from './entities';
 import {UserService} from './user.service';
-import {isUUID} from 'class-validator';
+import {isEmail, isPhoneNumber, isUUID} from 'class-validator';
 
 @UseGuards(AuthGuard)
 @Controller('user')
@@ -73,13 +73,27 @@ export class UserController {
 
   @Put('/me/phone')
   async updatePhone(@UserDynamic('uuid') userUUID: string, @Body('phone') phone: string): Promise<any> {
-    const user: UserEntity = await this.userService.updateUserPhone(userUUID, phone);
-    return {data: user, message: 'Update phone successfully'};
+    const user = await this.userService.updateUserPhone(userUUID, phone);
+
+    if (!isPhoneNumber(phone, 'VN')) {
+      return new HttpBadRequest('Phone is not valid');
+    }
+
+    return HandlerFilter(user, {
+      message: 'Update phone successfully',
+      data: user,
+      status: 200,
+    });
   }
 
   @Put('/me/email')
   async updateEmail(@UserDynamic('uuid') userUUID: string, @Body('email') email: string): Promise<any> {
     const user = await this.userService.updateUserEmail(userUUID, email);
+
+    if (!isEmail(email)) {
+      return new HttpBadRequest('Email is not valid');
+    }
+
     return HandlerFilter(user, {
       message: 'Update email successfully',
       data: user,
