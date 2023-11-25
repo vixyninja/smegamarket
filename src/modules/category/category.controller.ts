@@ -17,32 +17,32 @@ export class CategoryController {
     try {
       faker.fakerVI.seed();
 
-      let cateRnd: string[] = ['Vegetables', 'Fruits', 'Meat', 'Others'];
-      let categories = [];
+      let cateRnd: string[] = [
+        'Vegetables',
+        'Fruits',
+        'Meat',
+        'Cooking',
+        'Beverages',
+        'Snacks',
+        'Beer',
+        'Wine',
+        'Seafood',
+        'Dairy',
+        'Bread',
+        'Canned',
+        'Others',
+      ];
+
       let result = [];
 
       for (let i = 0; i < cateRnd.length; i++) {
-        var des: string;
-        switch (i) {
-          case 0:
-            des = 'Vegetables are parts of plants that are consumed by humans or other animals as food.';
-            break;
-          case 1:
-            des =
-              'In botany, a fruit is the seed-bearing structure in flowering plants (also known as angiosperms) formed from the ovary after flowering.';
-            break;
-          case 2:
-            des = 'Meat is animal flesh that is eaten as food.';
-            break;
-          default:
-            des = 'Others';
-        }
         const category: CreateCategoryDTO = {
           name: cateRnd[i].toString(),
-          description: des,
+          description: faker.fakerVI.lorem.paragraph(),
         };
-        categories.push(category);
+
         const response = await this.categoryService.create(category);
+
         result.push(response);
       }
 

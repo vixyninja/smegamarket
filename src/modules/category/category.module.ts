@@ -5,9 +5,10 @@ import {CategoryEntity} from './entities/category.entity';
 import {CategoryService} from './category.service';
 import {JwtService} from '@nestjs/jwt';
 import {JWTService} from '@/configs';
+import {FileModule} from '../file';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([CategoryEntity])],
+  imports: [TypeOrmModule.forFeature([CategoryEntity]), FileModule],
   controllers: [CategoryController],
   providers: [CategoryService, JwtService, JWTService],
   exports: [CategoryService],
