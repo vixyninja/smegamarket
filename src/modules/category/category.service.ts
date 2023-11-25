@@ -11,6 +11,7 @@ interface CategoryServiceInterface {
   findOne(categoryId: string): Promise<any>;
   create(arg: CreateCategoryDTO): Promise<any>;
   update(categoryId: string, arg: UpdateCategoryDTO): Promise<any>;
+  updateIcon(categoryId: string, file: Express.Multer.File): Promise<any>;
   delete(categoryId: string): Promise<any>;
 }
 
@@ -64,7 +65,7 @@ export class CategoryService implements CategoryServiceInterface {
 
       const defaultIcon = await this.fileService.findFile('7fa8a45a-bdfe-4674-a497-fbbf7e670639');
 
-      const result = await this.categoryRepository
+      const createCategory = await this.categoryRepository
         .createQueryBuilder('category')
         .insert()
         .into(CategoryEntity)
@@ -74,6 +75,16 @@ export class CategoryService implements CategoryServiceInterface {
           icon: defaultIcon,
         })
         .execute();
+
+      if (!createCategory) {
+        return new HttpBadRequest('Error creating category');
+      }
+
+      const result = await this.findOne(createCategory.raw.insertId);
+
+      if (!result) {
+        return new HttpBadRequest('Error creating category');
+      }
 
       return result;
     } catch (e) {
@@ -93,7 +104,7 @@ export class CategoryService implements CategoryServiceInterface {
         return new HttpNotFound('Category not found');
       }
 
-      const result = await this.categoryRepository
+      const updateCategory = await this.categoryRepository
         .createQueryBuilder('category')
         .update(CategoryEntity)
         .set({
@@ -103,9 +114,47 @@ export class CategoryService implements CategoryServiceInterface {
         .where('uuid = :uuid', {uuid: categoryId})
         .execute();
 
-      if (!result) {
+      if (!updateCategory) {
         return new HttpBadRequest('Error updating category');
       }
+
+      const result = await this.findOne(categoryId);
+
+      return result;
+    } catch (e) {
+      throw new HttpInternalServerError(e.message);
+    }
+  }
+
+  async updateIcon(categoryId: string, file: Express.Multer.File): Promise<any> {
+    try {
+      const category = await this.categoryRepository
+        .createQueryBuilder('category')
+        .where('uuid = :uuid', {uuid: categoryId})
+        .getOne();
+
+      if (!category) {
+        return new HttpNotFound('Category not found');
+      }
+
+      const icon = await this.fileService.uploadFile(file);
+
+      const updateIconCategory = await this.categoryRepository
+        .createQueryBuilder('category')
+        .update(CategoryEntity)
+        .set({
+          icon: icon,
+        })
+        .where('uuid = :uuid', {uuid: categoryId})
+        .execute();
+
+      if (!updateIconCategory) {
+        return new HttpBadRequest('Error updating category');
+      }
+
+      const result = await this.findOne(categoryId);
+
+      if (!result) return new HttpBadRequest('Error updating category');
 
       return result;
     } catch (e) {
