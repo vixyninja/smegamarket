@@ -1,4 +1,4 @@
-import {AuthGuard, HttpInternalServerError, RoleEnum, Roles, RolesGuard} from '@/core';
+import {AuthGuard, HandlerFilter, HttpInternalServerError, RoleEnum, Roles, RolesGuard} from '@/core';
 import * as faker from '@faker-js/faker';
 import {Body, Controller, Delete, Get, Param, Post, Put, UseGuards} from '@nestjs/common';
 import {isUUID} from 'class-validator';
@@ -58,10 +58,11 @@ export class CategoryController {
   @Get()
   async findAll(): Promise<any> {
     const categories = await this.categoryService.findAll();
-    return {
+
+    return HandlerFilter(categories, {
       message: 'Get all categories successfully',
       data: categories,
-    };
+    });
   }
 
   @Get(':categoryId')
@@ -73,10 +74,10 @@ export class CategoryController {
       };
     }
     const category = await this.categoryService.findOne(categoryId);
-    return {
+    return HandlerFilter(category, {
       message: 'Get category successfully',
       data: category,
-    };
+    });
   }
 
   @Roles([RoleEnum.ADMIN])
@@ -84,10 +85,11 @@ export class CategoryController {
   @Post()
   async createCategory(@Body() createCategoryDTO: CreateCategoryDTO): Promise<any> {
     const category = await this.categoryService.create(createCategoryDTO);
-    return {
+
+    return HandlerFilter(category, {
       message: 'Create category successfully',
       data: category,
-    };
+    });
   }
 
   @Roles([RoleEnum.ADMIN])
@@ -105,10 +107,10 @@ export class CategoryController {
       };
     }
     const category = await this.categoryService.update(categoryId, updateCategoryDTO);
-    return {
+    return HandlerFilter(category, {
       message: 'Update category successfully',
       data: category,
-    };
+    });
   }
 
   @Roles([RoleEnum.ADMIN])
@@ -122,9 +124,8 @@ export class CategoryController {
       };
     }
     const category = await this.categoryService.delete(categoryId);
-    return {
+    return HandlerFilter(category, {
       message: 'Delete category successfully',
-      data: category,
-    };
+    });
   }
 }
