@@ -77,21 +77,6 @@ export class CategoryController {
     });
   }
 
-  @Get(':categoryId')
-  async findOne(@Param('categoryId') categoryId: string): Promise<any> {
-    if (isUUID(categoryId) === false) {
-      return {
-        message: 'Category id is invalid',
-        data: null,
-      };
-    }
-    const category = await this.categoryService.findOne(categoryId);
-    return HandlerFilter(category, {
-      message: 'Get category successfully',
-      data: category,
-    });
-  }
-
   @Roles([RoleEnum.ADMIN])
   @UseGuards(RolesGuard)
   @Post()
@@ -100,6 +85,21 @@ export class CategoryController {
 
     return HandlerFilter(category, {
       message: 'Create category successfully',
+      data: category,
+    });
+  }
+
+  @Get(':categoryId')
+  async readOne(@Param('categoryId') categoryId: string): Promise<any> {
+    if (isUUID(categoryId) === false) {
+      return {
+        message: 'Category id is invalid',
+        data: null,
+      };
+    }
+    const category = await this.categoryService.readOne(categoryId);
+    return HandlerFilter(category, {
+      message: 'Get category successfully',
       data: category,
     });
   }

@@ -1,5 +1,5 @@
 import {HttpBadRequest} from '@/core';
-import {IQueryOptions, Meta} from '@/core/interface';
+import {QueryOptions, Meta} from '@/core/interface';
 import {Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
@@ -10,10 +10,10 @@ import {CreateProductDTO, UpdateProductDTO} from './dto';
 import {ProductEntity} from './entities/product.entity';
 
 interface ProductServiceInterface {
-  readAll(query: IQueryOptions): Promise<any>;
+  readAll(query: QueryOptions): Promise<any>;
   readOne(productId: string): Promise<any>;
-  readAllByBrand(brandId: string, query: IQueryOptions): Promise<any>;
-  readAllByCategory(categoryId: string, query: IQueryOptions): Promise<any>;
+  readAllByBrand(brandId: string, query: QueryOptions): Promise<any>;
+  readAllByCategory(categoryId: string, query: QueryOptions): Promise<any>;
   create(createProductDTO: CreateProductDTO): Promise<any>;
   update(productId: string, updateProductDTO: UpdateProductDTO): Promise<any>;
   updateImage(productId: string, files: Express.Multer.File[]): Promise<any>;
@@ -42,21 +42,21 @@ export class ProductService implements ProductServiceInterface {
   updateBrand(productId: string, brandId: string): Promise<any> {
     throw new Error('Method not implemented.');
   }
-  readAllByCategory(categoryId: string, query: IQueryOptions): Promise<any> {
+  readAllByCategory(categoryId: string, query: QueryOptions): Promise<any> {
     throw new Error('Method not implemented.');
   }
-  readAllByBrand(brandId: string, query: IQueryOptions): Promise<any> {
+  readAllByBrand(brandId: string, query: QueryOptions): Promise<any> {
     throw new Error('Method not implemented.');
   }
 
-  async readAll(query: IQueryOptions): Promise<any> {
+  async readAll(query: QueryOptions): Promise<any> {
     try {
       let {_page, _limit, _order, _sort} = query;
 
       _page = _page ? Number(_page) : 1;
       _limit = _limit ? Number(_limit) : 10;
-      _order = _order ? _order : 'DESC';
-      _sort = _sort ? _sort : 'createdAt';
+      _sort = _sort ? (_sort === 'createdAt' ? 'createdAt' : 'updatedAt') : 'createdAt';
+      _order = _order ? (_order === 'ASC' ? 'ASC' : 'DESC') : 'DESC';
 
       const response = await this.productRepository
         .createQueryBuilder('product')
@@ -65,7 +65,7 @@ export class ProductService implements ProductServiceInterface {
         .leftJoinAndSelect('product.images', 'images')
         .skip((_page - 1) * _limit)
         .take(_limit)
-        .orderBy(`product.${_sort}`, _order)
+        .orderBy(`product.${_sort === 'createdAt' ? 'createdAt' : 'updatedAt'}`, _order === 'ASC' ? 'ASC' : 'DESC')
         .getMany();
 
       const total = await this.productRepository.count();

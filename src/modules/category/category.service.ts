@@ -10,6 +10,7 @@ interface CategoryServiceInterface {
   findAll(): Promise<any>;
   findOne(categoryId: string): Promise<any>;
   create(arg: CreateCategoryDTO): Promise<any>;
+  readOne(categoryId: string): Promise<any>;
   update(categoryId: string, arg: UpdateCategoryDTO): Promise<any>;
   updateIcon(categoryId: string, file: Express.Multer.File): Promise<any>;
   delete(categoryId: string): Promise<any>;
@@ -34,6 +35,20 @@ export class CategoryService implements CategoryServiceInterface {
   }
 
   async findOne(categoryId: string): Promise<any> {
+    try {
+      const category = await this.categoryRepository
+        .createQueryBuilder('category')
+        .loadAllRelationIds()
+        .where('category.uuid = :uuid', {uuid: categoryId})
+        .getOne();
+
+      return category;
+    } catch (e) {
+      throw new HttpInternalServerError(e.message);
+    }
+  }
+
+  async readOne(categoryId: string): Promise<any> {
     try {
       const category = await this.categoryRepository
         .createQueryBuilder('category')

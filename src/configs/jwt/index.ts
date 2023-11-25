@@ -2,6 +2,7 @@ import {Injectable} from '@nestjs/common';
 import {JwtService} from '@nestjs/jwt';
 import {JWTPayload, RecordType, TokenType} from './typedef';
 import {Environment} from '../environments';
+import {HttpUnauthorized} from '@/core';
 
 @Injectable()
 export class JWTService {
@@ -22,7 +23,15 @@ export class JWTService {
 
         resolve(tokenBuffer);
       } catch (error: any) {
-        reject(error);
+        if (error.name === 'TokenExpiredError') {
+          reject(new HttpUnauthorized('Token is expired'));
+        } else if (error.name === 'JsonWebTokenError') {
+          reject(new HttpUnauthorized('Token is invalid'));
+        } else if (error.name === 'NotBeforeError') {
+          reject(new HttpUnauthorized('Token is not active'));
+        } else {
+          reject(error);
+        }
       }
     });
   }
@@ -41,7 +50,15 @@ export class JWTService {
 
         resolve(payload);
       } catch (error: any) {
-        reject(error);
+        if (error.name === 'TokenExpiredError') {
+          reject(new HttpUnauthorized('Token is expired'));
+        } else if (error.name === 'JsonWebTokenError') {
+          reject(new HttpUnauthorized('Token is invalid'));
+        } else if (error.name === 'NotBeforeError') {
+          reject(new HttpUnauthorized('Token is not active'));
+        } else {
+          reject(error);
+        }
       }
     });
   }

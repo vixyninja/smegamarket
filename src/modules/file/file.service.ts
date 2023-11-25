@@ -7,6 +7,7 @@ import {HttpBadRequest} from '@/core';
 
 interface FileServiceInterface {
   findFile(fileId: string): Promise<FileEntity>;
+  readOne(fileId: string): Promise<FileEntity>;
   uploadFile(file: Express.Multer.File, folder?: string): Promise<FileEntity>;
   deleteFile(fileId: string): Promise<any>;
   uploadFiles(files: Express.Multer.File[]): Promise<FileEntity[]>;
@@ -24,6 +25,16 @@ export class FileService implements FileServiceInterface {
     try {
       const file = await this.fileRepository.createQueryBuilder('file').where({uuid: fileId}).getOne();
 
+      return file;
+    } catch (e) {
+      throw new HttpBadRequest(e.message);
+    }
+  }
+
+  async readOne(fileId: string): Promise<FileEntity> {
+    try {
+      const file = await this.fileRepository.createQueryBuilder('file').where({uuid: fileId}).getOne();
+
       if (!file) throw new HttpBadRequest('File is not exist');
 
       return file;
@@ -31,6 +42,7 @@ export class FileService implements FileServiceInterface {
       throw new HttpBadRequest(e.message);
     }
   }
+
   async uploadFile(file: Express.Multer.File, folder?: string): Promise<FileEntity> {
     try {
       const result = await this.cloudinaryService.uploadFileImage(file, folder);

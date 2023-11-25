@@ -1,5 +1,5 @@
 import {HttpBadRequest, HttpForbidden, HttpInternalServerError} from '@/core';
-import {IQueryOptions, Meta} from '@/core/interface';
+import {QueryOptions, Meta} from '@/core/interface';
 import {Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
@@ -8,12 +8,14 @@ import {CreateBrandDTO, UpdateBrandDTO} from './dto';
 import {BrandEntity} from './entities';
 
 interface BrandServiceInterface {
-  findAll(query: IQueryOptions): Promise<any>;
+  findAll(query: QueryOptions): Promise<any>;
   findOne(brandId: string): Promise<any>;
   create(arg: CreateBrandDTO, file: Express.Multer.File): Promise<any>;
+  readOne(brandId: string): Promise<any>;
   update(brandId: string, arg: UpdateBrandDTO): Promise<any>;
   updateImage(brandId: string, file: Express.Multer.File): Promise<any>;
   delete(brandId: string): Promise<any>;
+  deleteImage(brandId: string): Promise<any>;
 }
 
 @Injectable()
@@ -24,26 +26,23 @@ export class BrandService implements BrandServiceInterface {
     private readonly fileService: FileService,
   ) {}
 
-  async findAll(query: IQueryOptions): Promise<any> {
+  async findAll(query: QueryOptions): Promise<any> {
     try {
-      let {_limit, _order, _page, _sort} = query;
+      let {_page, _limit, _sort, _order} = QueryOptions.initialize(query);
 
-      _page = _page ? Number(_page) : 1;
-      _limit = _limit ? Number(_limit) : 10;
-      _sort = _sort ? _sort : 'createdAt';
-      _order = _order ? _order : 'DESC';
+      console.log(_page, _limit, _sort, _order);
 
       const [brands, count] = await this.brandRepository
         .createQueryBuilder('brand')
         .loadAllRelationIds()
         .skip(_limit * (_page - 1))
         .take(_limit)
-        .orderBy(`brand.${_sort}`, _order)
+        .orderBy(`brand.${_sort}`, _order === 'DESC' ? 'DESC' : 'ASC')
         .getManyAndCount();
 
       return {
         data: brands,
-        meta: new Meta(_page, _limit, brands.length, Math.ceil(count / _limit), query),
+        meta: new Meta(_page, _limit, brands.length, Math.ceil(count / _limit), QueryOptions.initialize(query)),
       };
     } catch (e) {
       throw new HttpInternalServerError(e.message);
@@ -52,7 +51,25 @@ export class BrandService implements BrandServiceInterface {
 
   async findOne(brandId: string): Promise<any> {
     try {
-      const brand = await this.brandRepository.createQueryBuilder('brand').where({uuid: brandId}).getOne();
+      const brand = await this.brandRepository
+        .createQueryBuilder('brand')
+        .loadAllRelationIds()
+        .where({uuid: brandId})
+        .getOne();
+
+      return brand;
+    } catch (e) {
+      throw new HttpInternalServerError(e.message);
+    }
+  }
+
+  async readOne(brandId: string): Promise<any> {
+    try {
+      const brand = await this.brandRepository
+        .createQueryBuilder('brand')
+        .loadAllRelationIds()
+        .where({uuid: brandId})
+        .getOne();
 
       if (!brand) {
         return new HttpForbidden('Brand not found');
@@ -68,7 +85,13 @@ export class BrandService implements BrandServiceInterface {
     try {
       const {address, description, email, name, phoneNumber, website} = arg;
 
-      const brandExist = await this.brandRepository.createQueryBuilder('brand').where({name: name}).getOne();
+      const brandExist = await this.brandRepository
+        .createQueryBuilder('brand')
+        .where({name: name})
+        .orWhere({email: email})
+        .orWhere({phoneNumber: phoneNumber})
+        .orWhere({website: website})
+        .getOne();
 
       if (brandExist) {
         return new HttpBadRequest('Brand already exist');
@@ -99,7 +122,7 @@ export class BrandService implements BrandServiceInterface {
         return new HttpBadRequest('Error creating brand');
       }
 
-      const result = await this.findOne(brand.raw.insertId);
+      const result = await this.findOne(brand.raw[0].uuid);
 
       if (!result) {
         return new HttpBadRequest('Error creating brand');
@@ -115,7 +138,7 @@ export class BrandService implements BrandServiceInterface {
     try {
       const {address, description, email, name, phoneNumber, website} = arg;
 
-      const brand = await this.brandRepository.createQueryBuilder('brand').where({uuid: brandId}).getOne();
+      const brand = await this.findOne(brandId);
 
       if (!brand) {
         return new HttpBadRequest('Brand not found');
@@ -165,7 +188,7 @@ export class BrandService implements BrandServiceInterface {
 
   async updateImage(brandId: string, image: Express.Multer.File): Promise<any> {
     try {
-      const brand = await this.brandRepository.createQueryBuilder('brand').where({uuid: brandId}).getOne();
+      const brand = await this.findOne(brandId);
 
       if (!brand) {
         return new HttpBadRequest('Brand not found');
@@ -202,13 +225,54 @@ export class BrandService implements BrandServiceInterface {
 
   async delete(brandId: string): Promise<any> {
     try {
-      const response = await this.brandRepository.createQueryBuilder('brand').delete().where({uuid: brandId}).execute();
+      const brand = await this.findOne(brandId);
+
+      if (!brand) {
+        return new HttpBadRequest('Brand not found');
+      }
+
+      const response = await this.brandRepository
+        .createQueryBuilder('brand')
+        .softDelete()
+        .where({uuid: brandId})
+        .execute();
 
       if (!response) {
         return new HttpBadRequest('Error deleting brand');
       }
 
       return 'Brand deleted successfully';
+    } catch (e) {
+      throw new HttpInternalServerError(e.message);
+    }
+  }
+
+  async deleteImage(brandId: string): Promise<any> {
+    try {
+      const brand = await this.findOne(brandId);
+
+      if (!brand) {
+        return new HttpBadRequest('Brand not found');
+      }
+
+      const file = await this.fileService.findFile('26daf89b-4fac-4b0e-881f-518a6eceba10');
+
+      if (!file) {
+        return new HttpBadRequest('File not found');
+      }
+
+      const response = await this.brandRepository
+        .createQueryBuilder('brand')
+        .update()
+        .set({avatar: file})
+        .where({uuid: brandId})
+        .execute();
+
+      if (!response) {
+        return new HttpBadRequest('Error deleting image');
+      }
+
+      return 'Image deleted successfully';
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }

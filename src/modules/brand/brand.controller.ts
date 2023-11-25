@@ -1,5 +1,5 @@
 import {AuthGuard, HandlerFilter, HttpInternalServerError, RoleEnum, Roles, RolesGuard} from '@/core';
-import {IQueryOptions} from '@/core/interface';
+import {QueryOptions} from '@/core/interface';
 import * as faker from '@faker-js/faker';
 import {
   Body,
@@ -16,9 +16,9 @@ import {
 } from '@nestjs/common';
 import {FileInterceptor} from '@nestjs/platform-express';
 import {isBase64, isUUID} from 'class-validator';
-import {BrandEntity} from './entities/brand.entity';
 import {BrandService} from './brand.service';
 import {CreateBrandDTO, UpdateBrandDTO} from './dto';
+import {BrandEntity} from './entities/brand.entity';
 
 @UseGuards(AuthGuard)
 @Controller('brand')
@@ -33,7 +33,7 @@ export class BrandController {
       faker.fakerVI.seed(124);
       for (let i = 0; i < 8; i++) {
         const brand = new BrandEntity();
-        brand.name = faker.fakerVI.commerce.department() + i;
+        brand.name = faker.fakerVI.commerce.department();
         brand.description = faker.fakerVI.lorem.paragraph();
         brand.address = faker.fakerVI.location.streetAddress();
         brand.phoneNumber = faker.fakerVI.phone.number();
@@ -50,28 +50,13 @@ export class BrandController {
   }
 
   @Get()
-  async findAll(@Query() query: IQueryOptions): Promise<any> {
+  async findAll(@Query() query: QueryOptions): Promise<any> {
     const brands = await this.brandService.findAll(query);
 
     return HandlerFilter(brands, {
       message: 'Get brands successfully',
       data: brands.data,
       meta: brands.meta,
-    });
-  }
-
-  @Get(':brandId')
-  async findOne(@Param('brandId') brandId: string): Promise<any> {
-    if (isUUID(brandId) === false) {
-      return {
-        message: 'uuid is not valid',
-      };
-    }
-    const brand = await this.brandService.findOne(brandId);
-
-    return HandlerFilter(brand, {
-      message: 'Get brand successfully',
-      data: brand,
     });
   }
 
@@ -88,10 +73,25 @@ export class BrandController {
       };
     }
 
-    return {
+    return HandlerFilter(brand, {
       message: 'Create brand successfully',
       data: brand,
-    };
+    });
+  }
+
+  @Get(':brandId')
+  async readOne(@Param('brandId') brandId: string): Promise<any> {
+    if (isUUID(brandId) === false) {
+      return {
+        message: 'uuid is not valid',
+      };
+    }
+    const brand = await this.brandService.readOne(brandId);
+
+    return HandlerFilter(brand, {
+      message: 'Get brand successfully',
+      data: brand,
+    });
   }
 
   @Roles([RoleEnum.ADMIN])
@@ -138,17 +138,33 @@ export class BrandController {
 
   @Roles([RoleEnum.ADMIN])
   @UseGuards(RolesGuard)
-  @Delete()
-  async delete(@Body() brandId: {brandId: string}): Promise<any> {
-    if (isUUID(brandId.brandId) === false) {
+  @Delete(':brandId')
+  async delete(@Param('brandId') brandId: string): Promise<any> {
+    if (isUUID(brandId) === false) {
       return {
         message: 'uuid is not valid',
       };
     }
-    const message = await this.brandService.delete(brandId.brandId);
+    const message = await this.brandService.delete(brandId);
 
     return HandlerFilter(message, {
       message: message,
+    });
+  }
+
+  @Roles([RoleEnum.ADMIN])
+  @UseGuards(RolesGuard)
+  @Delete(':brandId/avatar')
+  async deleteAvatar(@Param('brandId') brandId: string): Promise<any> {
+    if (isUUID(brandId) === false) {
+      return {
+        message: 'uuid is not valid',
+      };
+    }
+    const brand = await this.brandService.deleteImage(brandId);
+
+    return HandlerFilter(brand, {
+      message: brand,
     });
   }
 }

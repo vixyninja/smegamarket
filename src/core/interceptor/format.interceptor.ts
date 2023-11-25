@@ -18,7 +18,7 @@ export class FormatResponseInterceptor<T> implements NestInterceptor<T, Response
         if (res?.meta)
           return {
             statusCode: HttpStatus.OK,
-            message: 'Response successfully',
+            message: res?.message || 'Response successfully',
             meta: res.meta,
             data: res.data || null,
           };

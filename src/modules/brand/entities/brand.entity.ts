@@ -1,6 +1,6 @@
 import {BaseEntity} from '@/core';
-import {Column, Entity, JoinColumn, OneToOne} from 'typeorm';
-import {FileEntity} from '../../file';
+import {FileEntity} from '@/modules/file';
+import {Column, Entity, JoinColumn, ManyToOne} from 'typeorm';
 
 @Entity({
   name: 'brand',
@@ -32,6 +32,6 @@ export class BrandEntity extends BaseEntity {
     foreignKeyConstraintName: 'FK_BRAND_AVATAR',
     referencedColumnName: 'uuid',
   })
-  @OneToOne(() => FileEntity, (file) => file.uuid, {cascade: true})
+  @ManyToOne(() => FileEntity, (file) => file.uuid, {cascade: true, nullable: true})
   avatar: FileEntity;
 }
