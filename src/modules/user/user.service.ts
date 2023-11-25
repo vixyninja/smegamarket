@@ -6,7 +6,7 @@ import {Repository} from 'typeorm';
 import {FileService} from '../file';
 import {CreateUserDTO, UpdateUserDTO} from './dto';
 import {StatusUser} from './enum';
-import {UserEntity} from './user.entity';
+import {UserEntity} from './entities';
 
 interface UserServiceInterface {
   createUser(arg: CreateUserDTO): Promise<any>;
