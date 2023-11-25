@@ -1,9 +1,21 @@
 import {AuthGuard, HandlerFilter, HttpInternalServerError, RoleEnum, Roles, RolesGuard} from '@/core';
 import * as faker from '@faker-js/faker';
-import {Body, Controller, Delete, Get, Param, Post, Put, UseGuards} from '@nestjs/common';
-import {isUUID} from 'class-validator';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import {isBase64, isUUID} from 'class-validator';
 import {CategoryService} from './category.service';
 import {CreateCategoryDTO, UpdateCategoryDTO} from './dto';
+import {FileInterceptor} from '@nestjs/platform-express';
 
 @UseGuards(AuthGuard)
 @Controller('category')
@@ -99,7 +111,6 @@ export class CategoryController {
     @Param('categoryId') categoryId: string,
     @Body() updateCategoryDTO: UpdateCategoryDTO,
   ): Promise<any> {
-    console.log('categoryId', categoryId);
     if (isUUID(categoryId) === false) {
       return {
         message: 'Category id is invalid',
@@ -107,6 +118,35 @@ export class CategoryController {
       };
     }
     const category = await this.categoryService.update(categoryId, updateCategoryDTO);
+    return HandlerFilter(category, {
+      message: 'Update category successfully',
+      data: category,
+    });
+  }
+
+  @Roles([RoleEnum.ADMIN])
+  @UseGuards(RolesGuard)
+  @Put(':categoryId/icon')
+  @UseInterceptors(FileInterceptor('file'))
+  async updateIconCategory(
+    @Param('categoryId') categoryId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<any> {
+    if (isUUID(categoryId) === false) {
+      return {
+        message: 'Category id is invalid',
+        data: null,
+      };
+    }
+
+    if (!isBase64(file.buffer.toString('base64'))) {
+      return {
+        message: 'Image is not valid',
+      };
+    }
+
+    const category = await this.categoryService.updateIcon(categoryId, file);
+
     return HandlerFilter(category, {
       message: 'Update category successfully',
       data: category,
@@ -125,7 +165,7 @@ export class CategoryController {
     }
     const category = await this.categoryService.delete(categoryId);
     return HandlerFilter(category, {
-      message: 'Delete category successfully',
+      message: category,
     });
   }
 }

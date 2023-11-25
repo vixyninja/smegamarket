@@ -8,6 +8,15 @@ export const HandlerFilter = (left: any, right: any) => {
     };
   }
 
+  if (right.meta) {
+    return {
+      message: right.message,
+      status: right.status,
+      data: right.data,
+      meta: right.meta,
+    };
+  }
+
   return {
     message: right.message,
     status: right.status,

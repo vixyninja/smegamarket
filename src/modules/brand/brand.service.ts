@@ -10,9 +10,9 @@ import {BrandEntity} from './entities';
 interface BrandServiceInterface {
   findAll(query: IQueryOptions): Promise<any>;
   findOne(brandId: string): Promise<any>;
-  create(createBrandDTO: CreateBrandDTO, file: Express.Multer.File): Promise<any>;
-  update(brandId: string, updateBrandDTO: UpdateBrandDTO): Promise<any>;
-  updateImage(brandId: string, image: Express.Multer.File): Promise<any>;
+  create(arg: CreateBrandDTO, file: Express.Multer.File): Promise<any>;
+  update(brandId: string, arg: UpdateBrandDTO): Promise<any>;
+  updateImage(brandId: string, file: Express.Multer.File): Promise<any>;
   delete(brandId: string): Promise<any>;
 }
 
@@ -33,20 +33,17 @@ export class BrandService implements BrandServiceInterface {
       _sort = _sort ? _sort : 'createdAt';
       _order = _order ? _order : 'DESC';
 
-      const brands = await this.brandRepository
+      const [brands, count] = await this.brandRepository
         .createQueryBuilder('brand')
-        .leftJoinAndSelect('brand.avatar', 'avatar')
-        .select(['brand', 'avatar'])
+        .loadAllRelationIds()
         .skip(_limit * (_page - 1))
         .take(_limit)
         .orderBy(`brand.${_sort}`, _order)
-        .getMany();
-
-      const total = await this.brandRepository.count();
+        .getManyAndCount();
 
       return {
         data: brands,
-        meta: new Meta(_page, _limit, brands.length, Math.ceil(total / _limit), query),
+        meta: new Meta(_page, _limit, brands.length, Math.ceil(count / _limit), query),
       };
     } catch (e) {
       throw new HttpInternalServerError(e.message);
@@ -67,7 +64,7 @@ export class BrandService implements BrandServiceInterface {
     }
   }
 
-  async create(arg: CreateBrandDTO, avatar: Express.Multer.File): Promise<any> {
+  async create(arg: CreateBrandDTO, file: Express.Multer.File): Promise<any> {
     try {
       const {address, description, email, name, phoneNumber, website} = arg;
 
@@ -77,7 +74,7 @@ export class BrandService implements BrandServiceInterface {
         return new HttpBadRequest('Brand already exist');
       }
 
-      const avatarUpload = await this.fileService.uploadFile(avatar);
+      const avatarUpload = await this.fileService.uploadFile(file);
 
       if (!avatarUpload) {
         return new HttpBadRequest('Error uploading image');
@@ -102,7 +99,7 @@ export class BrandService implements BrandServiceInterface {
         return new HttpBadRequest('Error creating brand');
       }
 
-      const result = await this.brandRepository.createQueryBuilder('brand').where({uuid: brand.raw.insertId}).getOne();
+      const result = await this.findOne(brand.raw.insertId);
 
       if (!result) {
         return new HttpBadRequest('Error creating brand');
@@ -154,7 +151,7 @@ export class BrandService implements BrandServiceInterface {
         return new HttpBadRequest('Error updating brand');
       }
 
-      const result = await this.brandRepository.createQueryBuilder('brand').where({uuid: brandId}).getOne();
+      const result = await this.findOne(brandId);
 
       if (!result) {
         return new HttpBadRequest('Error updating brand');
@@ -191,7 +188,7 @@ export class BrandService implements BrandServiceInterface {
         return new HttpBadRequest('Error updating brand');
       }
 
-      const result = await this.brandRepository.createQueryBuilder('brand').where({uuid: brandId}).getOne();
+      const result = await this.findOne(brandId);
 
       if (!result) {
         return new HttpBadRequest('Error updating brand');

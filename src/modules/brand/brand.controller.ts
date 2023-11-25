@@ -1,4 +1,4 @@
-import {AuthGuard, HttpInternalServerError, RoleEnum, Roles, RolesGuard} from '@/core';
+import {AuthGuard, HandlerFilter, HttpInternalServerError, RoleEnum, Roles, RolesGuard} from '@/core';
 import {IQueryOptions} from '@/core/interface';
 import * as faker from '@faker-js/faker';
 import {
@@ -15,7 +15,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import {FileInterceptor} from '@nestjs/platform-express';
-import {isUUID} from 'class-validator';
+import {isBase64, isUUID} from 'class-validator';
 import {BrandEntity} from './entities/brand.entity';
 import {BrandService} from './brand.service';
 import {CreateBrandDTO, UpdateBrandDTO} from './dto';
@@ -52,11 +52,12 @@ export class BrandController {
   @Get()
   async findAll(@Query() query: IQueryOptions): Promise<any> {
     const brands = await this.brandService.findAll(query);
-    return {
+
+    return HandlerFilter(brands, {
       message: 'Get brands successfully',
       data: brands.data,
       meta: brands.meta,
-    };
+    });
   }
 
   @Get(':brandId')
@@ -68,10 +69,10 @@ export class BrandController {
     }
     const brand = await this.brandService.findOne(brandId);
 
-    return {
+    return HandlerFilter(brand, {
       message: 'Get brand successfully',
       data: brand,
-    };
+    });
   }
 
   @Roles([RoleEnum.ADMIN])
@@ -80,6 +81,13 @@ export class BrandController {
   @Post()
   async create(@Body() createBrandDTO: CreateBrandDTO, @UploadedFile() avatar: Express.Multer.File): Promise<any> {
     const brand = await this.brandService.create(createBrandDTO, avatar);
+
+    if (!isBase64(avatar.buffer.toString('base64'))) {
+      return {
+        message: 'Image is not valid',
+      };
+    }
+
     return {
       message: 'Create brand successfully',
       data: brand,
@@ -96,10 +104,11 @@ export class BrandController {
       };
     }
     const brand = await this.brandService.update(brandId, updateBrandDTO);
-    return {
+
+    return HandlerFilter(brand, {
       message: 'Update brand successfully',
       data: brand,
-    };
+    });
   }
 
   @Roles([RoleEnum.ADMIN])
@@ -112,11 +121,19 @@ export class BrandController {
         message: 'uuid is not valid',
       };
     }
+
+    if (!isBase64(Buffer.from(file.buffer).toString('base64'))) {
+      return {
+        message: 'Image is not valid',
+      };
+    }
+
     const brand = await this.brandService.updateImage(brandId, file);
-    return {
-      message: 'Update brand logo successfully',
+
+    return HandlerFilter(brand, {
+      message: 'Update brand successfully',
       data: brand,
-    };
+    });
   }
 
   @Roles([RoleEnum.ADMIN])
@@ -129,8 +146,9 @@ export class BrandController {
       };
     }
     const message = await this.brandService.delete(brandId.brandId);
-    return {
+
+    return HandlerFilter(message, {
       message: message,
-    };
+    });
   }
 }
