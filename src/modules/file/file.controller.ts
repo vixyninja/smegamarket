@@ -27,7 +27,7 @@ export class FileController {
         data: null,
       };
     }
-    const result = await this.fileService.findFile(fileId);
+    const result = await this.fileService.readOne(fileId);
     if (result) {
       return {
         message: 'Get file successfully',

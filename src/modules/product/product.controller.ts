@@ -1,5 +1,5 @@
 import {AuthGuard, RoleEnum, Roles, RolesGuard} from '@/core';
-import {IQueryOptions} from '@/core/interface';
+import {QueryOptions} from '@/core/interface';
 import {
   Body,
   Controller,
@@ -12,11 +12,11 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import {CreateProductDTO} from './dto';
-import {ProductService} from './product.service';
-import {UpdateProductDTO} from './dto/updateProduct.dto';
 import {FilesInterceptor} from '@nestjs/platform-express';
+import {CreateProductDTO} from './dto';
+import {UpdateProductDTO} from './dto/updateProduct.dto';
 import {ProductEntity} from './entities';
+import {ProductService} from './product.service';
 
 @UseGuards(AuthGuard)
 @Controller('product')
@@ -24,7 +24,7 @@ export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Get()
-  async readAll(@Query() query: IQueryOptions) {
+  async readAll(@Query() query: QueryOptions) {
     const products: any = await this.productService.readAll(query);
     return {
       message: 'Get products successfully',
