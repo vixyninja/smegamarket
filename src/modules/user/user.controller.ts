@@ -12,7 +12,7 @@ import * as faker from '@faker-js/faker';
 import {Body, Controller, Get, Patch, Post, Put, UploadedFile, UseGuards, UseInterceptors} from '@nestjs/common';
 import {FileInterceptor} from '@nestjs/platform-express';
 import {CreateUserDTO, UpdateUserDTO} from './dto';
-import {UserEntity} from './user.entity';
+import {UserEntity} from './entities';
 import {UserService} from './user.service';
 import {isUUID} from 'class-validator';
 

@@ -1,8 +1,8 @@
 import {BaseEntity, RoleEnum} from '@/core';
 import * as bcryptjs from 'bcryptjs';
 import {BeforeInsert, Column, Entity, JoinColumn, OneToOne} from 'typeorm';
-import {FileEntity} from '../file';
-import {StatusUser} from './enum';
+import {FileEntity} from '../../file';
+import {StatusUser} from '../enum';
 
 @Entity({
   name: 'user',
