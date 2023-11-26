@@ -18,7 +18,7 @@ import {FileInterceptor} from '@nestjs/platform-express';
 import {isBase64, isUUID} from 'class-validator';
 import {BrandService} from './brand.service';
 import {CreateBrandDTO, UpdateBrandDTO} from './dto';
-import {BrandEntity} from './entities/brand.entity';
+import {BrandEntity} from './entities';
 
 @UseGuards(AuthGuard)
 @Controller('brand')
@@ -36,9 +36,10 @@ export class BrandController {
         brand.name = faker.fakerVI.commerce.department();
         brand.description = faker.fakerVI.lorem.paragraph();
         brand.address = faker.fakerVI.location.streetAddress();
-        brand.phoneNumber = faker.fakerVI.phone.number();
+        brand.phone = faker.fakerVI.phone.number();
         brand.email = faker.fakerVI.internet.email();
         brand.website = faker.fakerVI.internet.url();
+
         await this.brandService.create(brand, null);
       }
       return {
@@ -96,39 +97,26 @@ export class BrandController {
 
   @Roles([RoleEnum.ADMIN])
   @UseGuards(RolesGuard)
-  @Put(':brandId')
-  async update(@Body() updateBrandDTO: UpdateBrandDTO, @Param('brandId') brandId: string): Promise<any> {
-    if (isUUID(brandId) === false) {
-      return {
-        message: 'uuid is not valid',
-      };
-    }
-    const brand = await this.brandService.update(brandId, updateBrandDTO);
-
-    return HandlerFilter(brand, {
-      message: 'Update brand successfully',
-      data: brand,
-    });
-  }
-
-  @Roles([RoleEnum.ADMIN])
-  @UseGuards(RolesGuard)
-  @Put(':brandId/logo')
   @UseInterceptors(FileInterceptor('file'))
-  async updateImageId(@Param('brandId') brandId: string, @UploadedFile() file: Express.Multer.File): Promise<any> {
+  @Put(':brandId')
+  async update(
+    @Body() updateBrandDTO: UpdateBrandDTO,
+    @Param('brandId') brandId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<any> {
     if (isUUID(brandId) === false) {
       return {
         message: 'uuid is not valid',
       };
     }
 
-    if (!isBase64(Buffer.from(file.buffer).toString('base64'))) {
+    if (file && !isBase64(Buffer.from(file.buffer).toString('base64'))) {
       return {
         message: 'Image is not valid',
       };
     }
 
-    const brand = await this.brandService.updateImage(brandId, file);
+    const brand = await this.brandService.update(brandId, updateBrandDTO, file);
 
     return HandlerFilter(brand, {
       message: 'Update brand successfully',

@@ -1,5 +1,6 @@
-import {IsArray, IsEnum, IsNotEmpty} from 'class-validator';
+import {IsArray, IsEnum, IsNotEmpty, IsOptional} from 'class-validator';
 import {ProductEnum, SaleEnum, SizeEnum, StatusEnum} from '../enum';
+import {Transform} from 'class-transformer';
 
 export class CreateProductDTO {
   @IsNotEmpty()
@@ -8,30 +9,36 @@ export class CreateProductDTO {
   @IsNotEmpty()
   readonly price: number;
 
-  @IsEnum(ProductEnum)
-  readonly type: string;
-
-  @IsEnum(StatusEnum)
-  readonly status: string;
-
-  @IsEnum(SizeEnum)
-  readonly size: string;
-
-  readonly detail: string;
-
-  readonly benefit: string;
-
-  readonly caution: string;
-
-  @IsEnum(SaleEnum)
-  readonly sale: string;
-
+  @IsOptional()
   readonly link: string;
+
+  @IsOptional()
+  readonly description: string;
 
   @IsNotEmpty()
   readonly brandId: string;
 
   @IsNotEmpty()
-  @IsArray()
-  readonly category: string[];
+  readonly category: string | string[];
 }
+
+// @IsOptional()
+// readonly type: ProductEnum;
+
+// @IsOptional()
+// readonly status: StatusEnum;
+
+// @IsOptional()
+// readonly size: SizeEnum;
+
+// @IsOptional()
+// readonly detail: string | string[];
+
+// @IsOptional()
+// readonly benefit: string | string[];
+
+// @IsOptional()
+// readonly caution: string | string[];
+
+// @IsOptional()
+// readonly sale: SaleEnum;

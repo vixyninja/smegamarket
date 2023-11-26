@@ -25,8 +25,6 @@ import {
   VerifyPhoneDTO,
 } from './dto';
 
-const secret = 'verify-otp';
-
 interface AuthServiceInterface {
   signInEmailAndPassword(arg: SignInEmailDTO): Promise<any>;
   signUpEmailAndPassword(arg: SignUpEmailDTO): Promise<any>;
@@ -62,8 +60,6 @@ export class AuthService implements AuthServiceInterface {
       const userEntity = new UserEntity(user);
 
       const isMatchPassword = await userEntity.validatePassword(password);
-
-      console.log(isMatchPassword);
 
       if (!isMatchPassword) return new HttpUnauthorized('Password not match');
 

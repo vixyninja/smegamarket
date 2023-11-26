@@ -12,10 +12,10 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import {FileInterceptor} from '@nestjs/platform-express';
 import {isBase64, isUUID} from 'class-validator';
 import {CategoryService} from './category.service';
 import {CreateCategoryDTO, UpdateCategoryDTO} from './dto';
-import {FileInterceptor} from '@nestjs/platform-express';
 
 @UseGuards(AuthGuard)
 @Controller('category')
@@ -52,9 +52,7 @@ export class CategoryController {
           name: cateRnd[i].toString(),
           description: faker.fakerVI.lorem.paragraph(),
         };
-
         const response = await this.categoryService.create(category);
-
         result.push(response);
       }
 
@@ -106,30 +104,11 @@ export class CategoryController {
 
   @Roles([RoleEnum.ADMIN])
   @UseGuards(RolesGuard)
+  @UseInterceptors(FileInterceptor('file'))
   @Put(':categoryId')
   async updateCategory(
     @Param('categoryId') categoryId: string,
     @Body() updateCategoryDTO: UpdateCategoryDTO,
-  ): Promise<any> {
-    if (isUUID(categoryId) === false) {
-      return {
-        message: 'Category id is invalid',
-        data: null,
-      };
-    }
-    const category = await this.categoryService.update(categoryId, updateCategoryDTO);
-    return HandlerFilter(category, {
-      message: 'Update category successfully',
-      data: category,
-    });
-  }
-
-  @Roles([RoleEnum.ADMIN])
-  @UseGuards(RolesGuard)
-  @Put(':categoryId/icon')
-  @UseInterceptors(FileInterceptor('file'))
-  async updateIconCategory(
-    @Param('categoryId') categoryId: string,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<any> {
     if (isUUID(categoryId) === false) {
@@ -139,14 +118,13 @@ export class CategoryController {
       };
     }
 
-    if (!isBase64(file.buffer.toString('base64'))) {
+    if (file && !isBase64(Buffer.from(file.buffer).toString('base64'))) {
       return {
         message: 'Image is not valid',
       };
     }
 
-    const category = await this.categoryService.updateIcon(categoryId, file);
-
+    const category = await this.categoryService.update(categoryId, updateCategoryDTO, file);
     return HandlerFilter(category, {
       message: 'Update category successfully',
       data: category,

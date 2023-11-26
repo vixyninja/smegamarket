@@ -46,12 +46,12 @@ export class QueryOptions {
     }
 
     if (_order.trim() === '' || _order.trim() === undefined || _order.trim() === null) {
-      order = 'ASC';
+      order = 'DESC';
     } else {
       if (_order.toString().trim().toUpperCase() === 'DESC') {
         order = _order;
       } else {
-        order = 'ASC';
+        order = 'DESC';
       }
     }
 

@@ -1,13 +1,12 @@
 import {RedisxService} from '@/configs';
+import {CACHE_KEY, HttpBadRequest, HttpInternalServerError, HttpNotFound} from '@/core';
 import {Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
+import {ProductEntity, ProductService, SizeEnum} from '../product';
 import {UserService} from '../user';
 import {CreateCartItemDTO, UpdateCartDTO, UpdateCartItemDTO} from './dto';
 import {CartEntity, CartItemEntity} from './entities';
-import {CACHE_KEY, HttpBadRequest, HttpForbidden, HttpInternalServerError, HttpNotFound} from '@/core';
-import {ProductEntity, ProductService, SizeEnum} from '../product';
-import {isUUID} from 'class-validator';
 
 interface CartServiceInterface {
   getCart(userId: string): Promise<any>;

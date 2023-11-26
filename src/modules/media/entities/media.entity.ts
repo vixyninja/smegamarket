@@ -2,12 +2,12 @@ import {BaseEntity} from '@/core';
 import {Column, Entity} from 'typeorm';
 
 @Entity({
-  name: 'file',
+  name: 'media',
   orderBy: {
     createdAt: 'DESC',
   },
 })
-export class FileEntity extends BaseEntity {
+export class MediaEntity extends BaseEntity {
   @Column({type: 'varchar', length: 255})
   publicId: string;
 
@@ -61,4 +61,9 @@ export class FileEntity extends BaseEntity {
 
   @Column({type: 'varchar', length: 255})
   folder: string;
+
+  constructor(partial: Partial<MediaEntity>) {
+    super();
+    Object.assign(this, partial);
+  }
 }

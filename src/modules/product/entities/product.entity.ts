@@ -1,9 +1,8 @@
 import {BaseEntity} from '@/core';
-import {Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne} from 'typeorm';
-import {ProductEnum, SaleEnum, SizeEnum, StatusEnum} from '../enum';
 import {BrandEntity} from '@/modules/brand';
 import {CategoryEntity} from '@/modules/category';
-import {FileEntity} from '@/modules/file';
+import {MediaEntity} from '@/modules/media';
+import {Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne} from 'typeorm';
 
 @Entity({
   name: 'product',
@@ -15,29 +14,11 @@ export class ProductEntity extends BaseEntity {
   @Column({type: 'varchar', length: 225, nullable: false, unique: true})
   name: string;
 
-  @Column({type: 'numeric', nullable: false})
-  price: number;
+  @Column({type: 'text', nullable: true})
+  description: string;
 
-  @Column({type: 'enum', enum: ProductEnum, default: ProductEnum.Etc})
-  type: ProductEnum;
-
-  @Column({type: 'enum', enum: StatusEnum, default: StatusEnum.Active})
-  status: StatusEnum;
-
-  @Column({type: 'enum', enum: SizeEnum, default: SizeEnum.None})
-  size: SizeEnum;
-
-  @Column({type: 'varchar', nullable: true})
-  detail: string;
-
-  @Column({type: 'varchar', length: 225, nullable: true})
-  benefit: string;
-
-  @Column({type: 'varchar', length: 225, nullable: true})
-  caution: string;
-
-  @Column({type: 'enum', enum: SaleEnum, default: SaleEnum.None})
-  sale: SaleEnum;
+  @Column({type: 'varchar', array: true, nullable: true})
+  detail: string[];
 
   @Column({type: 'varchar', length: 225, nullable: true})
   link: string;
@@ -50,9 +31,7 @@ export class ProductEntity extends BaseEntity {
   @ManyToOne(() => BrandEntity, (brand) => brand.uuid, {cascade: true})
   brand: BrandEntity;
 
-  @ManyToMany(() => CategoryEntity, (category) => category.uuid, {
-    cascade: true,
-  })
+  @ManyToMany(() => CategoryEntity, (category) => category.uuid, {cascade: true})
   @JoinTable({
     name: 'product_category',
     joinColumn: {
@@ -66,21 +45,21 @@ export class ProductEntity extends BaseEntity {
       foreignKeyConstraintName: 'FK_CATEGORY_PRODUCT',
     },
   })
-  category: CategoryEntity[];
+  categories: CategoryEntity[];
 
-  @ManyToMany(() => FileEntity, (file) => file.uuid, {cascade: true})
+  @ManyToMany(() => MediaEntity, (media) => media.uuid, {cascade: true})
   @JoinTable({
-    name: 'product_image',
+    name: 'product_media',
     joinColumn: {
       name: 'productId',
       referencedColumnName: 'uuid',
-      foreignKeyConstraintName: 'FK_PRODUCT_IMAGE',
+      foreignKeyConstraintName: 'FK_PRODUCT_MEDIA',
     },
     inverseJoinColumn: {
-      name: 'imageId',
+      name: 'mediaId',
       referencedColumnName: 'uuid',
-      foreignKeyConstraintName: 'FK_IMAGE_PRODUCT',
+      foreignKeyConstraintName: 'FK_MEDIA_PRODUCT',
     },
   })
-  images: FileEntity[];
+  media: MediaEntity[];
 }

@@ -1,7 +1,7 @@
 import {BaseEntity, RoleEnum} from '@/core';
+import {MediaEntity} from '@/modules/media';
 import * as bcryptjs from 'bcryptjs';
-import {BeforeInsert, Column, Entity, JoinColumn, OneToOne} from 'typeorm';
-import {FileEntity} from '../../file';
+import {BeforeInsert, Column, Entity} from 'typeorm';
 import {StatusUser} from '../enum';
 
 @Entity({
@@ -20,13 +20,13 @@ export class UserEntity extends BaseEntity {
   @Column({type: 'varchar', length: 225, nullable: false, unique: true})
   email: string;
 
-  @Column({type: 'varchar', length: 225, nullable: true, unique: true, default: null})
+  @Column({type: 'varchar', length: 20, nullable: true, unique: true})
   phone: string;
 
-  @Column({type: 'varchar', length: 225, nullable: false})
+  @Column({type: 'varchar', length: 225, nullable: false, select: false})
   hashPassword: string;
 
-  @Column({type: 'varchar', length: 225, nullable: false})
+  @Column({type: 'varchar', length: 225, nullable: false, select: false})
   salt: string;
 
   @Column({type: 'enum', enum: RoleEnum, default: RoleEnum.USER})
@@ -41,21 +41,11 @@ export class UserEntity extends BaseEntity {
   @Column({type: 'varchar', length: 225, default: null})
   deviceType: string;
 
-  @JoinColumn({
-    name: 'avatar',
-    referencedColumnName: 'uuid',
-    foreignKeyConstraintName: 'FK_USER_AVATAR',
-  })
-  @OneToOne(() => FileEntity, (file) => file.uuid, {cascade: true, nullable: true})
-  avatar: FileEntity;
+  @Column({name: 'avatar', nullable: true})
+  avatar: MediaEntity;
 
-  @JoinColumn({
-    name: 'cover',
-    referencedColumnName: 'uuid',
-    foreignKeyConstraintName: 'FK_USER_COVER',
-  })
-  @OneToOne(() => FileEntity, (file) => file.uuid, {cascade: true, nullable: true})
-  cover: FileEntity;
+  @Column({name: 'cover', nullable: true})
+  cover: MediaEntity;
 
   @BeforeInsert()
   async hashPasswordBeforeInsert() {

@@ -12,12 +12,12 @@ import {
 } from '@nestjs/common';
 import {FileInterceptor, FilesInterceptor} from '@nestjs/platform-express';
 import {isUUID} from 'class-validator';
-import {FileService} from './file.service';
+import {MediaService} from './media.service';
 
 @UseGuards(AuthGuard)
 @Controller('file')
 export class FileController {
-  constructor(private readonly fileService: FileService) {}
+  constructor(private readonly mediaService: MediaService) {}
 
   @Get(':fileId')
   async getFile(@Param('fileId') fileId: string): Promise<any> {
@@ -27,7 +27,7 @@ export class FileController {
         data: null,
       };
     }
-    const result = await this.fileService.readOne(fileId);
+    const result = await this.mediaService.readOne(fileId);
     if (result) {
       return {
         message: 'Get file successfully',
@@ -39,7 +39,7 @@ export class FileController {
   @Post()
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(@UploadedFile() file: Express.Multer.File): Promise<any> {
-    const result = await this.fileService.uploadFile(file);
+    const result = await this.mediaService.uploadFile(file);
     if (result) {
       return {
         message: 'Upload file successfully',
@@ -57,7 +57,7 @@ export class FileController {
       };
     }
 
-    const result = await this.fileService.deleteFile(fileId);
+    const result = await this.mediaService.deleteFile(fileId);
     if (result) {
       return {
         message: 'Delete file successfully',
@@ -69,7 +69,7 @@ export class FileController {
   @Post('upload-multiple')
   @UseInterceptors(FilesInterceptor('files'))
   async uploadFiles(@UploadedFiles() files: Express.Multer.File[]): Promise<any> {
-    const result = await this.fileService.uploadFiles(files);
+    const result = await this.mediaService.uploadFiles(files);
     if (result) {
       return {
         message: 'Upload files successfully',

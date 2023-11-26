@@ -2,17 +2,17 @@ import {HttpBadRequest, HttpInternalServerError, HttpNotFound} from '@/core';
 import {Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
+import {MediaEntity, MediaService} from '../media';
 import {CreateCategoryDTO, UpdateCategoryDTO} from './dto';
 import {CategoryEntity} from './entities';
-import {FileService} from '../file';
 
 interface CategoryServiceInterface {
   findAll(): Promise<any>;
   findOne(categoryId: string): Promise<any>;
+  findMany(categoryIds: string[]): Promise<any>;
   create(arg: CreateCategoryDTO): Promise<any>;
   readOne(categoryId: string): Promise<any>;
-  update(categoryId: string, arg: UpdateCategoryDTO): Promise<any>;
-  updateIcon(categoryId: string, file: Express.Multer.File): Promise<any>;
+  update(categoryId: string, arg: UpdateCategoryDTO, file: Express.Multer.File): Promise<any>;
   delete(categoryId: string): Promise<any>;
 }
 
@@ -21,7 +21,7 @@ export class CategoryService implements CategoryServiceInterface {
   constructor(
     @InjectRepository(CategoryEntity)
     private readonly categoryRepository: Repository<CategoryEntity>,
-    private readonly fileService: FileService,
+    private readonly mediaService: MediaService,
   ) {}
 
   async findAll(): Promise<any> {
@@ -43,6 +43,20 @@ export class CategoryService implements CategoryServiceInterface {
         .getOne();
 
       return category;
+    } catch (e) {
+      throw new HttpInternalServerError(e.message);
+    }
+  }
+
+  async findMany(categoryIds: string[]): Promise<any> {
+    try {
+      const categories = await this.categoryRepository
+        .createQueryBuilder('category')
+        .loadAllRelationIds()
+        .where('category.uuid IN (:...uuid)', {uuid: categoryIds})
+        .getMany();
+
+      return categories;
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
@@ -78,7 +92,7 @@ export class CategoryService implements CategoryServiceInterface {
         return new HttpBadRequest('Category name already exist');
       }
 
-      const defaultIcon = await this.fileService.findFile('7fa8a45a-bdfe-4674-a497-fbbf7e670639');
+      const defaultIcon = await this.mediaService.findFile('7fa8a45a-bdfe-4674-a497-fbbf7e670639');
 
       const createCategory = await this.categoryRepository
         .createQueryBuilder('category')
@@ -107,7 +121,7 @@ export class CategoryService implements CategoryServiceInterface {
     }
   }
 
-  async update(categoryId: string, arg: UpdateCategoryDTO): Promise<any> {
+  async update(categoryId: string, arg: UpdateCategoryDTO, file: Express.Multer.File): Promise<any> {
     try {
       const {description, name} = arg;
 
@@ -119,12 +133,31 @@ export class CategoryService implements CategoryServiceInterface {
         return new HttpNotFound('Category not found');
       }
 
+      var _description: string, _name: string;
+      var _file: MediaEntity;
+
+      if (file) {
+        const temp = await this.mediaService.uploadFile(file);
+
+        if (!temp) {
+          return new HttpBadRequest('Error uploading image');
+        }
+
+        _file = temp;
+      } else {
+        _file = isExist.icon;
+      }
+
+      _description = description ?? isExist.description;
+      _name = name ?? isExist.name;
+
       const updateCategory = await this.categoryRepository
         .createQueryBuilder('category')
         .update(CategoryEntity)
         .set({
-          name: name ?? isExist.name,
-          description: description ?? isExist.description,
+          name: _name,
+          description: _description,
+          icon: _file,
         })
         .where('uuid = :uuid', {uuid: categoryId})
         .execute();
@@ -152,7 +185,7 @@ export class CategoryService implements CategoryServiceInterface {
         return new HttpNotFound('Category not found');
       }
 
-      const icon = await this.fileService.uploadFile(file);
+      const icon = await this.mediaService.uploadFile(file);
 
       const updateIconCategory = await this.categoryRepository
         .createQueryBuilder('category')
