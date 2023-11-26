@@ -12,7 +12,7 @@ export class CreateBrandDTO {
 
   @IsNotEmpty()
   @IsPhoneNumber('VN')
-  readonly phoneNumber: string;
+  readonly phone: string;
 
   @IsNotEmpty()
   readonly website: string;

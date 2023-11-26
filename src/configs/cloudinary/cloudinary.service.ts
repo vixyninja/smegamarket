@@ -2,12 +2,16 @@ import {Injectable} from '@nestjs/common';
 import {UploadApiOptions, v2 as cloudinary} from 'cloudinary';
 import {HttpBadRequest} from 'src/core';
 import {CloudinaryResponse} from './typedef';
+import {Environment} from '../environments';
 
 const streamifier = require('streamifier');
 
 @Injectable()
 export class CloudinaryService {
-  async uploadFileImage(file: Express.Multer.File, folder: string = 'mega-storage'): Promise<CloudinaryResponse> {
+  async uploadFileImage(
+    file: Express.Multer.File,
+    folder: string = Environment.FOLDER_NAME,
+  ): Promise<CloudinaryResponse> {
     const options: UploadApiOptions = {
       folder: folder,
       timestamp: Math.floor(Date.now() / 1000),
@@ -38,13 +42,12 @@ export class CloudinaryService {
     });
   }
 
-  async uploadMultipleFileImage(files: Express.Multer.File[]): Promise<CloudinaryResponse[]> {
-    // let result: CloudinaryResponse[] = [];
-    // for await (const file of files) {
-    // result.push(await this.uploadFileImage(file));
-    // }
-    // return result;
-    return Promise.all(files.map(async (file) => await this.uploadFileImage(file)));
+  async uploadMultipleFileImage(files: Express.Multer.File[], folder?: string): Promise<CloudinaryResponse[]> {
+    let result: CloudinaryResponse[] = [];
+    for await (const file of files) {
+      result.push(await this.uploadFileImage(file, folder));
+    }
+    return result;
   }
 
   async deleteFolder(folder: string): Promise<CloudinaryResponse> {

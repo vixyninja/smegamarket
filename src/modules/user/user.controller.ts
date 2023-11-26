@@ -1,20 +1,10 @@
-import {
-  AuthGuard,
-  HandlerFilter,
-  HttpBadRequest,
-  HttpInternalServerError,
-  RoleEnum,
-  Roles,
-  RolesGuard,
-  UserDynamic,
-} from '@/core';
+import {AuthGuard, HandlerFilter, HttpBadRequest, RoleEnum, Roles, RolesGuard, UserDynamic} from '@/core';
 import * as faker from '@faker-js/faker';
 import {Body, Controller, Get, Patch, Post, Put, UploadedFile, UseGuards, UseInterceptors} from '@nestjs/common';
 import {FileInterceptor} from '@nestjs/platform-express';
-import {CreateUserDTO, UpdateUserDTO} from './dto';
-import {UserEntity} from './entities';
-import {UserService} from './user.service';
 import {isEmail, isPhoneNumber, isUUID} from 'class-validator';
+import {CreateUserDTO, UpdateUserDTO} from './dto';
+import {UserService} from './user.service';
 
 @UseGuards(AuthGuard)
 @Controller('user')

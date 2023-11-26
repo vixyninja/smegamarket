@@ -15,6 +15,15 @@ export class PostgresDBService implements TypeOrmOptionsFactory {
       entities: ['dist/**/*.entity{.ts,.js}'],
       synchronize: true,
       autoLoadEntities: true,
+      migrations: ['src/migrations/*{.ts,.js}'],
+      cache: true,
+      connectTimeoutMS: 30000,
+      migrationsRun: true,
+      migrationsTableName: 'migrations',
+      migrationsTransactionMode: 'each',
+      uuidExtension: 'pgcrypto',
+      verboseRetryLog: true,
+      nativeDriver: true,
     };
   }
 }

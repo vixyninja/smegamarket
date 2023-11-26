@@ -1,4 +1,4 @@
-export * from './file';
+export * from './media';
 export * from './user';
 export * from './category';
 export * from './product';

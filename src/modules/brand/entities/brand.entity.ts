@@ -1,5 +1,5 @@
 import {BaseEntity} from '@/core';
-import {FileEntity} from '@/modules/file';
+import {MediaEntity} from '@/modules/media';
 import {Column, Entity, JoinColumn, ManyToOne} from 'typeorm';
 
 @Entity({
@@ -19,7 +19,7 @@ export class BrandEntity extends BaseEntity {
   address: string;
 
   @Column({type: 'varchar', length: 225, unique: true})
-  phoneNumber: string;
+  phone: string;
 
   @Column({type: 'varchar', length: 225, unique: true})
   website: string;
@@ -27,11 +27,6 @@ export class BrandEntity extends BaseEntity {
   @Column({type: 'varchar', length: 225, unique: true})
   email: string;
 
-  @JoinColumn({
-    name: 'avatar',
-    foreignKeyConstraintName: 'FK_BRAND_AVATAR',
-    referencedColumnName: 'uuid',
-  })
-  @ManyToOne(() => FileEntity, (file) => file.uuid, {cascade: true, nullable: true})
-  avatar: FileEntity;
+  @Column({name: 'avatar', nullable: true})
+  avatar: MediaEntity;
 }

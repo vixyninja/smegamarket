@@ -1,9 +1,9 @@
 import {HttpBadRequest, HttpForbidden, HttpInternalServerError} from '@/core';
-import {QueryOptions, Meta} from '@/core/interface';
+import {Meta, QueryOptions} from '@/core/interface';
 import {Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
-import {FileService} from '../file';
+import {MediaEntity, MediaService} from '../media';
 import {CreateBrandDTO, UpdateBrandDTO} from './dto';
 import {BrandEntity} from './entities';
 
@@ -12,8 +12,7 @@ interface BrandServiceInterface {
   findOne(brandId: string): Promise<any>;
   create(arg: CreateBrandDTO, file: Express.Multer.File): Promise<any>;
   readOne(brandId: string): Promise<any>;
-  update(brandId: string, arg: UpdateBrandDTO): Promise<any>;
-  updateImage(brandId: string, file: Express.Multer.File): Promise<any>;
+  update(brandId: string, arg: UpdateBrandDTO, file: Express.Multer.File): Promise<any>;
   delete(brandId: string): Promise<any>;
   deleteImage(brandId: string): Promise<any>;
 }
@@ -23,14 +22,12 @@ export class BrandService implements BrandServiceInterface {
   constructor(
     @InjectRepository(BrandEntity)
     private readonly brandRepository: Repository<BrandEntity>,
-    private readonly fileService: FileService,
+    private readonly mediaService: MediaService,
   ) {}
 
   async findAll(query: QueryOptions): Promise<any> {
     try {
       let {_page, _limit, _sort, _order} = QueryOptions.initialize(query);
-
-      console.log(_page, _limit, _sort, _order);
 
       const [brands, count] = await this.brandRepository
         .createQueryBuilder('brand')
@@ -83,13 +80,13 @@ export class BrandService implements BrandServiceInterface {
 
   async create(arg: CreateBrandDTO, file: Express.Multer.File): Promise<any> {
     try {
-      const {address, description, email, name, phoneNumber, website} = arg;
+      const {address, description, email, name, phone, website} = arg;
 
       const brandExist = await this.brandRepository
         .createQueryBuilder('brand')
         .where({name: name})
         .orWhere({email: email})
-        .orWhere({phoneNumber: phoneNumber})
+        .orWhere({phoneNumber: phone})
         .orWhere({website: website})
         .getOne();
 
@@ -97,7 +94,7 @@ export class BrandService implements BrandServiceInterface {
         return new HttpBadRequest('Brand already exist');
       }
 
-      const avatarUpload = await this.fileService.uploadFile(file);
+      const avatarUpload = await this.mediaService.uploadFile(file);
 
       if (!avatarUpload) {
         return new HttpBadRequest('Error uploading image');
@@ -112,7 +109,7 @@ export class BrandService implements BrandServiceInterface {
           description: description,
           email: email,
           name: name,
-          phoneNumber: phoneNumber,
+          phone: phone,
           website: website,
           avatar: avatarUpload,
         })
@@ -134,9 +131,9 @@ export class BrandService implements BrandServiceInterface {
     }
   }
 
-  async update(brandId: string, arg: UpdateBrandDTO): Promise<any> {
+  async update(brandId: string, arg: UpdateBrandDTO, file: Express.Multer.File): Promise<any> {
     try {
-      const {address, description, email, name, phoneNumber, website} = arg;
+      var {address, description, email, name, phone, website} = arg;
 
       const brand = await this.findOne(brandId);
 
@@ -148,7 +145,7 @@ export class BrandService implements BrandServiceInterface {
         .createQueryBuilder('brand')
         .where({name: name})
         .orWhere({email: email})
-        .orWhere({phoneNumber: phoneNumber})
+        .orWhere({phoneNumber: phone})
         .orWhere({website: website})
         .getOne();
 
@@ -156,54 +153,40 @@ export class BrandService implements BrandServiceInterface {
         return new HttpBadRequest("Brand's value already exist");
       }
 
+      var _address: string, _description: string, _email: string, _name: string, _phoneNumber: string, _website: string;
+      var _file: MediaEntity;
+
+      _address = address ?? brand.address;
+      _description = description ?? brand.description;
+      _email = email ?? brand.email;
+      _name = name ?? brand.name;
+      _phoneNumber = phone ?? brand.phoneNumber;
+      _website = website ?? brand.website;
+
+      if (file) {
+        const avatarUpload = await this.mediaService.uploadFile(file);
+
+        if (!avatarUpload) {
+          return new HttpBadRequest('Error uploading image');
+        }
+
+        _file = avatarUpload;
+      } else {
+        _file = brand.avatar;
+      }
+
       const updatedBrand = await this.brandRepository
         .createQueryBuilder('brand')
         .update()
         .set({
-          address: address ?? brand.address,
-          description: description ?? brand.description,
-          email: email ?? brand.email,
-          name: name ?? brand.name,
-          phoneNumber: phoneNumber ?? brand.phoneNumber,
-          website: website ?? brand.website,
+          address: _address,
+          description: _description,
+          email: _email,
+          name: _name,
+          phone: _phoneNumber,
+          website: _website,
+          avatar: _file,
         })
-        .where({uuid: brandId})
-        .execute();
-
-      if (!updatedBrand) {
-        return new HttpBadRequest('Error updating brand');
-      }
-
-      const result = await this.findOne(brandId);
-
-      if (!result) {
-        return new HttpBadRequest('Error updating brand');
-      }
-
-      return result;
-    } catch (e) {
-      throw new HttpInternalServerError(e.message);
-    }
-  }
-
-  async updateImage(brandId: string, image: Express.Multer.File): Promise<any> {
-    try {
-      const brand = await this.findOne(brandId);
-
-      if (!brand) {
-        return new HttpBadRequest('Brand not found');
-      }
-
-      const file = await this.fileService.uploadFile(image);
-
-      if (!file) {
-        return new HttpBadRequest('Error uploading image');
-      }
-
-      const updatedBrand = await this.brandRepository
-        .createQueryBuilder('brand')
-        .update()
-        .set({avatar: file})
         .where({uuid: brandId})
         .execute();
 
@@ -255,7 +238,7 @@ export class BrandService implements BrandServiceInterface {
         return new HttpBadRequest('Brand not found');
       }
 
-      const file = await this.fileService.findFile('26daf89b-4fac-4b0e-881f-518a6eceba10');
+      const file = await this.mediaService.findFile('26daf89b-4fac-4b0e-881f-518a6eceba10');
 
       if (!file) {
         return new HttpBadRequest('File not found');
