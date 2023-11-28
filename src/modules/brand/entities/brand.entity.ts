@@ -1,6 +1,6 @@
 import {BaseEntity} from '@/core';
 import {MediaEntity} from '@/modules/media';
-import {Column, Entity} from 'typeorm';
+import {Column, Entity, JoinColumn, OneToOne} from 'typeorm';
 
 @Entity({
   name: 'brand',
@@ -27,6 +27,7 @@ export class BrandEntity extends BaseEntity {
   @Column({type: 'varchar', length: 225, unique: true})
   email: string;
 
-  @Column({name: 'avatar', nullable: true})
+  @JoinColumn({name: 'avatar', foreignKeyConstraintName: 'FK_BRAND_AVATAR', referencedColumnName: 'uuid'})
+  @OneToOne(() => MediaEntity, {cascade: true, nullable: true})
   avatar: MediaEntity;
 }

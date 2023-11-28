@@ -1,7 +1,6 @@
 import {BaseEntity} from '@/core';
-import {Column, Entity, JoinColumn, ManyToOne} from 'typeorm';
+import {Column, Entity} from 'typeorm';
 import {ProductEnum, SaleEnum, SizeEnum, StatusEnum} from '../enum';
-import {ProductEntity} from './product.entity';
 
 @Entity({
   name: 'product_information',
@@ -30,12 +29,4 @@ export class ProductInformationEntity extends BaseEntity {
 
   @Column({type: 'text', nullable: true})
   description: string;
-
-  @JoinColumn({
-    name: 'productId',
-    foreignKeyConstraintName: 'FK_PRODUCT_INFORMATION_PRODUCT',
-    referencedColumnName: 'uuid',
-  })
-  @ManyToOne(() => ProductEntity, (product) => product.uuid, {cascade: true})
-  product: ProductEntity;
 }

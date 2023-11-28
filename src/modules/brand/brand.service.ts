@@ -46,8 +46,8 @@ export class BrandService implements BrandServiceInterface {
       const brand = await this.brandRepository
         .createQueryBuilder('brand')
         .loadAllRelationIds()
-        .where({name: name})
-        .getOne();
+        .where('LOWER(brand.name) LIKE LOWER(:name)', {name: '%' + name + '%'})
+        .getMany();
 
       return brand;
     } catch (e) {
@@ -59,11 +59,14 @@ export class BrandService implements BrandServiceInterface {
     try {
       const {address, description, email, name, phone, website} = arg;
 
+      var _address: string, _description: string, _email: string, _name: string, _phone: string, _website: string;
+      var _file: MediaEntity;
+
       const brandExist = await this.brandRepository
         .createQueryBuilder('brand')
         .where({name: name})
         .orWhere({email: email})
-        .orWhere({phoneNumber: phone})
+        .orWhere({phone: phone})
         .orWhere({website: website})
         .getOne();
 
@@ -71,24 +74,35 @@ export class BrandService implements BrandServiceInterface {
         return new HttpBadRequest('Brand already exist');
       }
 
-      const avatarUpload = await this.mediaService.uploadFile(file);
-
-      if (!avatarUpload) {
-        return new HttpBadRequest('Error uploading image');
+      if (file) {
+        const avatarUpload = await this.mediaService.uploadFile(file);
+        if (!avatarUpload) {
+          return new HttpBadRequest('Error uploading image');
+        }
+        _file = avatarUpload;
+      } else {
+        _file = null;
       }
+
+      _address = address ?? null;
+      _description = description ?? null;
+      _email = email ?? null;
+      _name = name ?? null;
+      _phone = phone ?? null;
+      _website = website ?? null;
 
       const brand = await this.brandRepository
         .createQueryBuilder('brand')
         .insert()
         .into(BrandEntity)
         .values({
-          address: address,
-          description: description,
-          email: email,
-          name: name,
-          phone: phone,
-          website: website,
-          avatar: avatarUpload,
+          address: _address,
+          description: _description,
+          email: _email,
+          name: _name,
+          phone: _phone,
+          website: _website,
+          avatar: _file,
         })
         .execute();
 
@@ -252,16 +266,10 @@ export class BrandService implements BrandServiceInterface {
         return new HttpBadRequest('Brand not found');
       }
 
-      const file = await this.mediaService.findFile('26daf89b-4fac-4b0e-881f-518a6eceba10');
-
-      if (!file) {
-        return new HttpBadRequest('File not found');
-      }
-
       const response = await this.brandRepository
         .createQueryBuilder('brand')
         .update()
-        .set({avatar: file})
+        .set({avatar: null})
         .where({uuid: brandId})
         .execute();
 

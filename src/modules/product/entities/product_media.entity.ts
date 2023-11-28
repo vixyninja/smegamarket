@@ -18,7 +18,7 @@ export class ProductMediaEntity extends BaseEntity {
     referencedColumnName: 'uuid',
     foreignKeyConstraintName: 'FK_PRODUCT_MEDIA_PRODUCT',
   })
-  @ManyToOne(() => ProductEntity, (product) => product.uuid, {cascade: true})
+  @ManyToOne(() => ProductEntity, (product) => product.uuid, {cascade: true, nullable: true})
   product: ProductEntity;
 
   @JoinColumn({
@@ -26,6 +26,6 @@ export class ProductMediaEntity extends BaseEntity {
     referencedColumnName: 'uuid',
     foreignKeyConstraintName: 'FK_PRODUCT_MEDIA_MEDIA',
   })
-  @ManyToOne(() => MediaEntity, (media) => media.uuid, {cascade: true})
+  @ManyToOne(() => MediaEntity, (media) => media.uuid, {cascade: true, nullable: true})
   media: MediaEntity;
 }

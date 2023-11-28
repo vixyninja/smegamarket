@@ -1,6 +1,6 @@
 import {BaseEntity} from '@/core';
 import {MediaEntity} from '@/modules/media';
-import {Column, Entity} from 'typeorm';
+import {Column, Entity, JoinColumn} from 'typeorm';
 
 @Entity({
   name: 'category',
@@ -15,6 +15,6 @@ export class CategoryEntity extends BaseEntity {
   @Column({type: 'varchar', length: 225, nullable: true})
   description: string;
 
-  @Column({name: 'icon', nullable: true})
+  @JoinColumn({name: 'icon', foreignKeyConstraintName: 'FK_CATEGORY_ICON', referencedColumnName: 'uuid'})
   icon: MediaEntity;
 }
