@@ -8,9 +8,11 @@ import {CreateBrandDTO, UpdateBrandDTO} from './dto';
 import {BrandEntity} from './entities';
 
 interface BrandServiceInterface {
-  findAll(query: QueryOptions): Promise<any>;
   findOne(brandId: string): Promise<any>;
+  findByName(name: string): Promise<any>;
+
   create(arg: CreateBrandDTO, file: Express.Multer.File): Promise<any>;
+  query(query: QueryOptions): Promise<any>;
   readOne(brandId: string): Promise<any>;
   update(brandId: string, arg: UpdateBrandDTO, file: Express.Multer.File): Promise<any>;
   delete(brandId: string): Promise<any>;
@@ -24,27 +26,6 @@ export class BrandService implements BrandServiceInterface {
     private readonly brandRepository: Repository<BrandEntity>,
     private readonly mediaService: MediaService,
   ) {}
-
-  async findAll(query: QueryOptions): Promise<any> {
-    try {
-      let {_page, _limit, _sort, _order} = QueryOptions.initialize(query);
-
-      const [brands, count] = await this.brandRepository
-        .createQueryBuilder('brand')
-        .loadAllRelationIds()
-        .skip(_limit * (_page - 1))
-        .take(_limit)
-        .orderBy(`brand.${_sort}`, _order === 'DESC' ? 'DESC' : 'ASC')
-        .getManyAndCount();
-
-      return {
-        data: brands,
-        meta: new Meta(_page, _limit, brands.length, Math.ceil(count / _limit), QueryOptions.initialize(query)),
-      };
-    } catch (e) {
-      throw new HttpInternalServerError(e.message);
-    }
-  }
 
   async findOne(brandId: string): Promise<any> {
     try {
@@ -60,17 +41,13 @@ export class BrandService implements BrandServiceInterface {
     }
   }
 
-  async readOne(brandId: string): Promise<any> {
+  async findByName(name: string): Promise<any> {
     try {
       const brand = await this.brandRepository
         .createQueryBuilder('brand')
         .loadAllRelationIds()
-        .where({uuid: brandId})
+        .where({name: name})
         .getOne();
-
-      if (!brand) {
-        return new HttpForbidden('Brand not found');
-      }
 
       return brand;
     } catch (e) {
@@ -131,6 +108,45 @@ export class BrandService implements BrandServiceInterface {
     }
   }
 
+  async query(query: QueryOptions): Promise<any> {
+    try {
+      let {_page, _limit, _sort, _order} = QueryOptions.initialize(query);
+
+      const [brands, count] = await this.brandRepository
+        .createQueryBuilder('brand')
+        .loadAllRelationIds()
+        .skip(_limit * (_page - 1))
+        .take(_limit)
+        .orderBy(`brand.${_sort}`, _order === 'DESC' ? 'DESC' : 'ASC')
+        .getManyAndCount();
+
+      return {
+        data: brands,
+        meta: new Meta(_page, _limit, brands.length, Math.ceil(count / _limit), QueryOptions.initialize(query)),
+      };
+    } catch (e) {
+      throw new HttpInternalServerError(e.message);
+    }
+  }
+
+  async readOne(brandId: string): Promise<any> {
+    try {
+      const brand = await this.brandRepository
+        .createQueryBuilder('brand')
+        .loadAllRelationIds()
+        .where({uuid: brandId})
+        .getOne();
+
+      if (!brand) {
+        return new HttpForbidden('Brand not found');
+      }
+
+      return brand;
+    } catch (e) {
+      throw new HttpInternalServerError(e.message);
+    }
+  }
+
   async update(brandId: string, arg: UpdateBrandDTO, file: Express.Multer.File): Promise<any> {
     try {
       var {address, description, email, name, phone, website} = arg;
@@ -165,11 +181,9 @@ export class BrandService implements BrandServiceInterface {
 
       if (file) {
         const avatarUpload = await this.mediaService.uploadFile(file);
-
         if (!avatarUpload) {
           return new HttpBadRequest('Error uploading image');
         }
-
         _file = avatarUpload;
       } else {
         _file = brand.avatar;

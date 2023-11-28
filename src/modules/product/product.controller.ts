@@ -15,7 +15,7 @@ import {
 } from '@nestjs/common';
 import {FilesInterceptor} from '@nestjs/platform-express';
 import {isBase64, isUUID} from 'class-validator';
-import {CreateProductDTO} from './dto';
+import {CreateProductDTO, CreateProductInformationDTO} from './dto';
 import {UpdateProductDTO} from './dto/updateProduct.dto';
 import {ProductService} from './product.service';
 
@@ -55,7 +55,7 @@ export class ProductController {
   @UseGuards(RolesGuard)
   @UseInterceptors(FilesInterceptor('files'))
   @Post()
-  async create(@Body() createProductDTO: CreateProductDTO, @UploadedFiles() files: Express.Multer.File[]) {
+  async createProduct(@Body() createProductDTO: CreateProductDTO, @UploadedFiles() files: Express.Multer.File[]) {
     files.forEach((file) => {
       if (!isBase64(Buffer.from(file.buffer).toString('base64'))) {
         return {
@@ -64,7 +64,7 @@ export class ProductController {
       }
     });
 
-    const product = await this.productService.create(createProductDTO, files);
+    const product = await this.productService.createProduct(createProductDTO, files);
 
     return HandlerFilter(product, {
       message: 'Create product successfully',
@@ -75,8 +75,37 @@ export class ProductController {
   @Roles([RoleEnum.ADMIN])
   @UseGuards(RolesGuard)
   @UseInterceptors(FilesInterceptor('files'))
+  @Post(':productId')
+  async createProductInformation(
+    @Body() createProductInformationDTO: CreateProductInformationDTO,
+    @UploadedFiles() files: Express.Multer.File[],
+    @Param('productId') productId: string,
+  ) {
+    files.forEach((file) => {
+      if (!isBase64(Buffer.from(file.buffer).toString('base64'))) {
+        return {
+          message: 'File is not valid',
+        };
+      }
+    });
+
+    const productInformation = await this.productService.createProductInformation(
+      productId,
+      createProductInformationDTO,
+      files,
+    );
+
+    return HandlerFilter(productInformation, {
+      message: 'Create product information successfully',
+      data: productInformation,
+    });
+  }
+
+  @Roles([RoleEnum.ADMIN])
+  @UseGuards(RolesGuard)
+  @UseInterceptors(FilesInterceptor('files'))
   @Put(':productId')
-  async update(
+  async updateProduct(
     @Param('productId') productId: string,
     @Body() updateProductDTO: UpdateProductDTO,
     @UploadedFiles() files: Express.Multer.File[],
@@ -96,7 +125,7 @@ export class ProductController {
         }
       });
 
-    const product = await this.productService.update(productId, updateProductDTO, files);
+    const product = await this.productService.updateProduct(productId, updateProductDTO, files);
     return HandlerFilter(product, {
       message: 'Update product successfully',
       data: product,
@@ -113,7 +142,7 @@ export class ProductController {
       };
     }
 
-    const product = await this.productService.delete(productId);
+    const product = await this.productService.deleteProduct(productId);
     return HandlerFilter(product, {
       message: product,
     });

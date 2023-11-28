@@ -1,6 +1,6 @@
 import {BaseEntity} from '@/core';
 import {MediaEntity} from '@/modules/media';
-import {Column, Entity, JoinColumn, ManyToOne} from 'typeorm';
+import {Column, Entity} from 'typeorm';
 
 @Entity({
   name: 'brand',

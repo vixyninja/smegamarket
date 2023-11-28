@@ -20,7 +20,7 @@ interface UserServiceInterface {
   updateUserPassword(uuid: string, password: string): Promise<any>;
   updateUserAvatar(uuid: string, avatar: Express.Multer.File): Promise<any>;
   updateUserCover(uuid: string, cover: Express.Multer.File): Promise<any>;
-  updateStatusUser(uuid: string, status: StatusUser): Promise<any>;
+  updateUserStatus(uuid: string, status: StatusUser): Promise<any>;
   updateUserPhone(uuid: string, phone: string): Promise<any>;
   updateUserEmail(uuid: string, email: string): Promise<any>;
   updateUserRole(uuid: string, role: RoleEnum): Promise<any>;
@@ -227,7 +227,7 @@ export class UserService implements UserServiceInterface {
 
       if (!user) return new HttpNotFound('User not found');
 
-      const avatarUpload = await this.mediaService.uploadFile(file);
+      const avatarUpload = await this.mediaService.uploadFile(file, 'avatar');
 
       if (!avatarUpload) return new HttpBadRequest('Upload avatar failed');
 
@@ -264,7 +264,7 @@ export class UserService implements UserServiceInterface {
 
       if (!user) return new HttpNotFound('User not found');
 
-      const coverUpload = await this.mediaService.uploadFile(file);
+      const coverUpload = await this.mediaService.uploadFile(file, 'cover');
 
       if (!coverUpload) return new HttpBadRequest('Upload cover failed');
 
@@ -291,7 +291,7 @@ export class UserService implements UserServiceInterface {
     }
   }
 
-  async updateStatusUser(uuid: string, status: StatusUser): Promise<any> {
+  async updateUserStatus(uuid: string, status: StatusUser): Promise<any> {
     try {
       const isExist = await this.redisxService.getKey(`${CACHE_KEY.user}:${uuid}`);
 

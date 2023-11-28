@@ -6,3 +6,4 @@ export * from './interceptor';
 export * from './pipes';
 export * from './constants';
 export * from './base';
+export * from './logger';
