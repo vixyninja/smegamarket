@@ -322,7 +322,7 @@ export class AuthService implements AuthServiceInterface {
       if (isMatchCode.toString() !== otp.toString())
         return new HttpBadRequest('OTP not match !!!, please try again !!!');
 
-      await this.userService.updateStatusUser(user.uuid, StatusUser.ACTIVE);
+      await this.userService.updateUserStatus(user.uuid, StatusUser.ACTIVE);
 
       await this.redisService.delKey(`${CACHE_KEY.verifyOtp}:${information}`);
 

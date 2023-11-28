@@ -2,8 +2,8 @@ import {CloudinaryService, Environment} from '@/configs';
 import {Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
-import {MediaEntity} from './entities/media.entity';
 import {HttpBadRequest, HttpInternalServerError} from '@/core';
+import {MediaEntity} from './entities';
 
 interface MediaServiceInterface {
   findFile(fileId: string): Promise<any>;
@@ -18,13 +18,13 @@ interface MediaServiceInterface {
 export class MediaService implements MediaServiceInterface {
   constructor(
     @InjectRepository(MediaEntity)
-    private readonly fileRepository: Repository<MediaEntity>,
+    private readonly mediaRepository: Repository<MediaEntity>,
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async findFile(fileId: string): Promise<any> {
     try {
-      const file = await this.fileRepository.createQueryBuilder('media').where({uuid: fileId}).getOne();
+      const file = await this.mediaRepository.createQueryBuilder('media').where({uuid: fileId}).getOne();
 
       return file;
     } catch (e) {
@@ -34,7 +34,7 @@ export class MediaService implements MediaServiceInterface {
 
   async readOne(fileId: string): Promise<any> {
     try {
-      const file = await this.fileRepository.createQueryBuilder('media').where({uuid: fileId}).getOne();
+      const file = await this.mediaRepository.createQueryBuilder('media').where({uuid: fileId}).getOne();
 
       if (!file) throw new HttpBadRequest('Media is not exist');
 
@@ -68,7 +68,7 @@ export class MediaService implements MediaServiceInterface {
         api_key,
       } = result;
 
-      const fileResult = await this.fileRepository
+      const fileResult = await this.mediaRepository
         .createQueryBuilder('media')
         .insert()
         .into(MediaEntity)
@@ -129,7 +129,7 @@ export class MediaService implements MediaServiceInterface {
           api_key,
         } = result;
 
-        const fileResult = await this.fileRepository
+        const fileResult = await this.mediaRepository
           .createQueryBuilder('media')
           .insert()
           .into(MediaEntity)
@@ -170,7 +170,7 @@ export class MediaService implements MediaServiceInterface {
 
       if (!file) throw new HttpBadRequest('Media is not exist');
 
-      await this.fileRepository.createQueryBuilder('media').softDelete().where({uuid: fileId}).execute();
+      await this.mediaRepository.createQueryBuilder('media').softDelete().where({uuid: fileId}).execute();
 
       return true;
     } catch (e) {
@@ -182,7 +182,7 @@ export class MediaService implements MediaServiceInterface {
     try {
       const result = await this.cloudinaryService.deleteFolder(folder);
 
-      await this.fileRepository.createQueryBuilder('media').softDelete().where({folder: folder}).execute();
+      await this.mediaRepository.createQueryBuilder('media').softDelete().where({folder: folder}).execute();
 
       return result;
     } catch (e) {

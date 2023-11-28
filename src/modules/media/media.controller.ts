@@ -15,8 +15,8 @@ import {isUUID} from 'class-validator';
 import {MediaService} from './media.service';
 
 @UseGuards(AuthGuard)
-@Controller('file')
-export class FileController {
+@Controller('media')
+export class MediaController {
   constructor(private readonly mediaService: MediaService) {}
 
   @Get(':fileId')

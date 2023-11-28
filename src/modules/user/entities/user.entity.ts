@@ -1,7 +1,7 @@
 import {BaseEntity, RoleEnum} from '@/core';
 import {MediaEntity} from '@/modules/media';
 import * as bcryptjs from 'bcryptjs';
-import {BeforeInsert, Column, Entity} from 'typeorm';
+import {BeforeInsert, Column, Entity, JoinColumn, OneToOne} from 'typeorm';
 import {StatusUser} from '../enum';
 
 @Entity({
@@ -41,10 +41,12 @@ export class UserEntity extends BaseEntity {
   @Column({type: 'varchar', length: 225, default: null})
   deviceType: string;
 
-  @Column({name: 'avatar', nullable: true})
+  @JoinColumn({name: 'avatar', foreignKeyConstraintName: 'FK_USER_AVATAR', referencedColumnName: 'uuid'})
+  @OneToOne(() => MediaEntity, {cascade: true, nullable: true})
   avatar: MediaEntity;
 
-  @Column({name: 'cover', nullable: true})
+  @JoinColumn({name: 'cover', foreignKeyConstraintName: 'FK_USER_COVER', referencedColumnName: 'uuid'})
+  @OneToOne(() => MediaEntity, {cascade: true, nullable: true})
   cover: MediaEntity;
 
   @BeforeInsert()

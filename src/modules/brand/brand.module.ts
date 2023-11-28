@@ -2,13 +2,13 @@ import {JWTService} from '@/configs';
 import {Module} from '@nestjs/common';
 import {JwtService} from '@nestjs/jwt';
 import {TypeOrmModule} from '@nestjs/typeorm';
-import {MediaEntity} from '../media';
+import {MediaModule} from '../media';
 import {BrandController} from './brand.controller';
 import {BrandService} from './brand.service';
 import {BrandEntity} from './entities';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([BrandEntity]), MediaEntity],
+  imports: [TypeOrmModule.forFeature([BrandEntity]), MediaModule],
   controllers: [BrandController],
   providers: [BrandService, JwtService, JWTService],
   exports: [BrandService],

@@ -26,9 +26,7 @@ export class CategoryService implements CategoryServiceInterface {
 
   async findAll(): Promise<any> {
     try {
-      const categories = await this.categoryRepository.createQueryBuilder('category').loadAllRelationIds().getMany();
-
-      return categories;
+      return await this.categoryRepository.createQueryBuilder('category').loadAllRelationIds().getMany();
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }

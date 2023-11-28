@@ -31,7 +31,7 @@ export class BrandController {
   async import(): Promise<any> {
     try {
       faker.fakerVI.seed(124);
-      for (let i = 0; i < 8; i++) {
+      for (let i = 0; i < 20; i++) {
         const brand = new BrandEntity();
         brand.name = faker.fakerVI.commerce.department();
         brand.description = faker.fakerVI.lorem.paragraph();
@@ -58,6 +58,16 @@ export class BrandController {
       message: 'Get brands successfully',
       data: brands.data,
       meta: brands.meta,
+    });
+  }
+
+  @Get(':name')
+  async findByName(@Param('name') name: string): Promise<any> {
+    const brand = await this.brandService.findByName(name);
+
+    return HandlerFilter(brand, {
+      message: 'Get brand successfully',
+      data: brand,
     });
   }
 

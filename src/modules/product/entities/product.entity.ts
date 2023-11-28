@@ -37,7 +37,7 @@ export class ProductEntity extends BaseEntity {
     foreignKeyConstraintName: 'FK_PRODUCT_PRODUCT_INFORMATION',
     referencedColumnName: 'uuid',
   })
-  @OneToMany(() => ProductInformationEntity, (productInformation) => productInformation.product, {
+  @OneToMany(() => ProductInformationEntity, (productInformation) => productInformation.uuid, {
     cascade: true,
     nullable: true,
   })
@@ -58,20 +58,4 @@ export class ProductEntity extends BaseEntity {
     },
   })
   categories: CategoryEntity[];
-
-  @ManyToMany(() => MediaEntity, (media) => media.uuid, {cascade: true})
-  @JoinTable({
-    name: 'product_media',
-    joinColumn: {
-      name: 'productId',
-      referencedColumnName: 'uuid',
-      foreignKeyConstraintName: 'FK_PRODUCT_MEDIA',
-    },
-    inverseJoinColumn: {
-      name: 'mediaId',
-      referencedColumnName: 'uuid',
-      foreignKeyConstraintName: 'FK_MEDIA_PRODUCT',
-    },
-  })
-  media: MediaEntity[];
 }
