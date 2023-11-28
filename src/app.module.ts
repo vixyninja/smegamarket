@@ -3,6 +3,7 @@ import {TypeOrmModule} from '@nestjs/typeorm';
 import {AppController} from './app.controller';
 import {AuthModule} from './auth/auth.module';
 import {CloudinaryModule, MailModule, PostgresDBService, RedisxModule, ThrottlerxModule} from './configs';
+import {LoggerModule} from './core';
 import {BrandModule, CartModule, CategoryModule, MediaModule, OrderModule, ProductModule, UserModule} from './modules';
 
 @Module({
@@ -15,6 +16,7 @@ import {BrandModule, CartModule, CategoryModule, MediaModule, OrderModule, Produ
     RedisxModule,
     ThrottlerxModule,
     AuthModule,
+    LoggerModule,
 
     // MODULES
     UserModule,

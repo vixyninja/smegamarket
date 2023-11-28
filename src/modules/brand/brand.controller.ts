@@ -50,9 +50,9 @@ export class BrandController {
     }
   }
 
-  @Get()
-  async findAll(@Query() query: QueryOptions): Promise<any> {
-    const brands = await this.brandService.findAll(query);
+  @Get('q')
+  async query(@Query() query: QueryOptions): Promise<any> {
+    const brands = await this.brandService.query(query);
 
     return HandlerFilter(brands, {
       message: 'Get brands successfully',
