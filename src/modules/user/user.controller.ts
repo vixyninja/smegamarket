@@ -1,9 +1,8 @@
-import {AuthGuard, HandlerFilter, HttpBadRequest, RoleEnum, Roles, RolesGuard, UserDynamic} from '@/core';
-import * as faker from '@faker-js/faker';
-import {Body, Controller, Get, Patch, Post, Put, UploadedFile, UseGuards, UseInterceptors} from '@nestjs/common';
+import {AuthGuard, HandlerFilter, HttpBadRequest, RoleEnum, UserDynamic} from '@/core';
+import {Body, Controller, Get, Patch, Put, UploadedFile, UseGuards, UseInterceptors} from '@nestjs/common';
 import {FileInterceptor} from '@nestjs/platform-express';
 import {isEmail, isPhoneNumber, isUUID} from 'class-validator';
-import {CreateUserDTO, UpdateUserDTO} from './dto';
+import {UpdateUserDTO} from './dto';
 import {UserService} from './user.service';
 
 @UseGuards(AuthGuard)
@@ -89,55 +88,5 @@ export class UserController {
       data: user,
       status: 200,
     });
-  }
-
-  @Patch('/me/update-role')
-  async updateAdmin(
-    @UserDynamic('uuid') userUUID: string,
-    @Body()
-    updateAdminDTO: {
-      role: RoleEnum;
-    },
-  ): Promise<any> {
-    const user = await this.userService.updateUserRole(userUUID, updateAdminDTO.role);
-    return {data: user, message: 'Update admin successfully'};
-  }
-
-  @Roles([RoleEnum.ADMIN])
-  @UseGuards(RolesGuard)
-  @Post('import')
-  async importUsers(): Promise<any> {
-    try {
-      faker.fakerVI.seed(Date.now());
-
-      for (let i = 0; i < 10; i++) {
-        let firstName = faker.fakerVI.person.firstName();
-
-        let lastName = faker.fakerVI.person.lastName();
-
-        let email = faker.fakerVI.internet.email({
-          firstName: firstName,
-          lastName: lastName,
-          provider: 'gmail',
-          allowSpecialCharacters: false,
-        });
-
-        const user: CreateUserDTO = {
-          firstName: firstName,
-          lastName: lastName,
-          email: email,
-          password: 'mega123456',
-        };
-
-        await this.userService.createUser(user);
-      }
-
-      const users = await this.userService.readUsers();
-
-      return {
-        message: 'Import users successfully',
-        data: users,
-      };
-    } catch (e) {}
   }
 }

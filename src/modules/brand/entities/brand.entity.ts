@@ -9,19 +9,19 @@ import {Column, Entity, JoinColumn, OneToOne} from 'typeorm';
   },
 })
 export class BrandEntity extends BaseEntity {
-  @Column({type: 'varchar', length: 225, unique: true})
+  @Column({type: 'varchar', length: 225, unique: true, nullable: false})
   name: string;
 
-  @Column({type: 'varchar', length: 225, unique: true})
+  @Column({type: 'varchar', length: 225, nullable: true, default: null})
   description: string;
 
-  @Column({type: 'varchar', length: 225, unique: true})
+  @Column({type: 'varchar', length: 225, unique: true, nullable: true, default: null})
   address: string;
 
   @Column({type: 'varchar', length: 225, unique: true})
   phone: string;
 
-  @Column({type: 'varchar', length: 225, unique: true})
+  @Column({type: 'varchar', length: 225, unique: true, nullable: true, default: null})
   website: string;
 
   @Column({type: 'varchar', length: 225, unique: true})
