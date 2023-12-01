@@ -27,7 +27,7 @@ export class CategoryController {
   @Post('import')
   async import(): Promise<any> {
     try {
-      faker.fakerVI.seed();
+      faker.fakerVI.seed(123);
 
       let cateRnd: string[] = [
         'Vegetables',
@@ -49,17 +49,17 @@ export class CategoryController {
 
       for (let i = 0; i < cateRnd.length; i++) {
         const category: CreateCategoryDTO = {
-          name: cateRnd[i].toString(),
+          name: cateRnd[i].toString() + i,
           description: faker.fakerVI.lorem.paragraph(),
         };
-        const response = await this.categoryService.create(category);
+        const response = await this.categoryService.create(category, null);
         result.push(response);
       }
 
-      return {
+      return HandlerFilter(result, {
         message: 'Import categories successfully',
         data: result,
-      };
+      });
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
@@ -77,9 +77,19 @@ export class CategoryController {
 
   @Roles([RoleEnum.ADMIN])
   @UseGuards(RolesGuard)
+  @UseInterceptors(FileInterceptor('icon'))
   @Post()
-  async createCategory(@Body() createCategoryDTO: CreateCategoryDTO): Promise<any> {
-    const category = await this.categoryService.create(createCategoryDTO);
+  async createCategory(
+    @Body() createCategoryDTO: CreateCategoryDTO,
+    @UploadedFile() icon: Express.Multer.File,
+  ): Promise<any> {
+    if (icon && !isBase64(Buffer.from(icon.buffer).toString('base64'))) {
+      return {
+        message: 'Image is not valid',
+      };
+    }
+
+    const category = await this.categoryService.create(createCategoryDTO, icon);
 
     return HandlerFilter(category, {
       message: 'Create category successfully',
@@ -142,6 +152,22 @@ export class CategoryController {
       };
     }
     const category = await this.categoryService.delete(categoryId);
+    return HandlerFilter(category, {
+      message: category,
+    });
+  }
+
+  @Roles([RoleEnum.ADMIN])
+  @UseGuards(RolesGuard)
+  @Delete(':categoryId/icon')
+  async deleteIcon(@Param('categoryId') categoryId: string): Promise<any> {
+    if (isUUID(categoryId) === false) {
+      return {
+        message: 'Category id is invalid',
+        data: null,
+      };
+    }
+    const category = await this.categoryService.deleteIcon(categoryId);
     return HandlerFilter(category, {
       message: category,
     });

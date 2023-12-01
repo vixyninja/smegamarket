@@ -56,7 +56,7 @@ services:
     ports:
       - 7843:7843
     volumes:
-      - /home/user/p3x-redis-ui-settings:/settings
+      - /home/vixyninja/Desktop/p3x-redis-ui-settings:/settings
 
   adminer:
     container_name: adminer

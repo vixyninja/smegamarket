@@ -33,7 +33,8 @@ export class BrandController {
       faker.fakerVI.seed(124);
       for (let i = 0; i < 20; i++) {
         const brand = new BrandEntity();
-        brand.name = faker.fakerVI.commerce.department();
+        brand.name =
+          faker.fakerVI.commerce.department() + ' ' + faker.fakerVI.helpers.arrayElement(['Co., Ltd', 'JSC']);
         brand.description = faker.fakerVI.lorem.paragraph();
         brand.address = faker.fakerVI.location.streetAddress();
         brand.phone = faker.fakerVI.phone.number();

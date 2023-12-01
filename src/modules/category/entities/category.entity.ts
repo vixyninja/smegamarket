@@ -1,6 +1,6 @@
 import {BaseEntity} from '@/core';
 import {MediaEntity} from '@/modules/media';
-import {Column, Entity, JoinColumn} from 'typeorm';
+import {Column, Entity, JoinColumn, ManyToOne, OneToMany} from 'typeorm';
 
 @Entity({
   name: 'category',
@@ -16,5 +16,6 @@ export class CategoryEntity extends BaseEntity {
   description: string;
 
   @JoinColumn({name: 'icon', foreignKeyConstraintName: 'FK_CATEGORY_ICON', referencedColumnName: 'uuid'})
+  @ManyToOne(() => MediaEntity, (media) => media.uuid, {nullable: true, cascade: true})
   icon: MediaEntity;
 }

@@ -1,5 +1,5 @@
 import {HttpBadRequest, HttpInternalServerError, HttpNotFound} from '@/core';
-import {Injectable} from '@nestjs/common';
+import {Injectable, Logger} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
 import {MediaEntity, MediaService} from '../media';
@@ -10,7 +10,7 @@ interface CategoryServiceInterface {
   findAll(): Promise<any>;
   findOne(categoryId: string): Promise<any>;
   findMany(categoryIds: string[]): Promise<any>;
-  create(arg: CreateCategoryDTO): Promise<any>;
+  create(arg: CreateCategoryDTO, file: Express.Multer.File): Promise<any>;
   readOne(categoryId: string): Promise<any>;
   update(categoryId: string, arg: UpdateCategoryDTO, file: Express.Multer.File): Promise<any>;
   delete(categoryId: string): Promise<any>;
@@ -78,9 +78,12 @@ export class CategoryService implements CategoryServiceInterface {
     }
   }
 
-  async create(arg: CreateCategoryDTO): Promise<any> {
+  async create(arg: CreateCategoryDTO, file: Express.Multer.File): Promise<any> {
     try {
       const {description, name} = arg;
+
+      var _description: string, _name: string;
+      var _icon: MediaEntity;
 
       const nameExist = await this.categoryRepository.findOne({
         where: {name: name},
@@ -90,16 +93,23 @@ export class CategoryService implements CategoryServiceInterface {
         return new HttpBadRequest('Category name already exist');
       }
 
-      const defaultIcon = await this.mediaService.findFile('7fa8a45a-bdfe-4674-a497-fbbf7e670639');
+      _name = name ?? '';
+      _description = description ?? '';
+
+      if (file) {
+        _icon = await this.mediaService.uploadFile(file);
+      } else {
+        _icon = await this.mediaService.findFile('2c3659a3-c8f9-421a-998f-74c2a119a87c');
+      }
 
       const createCategory = await this.categoryRepository
         .createQueryBuilder('category')
         .insert()
         .into(CategoryEntity)
         .values({
-          name: name,
-          description: description,
-          icon: defaultIcon,
+          name: _name,
+          description: _description,
+          icon: _icon,
         })
         .execute();
 
@@ -107,7 +117,7 @@ export class CategoryService implements CategoryServiceInterface {
         return new HttpBadRequest('Error creating category');
       }
 
-      const result = await this.findOne(createCategory.raw.insertId);
+      const result = await this.findOne(createCategory.raw[0].uuid);
 
       if (!result) {
         return new HttpBadRequest('Error creating category');
@@ -172,42 +182,6 @@ export class CategoryService implements CategoryServiceInterface {
     }
   }
 
-  async updateIcon(categoryId: string, file: Express.Multer.File): Promise<any> {
-    try {
-      const category = await this.categoryRepository
-        .createQueryBuilder('category')
-        .where('uuid = :uuid', {uuid: categoryId})
-        .getOne();
-
-      if (!category) {
-        return new HttpNotFound('Category not found');
-      }
-
-      const icon = await this.mediaService.uploadFile(file);
-
-      const updateIconCategory = await this.categoryRepository
-        .createQueryBuilder('category')
-        .update(CategoryEntity)
-        .set({
-          icon: icon,
-        })
-        .where('uuid = :uuid', {uuid: categoryId})
-        .execute();
-
-      if (!updateIconCategory) {
-        return new HttpBadRequest('Error updating category');
-      }
-
-      const result = await this.findOne(categoryId);
-
-      if (!result) return new HttpBadRequest('Error updating category');
-
-      return result;
-    } catch (e) {
-      throw new HttpInternalServerError(e.message);
-    }
-  }
-
   async delete(categoryId: string): Promise<any> {
     try {
       const result = await this.categoryRepository
@@ -219,6 +193,35 @@ export class CategoryService implements CategoryServiceInterface {
 
       if (!result) {
         return new HttpBadRequest('Error deleting category');
+      }
+
+      return 'Deleted successfully';
+    } catch (e) {
+      throw new HttpInternalServerError(e.message);
+    }
+  }
+
+  async deleteIcon(categoryId: string): Promise<any> {
+    try {
+      const category = await this.categoryRepository.findOne({
+        where: {uuid: categoryId},
+      });
+
+      if (!category) {
+        return new HttpNotFound('Category not found');
+      }
+
+      const result = await this.categoryRepository
+        .createQueryBuilder()
+        .update(CategoryEntity)
+        .set({
+          icon: null,
+        })
+        .where('uuid = :uuid', {uuid: categoryId})
+        .execute();
+
+      if (!result) {
+        return new HttpBadRequest('Error deleting category icon');
       }
 
       return 'Deleted successfully';
