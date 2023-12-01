@@ -19,60 +19,60 @@ import {MediaService} from './media.service';
 export class MediaController {
   constructor(private readonly mediaService: MediaService) {}
 
-  @Get(':fileId')
-  async getFile(@Param('fileId') fileId: string): Promise<any> {
-    if (isUUID(fileId) === false) {
+  @Get(':mediaID')
+  async getFile(@Param('mediaID') mediaID: string): Promise<any> {
+    if (isUUID(mediaID) === false) {
       return {
-        message: 'File id is invalid',
+        message: 'Media id is invalid',
         data: null,
       };
     }
-    const result = await this.mediaService.readOne(fileId);
+    const result = await this.mediaService.readOne(mediaID);
     if (result) {
       return {
-        message: 'Get file successfully',
+        message: 'Get media successfully',
         data: result,
       };
     }
   }
 
   @Post()
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('media'))
   async uploadFile(@UploadedFile() file: Express.Multer.File): Promise<any> {
-    const result = await this.mediaService.uploadFile(file);
+    const result = await this.mediaService.uploadFile(file, 'common');
     if (result) {
       return {
-        message: 'Upload file successfully',
+        message: 'Upload media successfully',
         data: result,
       };
     }
   }
 
-  @Delete(':fileId')
-  async deleteFile(@Param('fileId') fileId: string): Promise<any> {
-    if (isUUID(fileId) === false) {
+  @Delete(':mediaId')
+  async deleteFile(@Param('mediaId') mediaId: string): Promise<any> {
+    if (isUUID(mediaId) === false) {
       return {
-        message: 'File id is invalid',
+        message: 'Media id is invalid',
         data: null,
       };
     }
 
-    const result = await this.mediaService.deleteFile(fileId);
+    const result = await this.mediaService.deleteFile(mediaId);
     if (result) {
       return {
-        message: 'Delete file successfully',
+        message: 'Delete media successfully',
         data: null,
       };
     }
   }
 
   @Post('upload-multiple')
-  @UseInterceptors(FilesInterceptor('files'))
-  async uploadFiles(@UploadedFiles() files: Express.Multer.File[]): Promise<any> {
-    const result = await this.mediaService.uploadFiles(files);
+  @UseInterceptors(FilesInterceptor('medias'))
+  async uploadFiles(@UploadedFiles() medias: Express.Multer.File[]): Promise<any> {
+    const result = await this.mediaService.uploadFiles(medias);
     if (result) {
       return {
-        message: 'Upload files successfully',
+        message: 'Upload medias successfully',
         data: result,
       };
     }
