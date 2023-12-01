@@ -11,10 +11,10 @@ import {StatusUser} from '../enum';
   },
 })
 export class UserEntity extends BaseEntity {
-  @Column({type: 'varchar', length: 225, nullable: false})
+  @Column({type: 'varchar', length: 225, nullable: true, default: null})
   firstName: string;
 
-  @Column({type: 'varchar', length: 225, nullable: false})
+  @Column({type: 'varchar', length: 225, nullable: true, default: null})
   lastName: string;
 
   @Column({type: 'varchar', length: 225, nullable: false, unique: true})

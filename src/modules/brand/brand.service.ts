@@ -1,19 +1,20 @@
-import {HttpBadRequest, HttpForbidden, HttpInternalServerError} from '@/core';
+import {CACHE_KEY, HttpBadRequest, HttpForbidden, HttpInternalServerError} from '@/core';
 import {Meta, QueryOptions} from '@/core/interface';
-import {Injectable} from '@nestjs/common';
+import {Injectable, Logger} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
 import {MediaEntity, MediaService} from '../media';
 import {CreateBrandDTO, UpdateBrandDTO} from './dto';
 import {BrandEntity} from './entities';
+import {RedisxService} from '@/configs';
 
 interface BrandServiceInterface {
   findOne(brandId: string): Promise<any>;
   findByName(name: string): Promise<any>;
-
   create(arg: CreateBrandDTO, file: Express.Multer.File): Promise<any>;
   query(query: QueryOptions): Promise<any>;
   readOne(brandId: string): Promise<any>;
+  readAll(): Promise<any>;
   update(brandId: string, arg: UpdateBrandDTO, file: Express.Multer.File): Promise<any>;
   delete(brandId: string): Promise<any>;
   deleteImage(brandId: string): Promise<any>;
@@ -25,6 +26,7 @@ export class BrandService implements BrandServiceInterface {
     @InjectRepository(BrandEntity)
     private readonly brandRepository: Repository<BrandEntity>,
     private readonly mediaService: MediaService,
+    private readonly redisxService: RedisxService,
   ) {}
 
   async findOne(brandId: string): Promise<any> {
@@ -46,8 +48,10 @@ export class BrandService implements BrandServiceInterface {
       const brand = await this.brandRepository
         .createQueryBuilder('brand')
         .loadAllRelationIds()
-        .where('LOWER(brand.name) LIKE LOWER(:name)', {name: '%' + name + '%'})
+        .where('LOWER(brand.name) LIKE LOWER(:name)', {name: `%${name}%`})
         .getMany();
+
+      Logger.log(brand);
 
       return brand;
     } catch (e) {
@@ -145,6 +149,12 @@ export class BrandService implements BrandServiceInterface {
 
   async readOne(brandId: string): Promise<any> {
     try {
+      const exist = await this.redisxService.getKey(`${CACHE_KEY.brand}:${brandId}`);
+
+      if (exist) {
+        return JSON.parse(exist);
+      }
+
       const brand = await this.brandRepository
         .createQueryBuilder('brand')
         .loadAllRelationIds()
@@ -155,7 +165,19 @@ export class BrandService implements BrandServiceInterface {
         return new HttpForbidden('Brand not found');
       }
 
+      await this.redisxService.setKey(`${CACHE_KEY.brand}:${brandId}`, JSON.stringify(brand));
+
       return brand;
+    } catch (e) {
+      throw new HttpInternalServerError(e.message);
+    }
+  }
+
+  async readAll(): Promise<any> {
+    try {
+      const brands = await this.brandRepository.createQueryBuilder('brand').loadAllRelationIds().getMany();
+
+      return brands;
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
@@ -171,26 +193,20 @@ export class BrandService implements BrandServiceInterface {
         return new HttpBadRequest('Brand not found');
       }
 
-      const brandExistValue = await this.brandRepository
-        .createQueryBuilder('brand')
-        .where({name: name})
-        .orWhere({email: email})
-        .orWhere({phoneNumber: phone})
-        .orWhere({website: website})
-        .getOne();
+      const brandExistValue = await this.brandRepository.createQueryBuilder('brand').where({name: name}).getOne();
 
       if (brandExistValue) {
         return new HttpBadRequest("Brand's value already exist");
       }
 
-      var _address: string, _description: string, _email: string, _name: string, _phoneNumber: string, _website: string;
+      var _address: string, _description: string, _email: string, _name: string, _phone: string, _website: string;
       var _file: MediaEntity;
 
       _address = address ?? brand.address;
       _description = description ?? brand.description;
       _email = email ?? brand.email;
       _name = name ?? brand.name;
-      _phoneNumber = phone ?? brand.phoneNumber;
+      _phone = phone ?? brand.phone;
       _website = website ?? brand.website;
 
       if (file) {
@@ -211,7 +227,7 @@ export class BrandService implements BrandServiceInterface {
           description: _description,
           email: _email,
           name: _name,
-          phone: _phoneNumber,
+          phone: _phone,
           website: _website,
           avatar: _file,
         })
@@ -227,6 +243,8 @@ export class BrandService implements BrandServiceInterface {
       if (!result) {
         return new HttpBadRequest('Error updating brand');
       }
+
+      await this.redisxService.delKey(`${CACHE_KEY.brand}:${brandId}`);
 
       return result;
     } catch (e) {
@@ -252,6 +270,8 @@ export class BrandService implements BrandServiceInterface {
         return new HttpBadRequest('Error deleting brand');
       }
 
+      await this.redisxService.delKey(`${CACHE_KEY.brand}:${brandId}`);
+
       return 'Brand deleted successfully';
     } catch (e) {
       throw new HttpInternalServerError(e.message);
@@ -276,6 +296,8 @@ export class BrandService implements BrandServiceInterface {
       if (!response) {
         return new HttpBadRequest('Error deleting image');
       }
+
+      await this.redisxService.delKey(`${CACHE_KEY.brand}:${brandId}`);
 
       return 'Image deleted successfully';
     } catch (e) {

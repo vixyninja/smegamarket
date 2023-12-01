@@ -6,10 +6,11 @@ import {MediaModule} from '../media';
 import {UserEntity} from './entities';
 import {UserController} from './user.controller';
 import {UserService} from './user.service';
+import {AdminController} from './admin.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([UserEntity]), RedisxModule, MediaModule],
-  controllers: [UserController],
+  controllers: [UserController, AdminController],
   providers: [UserService, JwtService, JWTService],
   exports: [UserService],
 })

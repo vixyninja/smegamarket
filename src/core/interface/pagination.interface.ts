@@ -35,24 +35,32 @@ export class QueryOptions {
     var sort: string, order: string;
     var page: number, limit: number;
 
-    if (_sort.trim() === '' || _sort.trim() === undefined || _sort.trim() === null) {
-      sort = 'createdAt';
-    } else {
-      if (_sort.toString().trim() === 'updatedAt') {
-        sort = _sort;
-      } else {
+    if (_sort) {
+      if (_sort.trim() === '' || _sort.trim() === undefined || _sort.trim() === null) {
         sort = 'createdAt';
+      } else {
+        if (_sort.toString().trim() === 'updatedAt') {
+          sort = _sort;
+        } else {
+          sort = 'createdAt';
+        }
       }
+    } else {
+      sort = 'createdAt';
     }
 
-    if (_order.trim() === '' || _order.trim() === undefined || _order.trim() === null) {
-      order = 'DESC';
-    } else {
-      if (_order.toString().trim().toUpperCase() === 'DESC') {
-        order = _order;
-      } else {
+    if (_order) {
+      if (_order.trim() === '' || _order.trim() === undefined || _order.trim() === null) {
         order = 'DESC';
+      } else {
+        if (_order.toString().trim() === 'ASC') {
+          order = _order;
+        } else {
+          order = 'DESC';
+        }
       }
+    } else {
+      order = 'DESC';
     }
 
     order = order.trim().toUpperCase();

@@ -7,22 +7,27 @@ import {MediaService} from '../media';
 import {CreateUserDTO, UpdateUserDTO} from './dto';
 import {UserEntity} from './entities';
 import {StatusUser} from './enum';
+import {Meta, QueryOptions} from '@/core/interface';
 
 interface UserServiceInterface {
+  // user
   findForAuth(email: string): Promise<any>;
   findByEmail(email: string): Promise<any>;
   findByPhone(phone: string): Promise<any>;
   findByUuid(uuid: string): Promise<any>;
   createUser(arg: CreateUserDTO): Promise<any>;
   readUser(uuid: string): Promise<any>;
-  readUsers(): Promise<any>;
+  query(query: QueryOptions): Promise<any>;
   updateUser(uuid: string, arg: UpdateUserDTO): Promise<any>;
   updateUserPassword(uuid: string, password: string): Promise<any>;
   updateUserAvatar(uuid: string, avatar: Express.Multer.File): Promise<any>;
   updateUserCover(uuid: string, cover: Express.Multer.File): Promise<any>;
-  updateUserStatus(uuid: string, status: StatusUser): Promise<any>;
   updateUserPhone(uuid: string, phone: string): Promise<any>;
   updateUserEmail(uuid: string, email: string): Promise<any>;
+
+  //   admin
+  readUsers(): Promise<any>;
+  updateUserStatus(uuid: string, status: StatusUser): Promise<any>;
   updateUserRole(uuid: string, role: RoleEnum): Promise<any>;
   deleteUser(uuid: string): Promise<any>;
 }
@@ -138,7 +143,28 @@ export class UserService implements UserServiceInterface {
     }
   }
 
-  async readUsers(): Promise<UserEntity[]> {
+  async query(query: QueryOptions): Promise<any> {
+    try {
+      const {_limit, _order, _page, _sort} = QueryOptions.initialize(query);
+
+      const [users, total] = await this.userRepository
+        .createQueryBuilder('user')
+        .loadAllRelationIds()
+        .skip((_page - 1) * _limit)
+        .take(_limit)
+        .orderBy(`user.${_sort}`, _order === 'ASC' ? 'ASC' : 'DESC')
+        .getManyAndCount();
+
+      return {
+        data: users,
+        meta: new Meta(_page, _limit, total, Math.ceil(total / _limit), QueryOptions.initialize(query)),
+      };
+    } catch (e) {
+      throw new HttpInternalServerError(e.message);
+    }
+  }
+
+  async readUsers(): Promise<any> {
     try {
       const users = await this.userRepository.createQueryBuilder('user').loadAllRelationIds().getMany();
       return users;
@@ -153,7 +179,7 @@ export class UserService implements UserServiceInterface {
 
       if (isExist) await this.redisxService.delKey(`${CACHE_KEY.user}:${uuid}`);
 
-      const user = await this.userRepository.createQueryBuilder('user').where('uuid = :uuid', {uuid: uuid}).getOne();
+      const user = await this.findByUuid(uuid);
 
       if (!user) {
         throw new HttpNotFound('User not found');
@@ -195,11 +221,11 @@ export class UserService implements UserServiceInterface {
 
       if (isExist) await this.redisxService.delKey(`${CACHE_KEY.user}:${uuid}`);
 
-      const user = await this.userRepository.createQueryBuilder('user').where('uuid = :uuid', {uuid: uuid}).getOne();
-
-      await user.updatePassword(password);
+      const user = await this.findByUuid(uuid);
 
       if (!user) return new HttpNotFound('User not found');
+
+      await user.updatePassword(password);
 
       const saveUser = await this.userRepository.save(user);
 
@@ -223,7 +249,7 @@ export class UserService implements UserServiceInterface {
 
       if (isExist) await this.redisxService.delKey(`${CACHE_KEY.user}:${uuid}`);
 
-      const user = await this.userRepository.createQueryBuilder('user').where('uuid = :uuid', {uuid: uuid}).getOne();
+      const user = await this.findByUuid(uuid);
 
       if (!user) return new HttpNotFound('User not found');
 
@@ -234,7 +260,7 @@ export class UserService implements UserServiceInterface {
       const updateUser = await this.userRepository
         .createQueryBuilder('user')
         .update(UserEntity)
-        .set({avatar: avatarUpload})
+        .set({avatar: avatarUpload ?? user.avatar})
         .where('uuid = :uuid', {uuid: uuid})
         .execute();
 
@@ -243,7 +269,7 @@ export class UserService implements UserServiceInterface {
       const userUpdated = await this.findByUuid(uuid);
 
       if (!userUpdated) {
-        throw new HttpNotFound('User not found');
+        return new HttpNotFound('User not found');
       }
 
       await this.redisxService.setKey(`${CACHE_KEY.user}:${uuid}`, JSON.stringify(userUpdated));
@@ -260,7 +286,7 @@ export class UserService implements UserServiceInterface {
 
       if (isExist) await this.redisxService.delKey(`${CACHE_KEY.user}:${uuid}`);
 
-      const user = await this.userRepository.createQueryBuilder('user').where('uuid = :uuid', {uuid: uuid}).getOne();
+      const user = await this.findByUuid(uuid);
 
       if (!user) return new HttpNotFound('User not found');
 
@@ -297,7 +323,7 @@ export class UserService implements UserServiceInterface {
 
       if (isExist) await this.redisxService.delKey(`${CACHE_KEY.user}:${uuid}`);
 
-      const user = await this.userRepository.createQueryBuilder('user').where('uuid = :uuid', {uuid: uuid}).getOne();
+      const user = await this.findByUuid(uuid);
 
       if (!user) return new HttpNotFound('User not found');
 
@@ -337,7 +363,7 @@ export class UserService implements UserServiceInterface {
 
       if (userExist) return new HttpBadRequest('Phone already exists');
 
-      const user = await this.userRepository.createQueryBuilder('user').where('uuid = :uuid', {uuid: uuid}).getOne();
+      const user = await this.findByUuid(uuid);
 
       if (!user) return new HttpNotFound('User not found');
 
@@ -377,7 +403,7 @@ export class UserService implements UserServiceInterface {
 
       if (userExist) return new HttpBadRequest('Email already exists');
 
-      const user = await this.userRepository.createQueryBuilder('user').where('uuid = :uuid', {uuid: uuid}).getOne();
+      const user = await this.findByUuid(uuid);
 
       if (!user) return new HttpNotFound('User not found');
 

@@ -50,6 +50,16 @@ export class BrandController {
     }
   }
 
+  @Get()
+  async getAll(): Promise<any> {
+    const brands = await this.brandService.readAll();
+
+    return HandlerFilter(brands, {
+      message: 'Get brands successfully',
+      data: brands,
+    });
+  }
+
   @Get('q')
   async query(@Query() query: QueryOptions): Promise<any> {
     const brands = await this.brandService.query(query);
@@ -61,7 +71,22 @@ export class BrandController {
     });
   }
 
-  @Get(':name')
+  @Get(':brandId')
+  async readOne(@Param('brandId') brandId: string): Promise<any> {
+    if (isUUID(brandId) === false) {
+      return {
+        message: 'uuid is not valid',
+      };
+    }
+    const brand = await this.brandService.readOne(brandId);
+
+    return HandlerFilter(brand, {
+      message: 'Get brand successfully',
+      data: brand,
+    });
+  }
+
+  @Get('name/:name')
   async findByName(@Param('name') name: string): Promise<any> {
     const brand = await this.brandService.findByName(name);
 
@@ -78,7 +103,7 @@ export class BrandController {
   async create(@Body() createBrandDTO: CreateBrandDTO, @UploadedFile() avatar: Express.Multer.File): Promise<any> {
     const brand = await this.brandService.create(createBrandDTO, avatar);
 
-    if (!isBase64(avatar.buffer.toString('base64'))) {
+    if (avatar && !isBase64(avatar.buffer.toString('base64'))) {
       return {
         message: 'Image is not valid',
       };
@@ -86,21 +111,6 @@ export class BrandController {
 
     return HandlerFilter(brand, {
       message: 'Create brand successfully',
-      data: brand,
-    });
-  }
-
-  @Get(':brandId')
-  async readOne(@Param('brandId') brandId: string): Promise<any> {
-    if (isUUID(brandId) === false) {
-      return {
-        message: 'uuid is not valid',
-      };
-    }
-    const brand = await this.brandService.readOne(brandId);
-
-    return HandlerFilter(brand, {
-      message: 'Get brand successfully',
       data: brand,
     });
   }

@@ -1,22 +1,22 @@
-import {IsEmail, IsNotEmpty, IsPhoneNumber} from 'class-validator';
+import {IsEmail, IsNotEmpty, IsOptional, IsPhoneNumber} from 'class-validator';
 
 export class CreateBrandDTO {
   @IsNotEmpty()
   readonly name: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   readonly description: string;
-
-  @IsNotEmpty()
-  readonly address: string;
-
-  @IsNotEmpty()
-  @IsPhoneNumber('VN')
-  readonly phone: string;
-
-  @IsNotEmpty()
-  readonly website: string;
 
   @IsEmail()
   readonly email: string;
+
+  @IsOptional()
+  readonly address: string;
+
+  @IsOptional()
+  @IsPhoneNumber('VN')
+  readonly phone: string;
+
+  @IsOptional()
+  readonly website: string;
 }
