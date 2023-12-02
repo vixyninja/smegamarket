@@ -200,33 +200,4 @@ export class CategoryService implements CategoryServiceInterface {
       throw new HttpInternalServerError(e.message);
     }
   }
-
-  async deleteIcon(categoryId: string): Promise<any> {
-    try {
-      const category = await this.categoryRepository.findOne({
-        where: {uuid: categoryId},
-      });
-
-      if (!category) {
-        return new HttpNotFound('Category not found');
-      }
-
-      const result = await this.categoryRepository
-        .createQueryBuilder()
-        .update(CategoryEntity)
-        .set({
-          icon: null,
-        })
-        .where('uuid = :uuid', {uuid: categoryId})
-        .execute();
-
-      if (!result) {
-        return new HttpBadRequest('Error deleting category icon');
-      }
-
-      return 'Deleted successfully';
-    } catch (e) {
-      throw new HttpInternalServerError(e.message);
-    }
-  }
 }
