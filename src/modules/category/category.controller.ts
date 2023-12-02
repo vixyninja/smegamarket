@@ -151,23 +151,8 @@ export class CategoryController {
         data: null,
       };
     }
-    const category = await this.categoryService.delete(categoryId);
-    return HandlerFilter(category, {
-      message: category,
-    });
-  }
 
-  @Roles([RoleEnum.ADMIN])
-  @UseGuards(RolesGuard)
-  @Delete(':categoryId/icon')
-  async deleteIcon(@Param('categoryId') categoryId: string): Promise<any> {
-    if (isUUID(categoryId) === false) {
-      return {
-        message: 'Category id is invalid',
-        data: null,
-      };
-    }
-    const category = await this.categoryService.deleteIcon(categoryId);
+    const category = await this.categoryService.delete(categoryId);
     return HandlerFilter(category, {
       message: category,
     });
