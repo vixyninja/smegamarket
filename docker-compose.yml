@@ -54,7 +54,7 @@ services:
     image: patrikx3/p3x-redis-ui:latest
     container_name: regis-adminer
     ports:
-      - 7843:7843
+      - ${REDIS_ADMINER_PORT}:${REDIS_ADMINER_PORT}
     volumes:
       - regis-adminer:/p3x-redis-ui/p3x-redis-ui-store.json
 
