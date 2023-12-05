@@ -1,20 +1,20 @@
-// import {Module} from '@nestjs/common';
-// import {MongooseModule} from '@nestjs/mongoose';
-// import {MongooseConfigService} from './mongodb.service';
+import {Module} from '@nestjs/common';
+import {MongooseModule} from '@nestjs/mongoose';
+import {MongooseProvider} from './mongodb.provider';
 
-// @Module({
-//   imports: [
-//     MongooseModule.forRootAsync({
-//       useClass: MongooseConfigService,
-//       inject: [MongooseConfigService],
-//     }),
-//   ],
-//   providers: [
-//     {
-//       provide: 'DATABASE_CONNECTION',
-//       useClass: MongooseConfigService,
-//     },
-//   ],
-//   exports: [MongooseModule, 'DATABASE_CONNECTION'],
-// })
-// export class MongodbModule {}
+@Module({
+  imports: [
+    MongooseModule.forRootAsync({
+      useClass: MongooseProvider,
+      inject: [MongooseProvider],
+    }),
+  ],
+  providers: [
+    {
+      provide: 'MONGO_PROVIDER',
+      useClass: MongooseProvider,
+    },
+  ],
+  exports: [MongooseModule, 'MONGO_PROVIDER'],
+})
+export class MongodbModule {}
