@@ -12,4 +12,8 @@ export class CreateUserDTO {
 
   @IsNotEmpty()
   readonly password: string;
+
+  readonly deviceToken: string;
+
+  readonly deviceType: string;
 }

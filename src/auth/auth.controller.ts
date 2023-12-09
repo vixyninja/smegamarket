@@ -22,8 +22,6 @@ export class AuthController {
 
   @Post('sign-in')
   async signInEmailAndPassword(@Body() signInEmailDTO: SignInEmailDTO): Promise<any> {
-    if (signInEmailDTO.password !== signInEmailDTO.confirmPassword)
-      return new BadRequestException('Password and confirm password not match');
     const credentials = await this.authService.signInEmailAndPassword(signInEmailDTO);
     return HandlerFilter(credentials, {
       message: 'Sign in successfully',
@@ -47,7 +45,12 @@ export class AuthController {
 
   @Post('sign-in-with-google')
   async signInGoogle(@Body() signInGoogleDTO: SignInGoogleDTO): Promise<any> {
-    return await this.authService.signInWithGoogle(signInGoogleDTO);
+    const credentials = await this.authService.signInWithGoogle(signInGoogleDTO);
+
+    return HandlerFilter(credentials, {
+      message: 'Sign in with google successfully',
+      data: credentials,
+    });
   }
 
   @Get('refresh-token')

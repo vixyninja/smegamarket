@@ -1,7 +1,15 @@
 import {Module} from '@nestjs/common';
 import {AppController} from './app.controller';
 import {AuthModule} from './auth/auth.module';
-import {CloudinaryModule, MailModule, MongodbModule, PostgresDBModule, RedisxModule, ThrottlerxModule} from './configs';
+import {
+  CdnModule,
+  CloudinaryModule,
+  MailModule,
+  MongodbModule,
+  PostgresDBModule,
+  RedisxModule,
+  ThrottlerxModule,
+} from './configs';
 import {LoggerModule} from './core';
 import {BrandModule, CartModule, CategoryModule, MediaModule, OrderModule, ProductModule, UserModule} from './modules';
 
@@ -9,6 +17,7 @@ import {BrandModule, CartModule, CategoryModule, MediaModule, OrderModule, Produ
   imports: [
     PostgresDBModule,
     MongodbModule,
+    CdnModule,
     MailModule,
     CloudinaryModule,
     RedisxModule,
