@@ -50,14 +50,6 @@ services:
     environment:
       REDIS_HOST: ${REDIS_HOST}
 
-  regis-adminer:
-    image: patrikx3/p3x-redis-ui:latest
-    container_name: regis-adminer
-    ports:
-      - ${REDIS_ADMINER_PORT}:${REDIS_ADMINER_PORT}
-    volumes:
-      - regis-adminer:/p3x-redis-ui/p3x-redis-ui-store.json
-
   adminer:
     container_name: adminer
     image: adminer
@@ -70,12 +62,7 @@ services:
       - postgres
     environment:
       ADMINER_PLUGINS: tables-filter tinymce
-      ADMINER_DEFAULT_DB_DRIVER: pgsql
-      ADMINER_DEFAULT_DB_HOST: postgres
-      ADMINER_DEFAULT_DB_NAME: ${POSTGRES_DB}
-      ADMINER_DEFAULT_DB_USERNAME: ${POSTGRES_USER}
-      ADMINER_DEFAULT_DB_PASSWORD: ${POSTGRES_PASSWORD}
-      ADMINER_DESIGN: dracula
+      ADMINER_DESIGN: pepa-linha
 
 volumes:
   api-client:
@@ -89,7 +76,4 @@ volumes:
     driver: local
   redis:
     name: vredis
-    driver: local
-  regis-adminer:
-    name: vregis-adminer
     driver: local

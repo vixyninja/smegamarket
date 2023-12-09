@@ -78,6 +78,7 @@ export class AuthService implements AuthServiceInterface {
       return {
         accessToken: accessToken,
         refreshToken: refreshToken,
+        user: user,
       };
     } catch (e) {
       throw new HttpInternalServerError(e.message);
@@ -97,6 +98,8 @@ export class AuthService implements AuthServiceInterface {
         firstName: firstName,
         lastName: lastName,
         password: password,
+        deviceToken: deviceToken,
+        deviceType: deviceType,
       };
 
       const newUser: UserEntity = await this.userService.createUser(createUserDTO);
@@ -136,7 +139,56 @@ export class AuthService implements AuthServiceInterface {
 
       const payload: TokenPayload = ticker.getPayload();
 
-      return null;
+      const existUser: UserEntity = await this.userService.findForAuth(payload.email);
+
+      if (existUser) {
+        const jwtPayLoad: JWTPayload = {
+          deviceToken: deviceToken,
+          deviceType: deviceType,
+          email: existUser.email,
+          uuid: existUser.uuid,
+          role: existUser.role,
+        };
+
+        const accessToken = await this.jwtService.signToken(jwtPayLoad, 'accessToken');
+
+        const refreshToken = await this.jwtService.signToken(jwtPayLoad, 'refreshToken');
+
+        return {
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+          user: existUser,
+        };
+      } else {
+        const createUserDTO: CreateUserDTO = {
+          email: payload.email,
+          firstName: payload.given_name,
+          lastName: payload.family_name,
+          password: payload.sub,
+          deviceToken: deviceToken,
+          deviceType: deviceType,
+        };
+
+        const newUser: UserEntity = await this.userService.createUser(createUserDTO);
+
+        const jwtPayLoad: JWTPayload = {
+          deviceToken: deviceToken,
+          deviceType: deviceType,
+          email: newUser.email,
+          uuid: newUser.uuid,
+          role: RoleEnum.USER,
+        };
+
+        const accessToken = await this.jwtService.signToken(jwtPayLoad, 'accessToken');
+
+        const refreshToken = await this.jwtService.signToken(jwtPayLoad, 'refreshToken');
+
+        return {
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+          user: newUser,
+        };
+      }
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
