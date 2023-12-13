@@ -29,7 +29,7 @@ export class ProductEntity extends BaseEntity {
     foreignKeyConstraintName: 'FK_PRODUCT_BRAND',
     referencedColumnName: 'uuid',
   })
-  @ManyToOne(() => BrandEntity, (brand) => brand.uuid, {cascade: true})
+  @ManyToOne(() => BrandEntity, (brand) => brand.uuid, {cascade: true, nullable: true})
   brand: BrandEntity;
 
   @JoinColumn({
@@ -43,7 +43,6 @@ export class ProductEntity extends BaseEntity {
   })
   productInformation: ProductInformationEntity[];
 
-  @ManyToMany(() => CategoryEntity, (category) => category.uuid, {cascade: true})
   @JoinTable({
     name: 'product_category',
     joinColumn: {
@@ -57,5 +56,6 @@ export class ProductEntity extends BaseEntity {
       foreignKeyConstraintName: 'FK_CATEGORY_PRODUCT',
     },
   })
+  @ManyToMany(() => CategoryEntity, (category) => category.uuid, {cascade: true, nullable: true})
   categories: CategoryEntity[];
 }

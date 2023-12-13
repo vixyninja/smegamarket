@@ -71,7 +71,7 @@ export class ProductService implements ProductServiceInterface {
         .loadAllRelationIds()
         .skip(_limit * (_page - 1))
         .take(_limit)
-        .orderBy(`product.${_sort}`, _order === 'DESC' ? 'DESC' : 'ASC')
+        .orderBy(`product.${_sort}`, _order)
         .getManyAndCount();
 
       return {
@@ -84,7 +84,25 @@ export class ProductService implements ProductServiceInterface {
   }
 
   async readByName(name: string, query: QueryOptions): Promise<any> {
-    throw new Error('Method not implemented.');
+    try {
+      let {_page, _limit, _order, _sort} = QueryOptions.initialize(query);
+
+      const [products, count] = await this.productRepository
+        .createQueryBuilder('product')
+        .loadAllRelationIds()
+        .where({name})
+        .skip(_limit * (_page - 1))
+        .take(_limit)
+        .orderBy(`product.${_sort}`, _order)
+        .getManyAndCount();
+
+      return {
+        data: products,
+        meta: new Meta(_page, _limit, products.length, Math.ceil(count / _limit), QueryOptions.initialize(query)),
+      };
+    } catch (e) {
+      throw new HttpInternalServerError(e.message);
+    }
   }
 
   async readByBrand(brandId: string, query: QueryOptions): Promise<any> {
@@ -97,7 +115,7 @@ export class ProductService implements ProductServiceInterface {
         .where({brandId})
         .skip(_limit * (_page - 1))
         .take(_limit)
-        .orderBy(`product.${_sort}`, _order === 'DESC' ? 'DESC' : 'ASC')
+        .orderBy(`product.${_sort}`, _order)
         .getManyAndCount();
 
       return {
@@ -119,7 +137,7 @@ export class ProductService implements ProductServiceInterface {
         .where({categoryId})
         .skip(_limit * (_page - 1))
         .take(_limit)
-        .orderBy(`product.${_sort}`, _order === 'DESC' ? 'DESC' : 'ASC')
+        .orderBy(`product.${_sort}`, _order)
         .getManyAndCount();
 
       return {
@@ -140,7 +158,7 @@ export class ProductService implements ProductServiceInterface {
         .loadAllRelationIds()
         .skip(_limit * (_page - 1))
         .take(_limit)
-        .orderBy(`product.${_sort}`, _order === 'DESC' ? 'DESC' : 'ASC')
+        .orderBy(`product.${_sort}`, _order)
         .getManyAndCount();
 
       return {
@@ -152,7 +170,7 @@ export class ProductService implements ProductServiceInterface {
     }
   }
 
-  async readOne(productId: string): Promise<any> {
+  async readOne(productId: string) {
     try {
       const product = await this.productRepository
         .createQueryBuilder('product')
@@ -188,12 +206,12 @@ export class ProductService implements ProductServiceInterface {
         _brand: BrandEntity,
         _category: CategoryEntity[];
 
-      _name = name ?? 'Empty name';
-      _link = link ?? '';
-      _description = description ?? '';
+      _name = name ?? 'No name';
+      _link = link ?? 'No link';
+      _description = description ?? 'No description';
       _detail = detail instanceof Array ? detail : [detail];
 
-      _brand = await this.brandService.findOne(brandId);
+      // _brand = await this.brandService.findOne(brandId);
 
       if (!_brand) {
         return new HttpNotFound('Brand is not exist');
@@ -255,6 +273,8 @@ export class ProductService implements ProductServiceInterface {
 
       return response;
     } catch (e) {
+      console.log(e);
+
       throw new HttpInternalServerError(e.message);
     }
   }

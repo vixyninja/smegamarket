@@ -1,5 +1,6 @@
 import {AuthGuard, HandlerFilter, RoleEnum, Roles, RolesGuard} from '@/core';
 import {QueryOptions} from '@/core/interface';
+import * as faker from '@faker-js/faker';
 import {
   Body,
   Controller,
@@ -15,21 +16,58 @@ import {
 } from '@nestjs/common';
 import {FilesInterceptor} from '@nestjs/platform-express';
 import {isBase64, isUUID} from 'class-validator';
-import {CreateProductDTO, CreateProductInformationDTO} from './dto';
-import {UpdateProductDTO} from './dto/updateProduct.dto';
+import {BrandEntity, BrandService} from '../brand';
+import {CategoryEntity, CategoryService} from '../category';
+import {CreateProductDTO, CreateProductInformationDTO, UpdateProductDTO} from './dto';
 import {ProductService} from './product.service';
 
 @UseGuards(AuthGuard)
 @Controller('product')
 export class ProductController {
-  constructor(private readonly productService: ProductService) {}
+  constructor(
+    private readonly productService: ProductService,
+    private readonly brandService: BrandService,
+    private readonly cateService: CategoryService,
+  ) {}
+
+  @Roles([RoleEnum.ADMIN])
+  @UseGuards(RolesGuard)
+  @Post('import')
+  async import() {
+    let products = [];
+    faker.fakerEN.seed(123);
+
+    const categoryData: CategoryEntity[] = await this.cateService.findAll();
+    const categories = categoryData.map((category) => category.uuid);
+    const brandsData: BrandEntity[] = await this.brandService.readAll();
+    const brands = brandsData.map((brand) => brand.uuid);
+
+    for (let index = 0; index < 20; index++) {
+      let dto: CreateProductDTO = {
+        name: faker.fakerEN.commerce.productName(),
+        category: faker.fakerEN.helpers.arrayElements(categories, 4),
+        brandId: faker.fakerEN.helpers.arrayElements(brands, 1)[0],
+        description: faker.fakerEN.commerce.productDescription(),
+        detail: faker.fakerEN.commerce.productDescription(),
+        link: faker.fakerEN.internet.url(),
+      };
+
+      const product = await this.productService.createProduct(dto, []);
+      products.push(product);
+    }
+
+    return HandlerFilter(products, {
+      message: 'SUCCESS',
+      data: products,
+    });
+  }
 
   @Get()
   async readAll(@Query() query: QueryOptions) {
     const products: any = await this.productService.readAll(query);
 
     return HandlerFilter(products, {
-      message: 'Get products successfully',
+      message: 'SUCCESS',
       data: products.data,
       meta: products.meta,
     });
@@ -46,7 +84,7 @@ export class ProductController {
     const product = await this.productService.readOne(productId);
 
     return {
-      message: 'Get product successfully',
+      message: 'SUCCESS',
       data: product,
     };
   }
@@ -67,7 +105,7 @@ export class ProductController {
     const product = await this.productService.createProduct(createProductDTO, files);
 
     return HandlerFilter(product, {
-      message: 'Create product successfully',
+      message: 'SUCCESS',
       data: product,
     });
   }
@@ -96,7 +134,7 @@ export class ProductController {
     );
 
     return HandlerFilter(productInformation, {
-      message: 'Create product information successfully',
+      message: 'SUCCESS',
       data: productInformation,
     });
   }
