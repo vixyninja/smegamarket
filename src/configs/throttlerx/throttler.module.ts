@@ -17,7 +17,6 @@ import {Environment} from '@/configs/environments';
         storage: new ThrottlerStorageRedisService({
           host: Environment.REDIS_HOST,
           port: Environment.REDIS_PORT,
-          keyPrefix: 'throttler:',
         }),
       }),
     }),

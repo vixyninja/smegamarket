@@ -125,7 +125,7 @@ export class UserService implements UserServiceInterface {
 
   async readUser(uuid: string): Promise<any> {
     try {
-      const isExist = await this.redisxService.getKey(`${CACHE_KEY.user}:${uuid}`);
+      const isExist = await this.redisxService.getKey(`${CACHE_KEY.USER}:${uuid}`);
 
       if (isExist) return JSON.parse(isExist);
 
@@ -135,7 +135,7 @@ export class UserService implements UserServiceInterface {
         return new HttpNotFound('User not found');
       }
 
-      await this.redisxService.setKey(`${CACHE_KEY.user}:${uuid}`, JSON.stringify(user));
+      await this.redisxService.setKey(`${CACHE_KEY.USER}:${uuid}`, JSON.stringify(user));
 
       return user;
     } catch (e) {
@@ -175,9 +175,9 @@ export class UserService implements UserServiceInterface {
 
   async updateUser(uuid: string, updateUserDTO: UpdateUserDTO): Promise<any> {
     try {
-      const isExist = await this.redisxService.getKey(`${CACHE_KEY.user}:${uuid}`);
+      const isExist = await this.redisxService.getKey(`${CACHE_KEY.USER}:${uuid}`);
 
-      if (isExist) await this.redisxService.delKey(`${CACHE_KEY.user}:${uuid}`);
+      if (isExist) await this.redisxService.delKey(`${CACHE_KEY.USER}:${uuid}`);
 
       const user = await this.findByUuid(uuid);
 
@@ -207,7 +207,7 @@ export class UserService implements UserServiceInterface {
         return new HttpNotFound('User not found');
       }
 
-      await this.redisxService.setKey(`${CACHE_KEY.user}:${uuid}`, JSON.stringify(userUpdated));
+      await this.redisxService.setKey(`${CACHE_KEY.USER}:${uuid}`, JSON.stringify(userUpdated));
 
       return userUpdated;
     } catch (e) {
@@ -217,9 +217,9 @@ export class UserService implements UserServiceInterface {
 
   async updateUserPassword(uuid: string, password: string): Promise<any> {
     try {
-      const isExist = await this.redisxService.getKey(`${CACHE_KEY.user}:${uuid}`);
+      const isExist = await this.redisxService.getKey(`${CACHE_KEY.USER}:${uuid}`);
 
-      if (isExist) await this.redisxService.delKey(`${CACHE_KEY.user}:${uuid}`);
+      if (isExist) await this.redisxService.delKey(`${CACHE_KEY.USER}:${uuid}`);
 
       const user = await this.findByUuid(uuid);
 
@@ -235,7 +235,7 @@ export class UserService implements UserServiceInterface {
 
       if (!updateUser) return new HttpBadRequest('Update user failed');
 
-      await this.redisxService.setKey(`${CACHE_KEY.user}:${uuid}`, JSON.stringify(updateUser));
+      await this.redisxService.setKey(`${CACHE_KEY.USER}:${uuid}`, JSON.stringify(updateUser));
 
       return updateUser;
     } catch (e) {
@@ -245,9 +245,9 @@ export class UserService implements UserServiceInterface {
 
   async updateUserAvatar(uuid: string, file: Express.Multer.File): Promise<any> {
     try {
-      const isExist = await this.redisxService.getKey(`${CACHE_KEY.user}:${uuid}`);
+      const isExist = await this.redisxService.getKey(`${CACHE_KEY.USER}:${uuid}`);
 
-      if (isExist) await this.redisxService.delKey(`${CACHE_KEY.user}:${uuid}`);
+      if (isExist) await this.redisxService.delKey(`${CACHE_KEY.USER}:${uuid}`);
 
       const user = await this.findByUuid(uuid);
 
@@ -272,7 +272,7 @@ export class UserService implements UserServiceInterface {
         return new HttpNotFound('User not found');
       }
 
-      await this.redisxService.setKey(`${CACHE_KEY.user}:${uuid}`, JSON.stringify(userUpdated));
+      await this.redisxService.setKey(`${CACHE_KEY.USER}:${uuid}`, JSON.stringify(userUpdated));
 
       return userUpdated;
     } catch (e) {
@@ -282,9 +282,9 @@ export class UserService implements UserServiceInterface {
 
   async updateUserCover(uuid: string, file: Express.Multer.File): Promise<any> {
     try {
-      const isExist = await this.redisxService.getKey(`${CACHE_KEY.user}:${uuid}`);
+      const isExist = await this.redisxService.getKey(`${CACHE_KEY.USER}:${uuid}`);
 
-      if (isExist) await this.redisxService.delKey(`${CACHE_KEY.user}:${uuid}`);
+      if (isExist) await this.redisxService.delKey(`${CACHE_KEY.USER}:${uuid}`);
 
       const user = await this.findByUuid(uuid);
 
@@ -309,7 +309,7 @@ export class UserService implements UserServiceInterface {
         return new HttpNotFound('User not found');
       }
 
-      await this.redisxService.setKey(`${CACHE_KEY.user}:${uuid}`, JSON.stringify(userUpdated));
+      await this.redisxService.setKey(`${CACHE_KEY.USER}:${uuid}`, JSON.stringify(userUpdated));
 
       return userUpdated;
     } catch (e) {
@@ -319,9 +319,9 @@ export class UserService implements UserServiceInterface {
 
   async updateUserStatus(uuid: string, status: StatusUser): Promise<any> {
     try {
-      const isExist = await this.redisxService.getKey(`${CACHE_KEY.user}:${uuid}`);
+      const isExist = await this.redisxService.getKey(`${CACHE_KEY.USER}:${uuid}`);
 
-      if (isExist) await this.redisxService.delKey(`${CACHE_KEY.user}:${uuid}`);
+      if (isExist) await this.redisxService.delKey(`${CACHE_KEY.USER}:${uuid}`);
 
       const user = await this.findByUuid(uuid);
 
@@ -342,7 +342,7 @@ export class UserService implements UserServiceInterface {
         return new HttpNotFound('User not found');
       }
 
-      await this.redisxService.setKey(`${CACHE_KEY.user}:${uuid}`, JSON.stringify(userUpdated));
+      await this.redisxService.setKey(`${CACHE_KEY.USER}:${uuid}`, JSON.stringify(userUpdated));
 
       return userUpdated;
     } catch (e) {
@@ -352,9 +352,9 @@ export class UserService implements UserServiceInterface {
 
   async updateUserPhone(uuid: string, phone: string): Promise<any> {
     try {
-      const isExist = await this.redisxService.getKey(`${CACHE_KEY.user}:${uuid}`);
+      const isExist = await this.redisxService.getKey(`${CACHE_KEY.USER}:${uuid}`);
 
-      if (isExist) await this.redisxService.delKey(`${CACHE_KEY.user}:${uuid}`);
+      if (isExist) await this.redisxService.delKey(`${CACHE_KEY.USER}:${uuid}`);
 
       const userExist = await this.userRepository
         .createQueryBuilder('user')
@@ -382,7 +382,7 @@ export class UserService implements UserServiceInterface {
         return new HttpNotFound('User not found');
       }
 
-      await this.redisxService.setKey(`${CACHE_KEY.user}:${uuid}`, JSON.stringify(userUpdated));
+      await this.redisxService.setKey(`${CACHE_KEY.USER}:${uuid}`, JSON.stringify(userUpdated));
 
       return userUpdated;
     } catch (e) {
@@ -392,9 +392,9 @@ export class UserService implements UserServiceInterface {
 
   async updateUserEmail(uuid: string, email: string): Promise<any> {
     try {
-      const isExist = await this.redisxService.getKey(`${CACHE_KEY.user}:${uuid}`);
+      const isExist = await this.redisxService.getKey(`${CACHE_KEY.USER}:${uuid}`);
 
-      if (isExist) await this.redisxService.delKey(`${CACHE_KEY.user}:${uuid}`);
+      if (isExist) await this.redisxService.delKey(`${CACHE_KEY.USER}:${uuid}`);
 
       const userExist = await this.userRepository
         .createQueryBuilder('user')
@@ -422,7 +422,7 @@ export class UserService implements UserServiceInterface {
         return new HttpNotFound('User not found');
       }
 
-      await this.redisxService.setKey(`${CACHE_KEY.user}:${uuid}`, JSON.stringify(userUpdated));
+      await this.redisxService.setKey(`${CACHE_KEY.USER}:${uuid}`, JSON.stringify(userUpdated));
 
       return userUpdated;
     } catch (e) {
@@ -432,9 +432,9 @@ export class UserService implements UserServiceInterface {
 
   async updateUserRole(uuid: string, role: RoleEnum): Promise<any> {
     try {
-      const isExist = await this.redisxService.getKey(`${CACHE_KEY.user}:${uuid}`);
+      const isExist = await this.redisxService.getKey(`${CACHE_KEY.USER}:${uuid}`);
 
-      if (isExist) await this.redisxService.delKey(`${CACHE_KEY.user}:${uuid}`);
+      if (isExist) await this.redisxService.delKey(`${CACHE_KEY.USER}:${uuid}`);
 
       const updateUser = await this.userRepository
         .createQueryBuilder('user')
@@ -449,7 +449,7 @@ export class UserService implements UserServiceInterface {
 
       if (!user) return new HttpNotFound('User not found');
 
-      await this.redisxService.setKey(`${CACHE_KEY.user}:${uuid}`, JSON.stringify(user));
+      await this.redisxService.setKey(`${CACHE_KEY.USER}:${uuid}`, JSON.stringify(user));
 
       return user;
     } catch (e) {
@@ -459,9 +459,9 @@ export class UserService implements UserServiceInterface {
 
   async deleteUser(uuid: string): Promise<any> {
     try {
-      const isExist = await this.redisxService.getKey(`${CACHE_KEY.user}:${uuid}`);
+      const isExist = await this.redisxService.getKey(`${CACHE_KEY.USER}:${uuid}`);
 
-      if (isExist) await this.redisxService.delKey(`${CACHE_KEY.user}:${uuid}`);
+      if (isExist) await this.redisxService.delKey(`${CACHE_KEY.USER}:${uuid}`);
 
       const user = await this.userRepository
         .createQueryBuilder('user')

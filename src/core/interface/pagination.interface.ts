@@ -27,12 +27,12 @@ export class QueryOptions {
   _sort: string;
 
   @Transform((value) => value.value.toUpperCase())
-  _order: string;
+  _order: 'ASC' | 'DESC';
 
   static initialize(query: QueryOptions): QueryOptions {
     const {_page, _limit, _sort, _order} = query;
 
-    var sort: string, order: string;
+    var sort: string, order: 'ASC' | 'DESC';
     var page: number, limit: number;
 
     if (_sort) {
@@ -62,8 +62,6 @@ export class QueryOptions {
     } else {
       order = 'DESC';
     }
-
-    order = order.trim().toUpperCase();
 
     Number(_page) ? (page = Number(_page)) : (page = 1);
     Number(_limit) ? (limit = Number(_limit)) : (limit = 10);

@@ -2,6 +2,7 @@ import {Module} from '@nestjs/common';
 import {AppController} from './app.controller';
 import {AuthModule} from './auth/auth.module';
 import {
+  CachexModule,
   CdnModule,
   CloudinaryModule,
   MailModule,
@@ -21,6 +22,7 @@ import {BrandModule, CartModule, CategoryModule, MediaModule, OrderModule, Produ
     MailModule,
     CloudinaryModule,
     RedisxModule,
+    CachexModule,
     ThrottlerxModule,
     AuthModule,
     LoggerModule,

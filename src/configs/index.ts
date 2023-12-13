@@ -5,3 +5,5 @@ export * from './database';
 export * from './cloudinary';
 export * from './throttlerx';
 export * from './cdn';
+export * from './cache';
+export * from './redisx';

@@ -1,4 +1,4 @@
-import {Logger} from '@nestjs/common';
+import {Logger, RequestMethod} from '@nestjs/common';
 import {NestFactory} from '@nestjs/core';
 import helmet from 'helmet';
 import {AppModule} from './app.module';
@@ -30,7 +30,9 @@ async function bootstrap() {
     exposedHeaders: ['Content-Range', 'X-Content-Range'],
   });
 
-  app.setGlobalPrefix(prefix);
+  app.setGlobalPrefix(prefix, {
+    exclude: [{path: 'health', method: RequestMethod.GET}],
+  });
 
   app.use(express.static(join(__dirname, '..', 'public')));
 
