@@ -161,7 +161,7 @@ export class CartService implements CartServiceInterface {
 
       const {brandId, price, productId, quantity, size} = arg;
 
-      const product: ProductEntity = await this.productService.readOne(productId);
+      const product = await this.productService.readOne(productId);
 
       if (!product) {
         return new HttpNotFound('Product not found');
