@@ -39,17 +39,14 @@ export class CachexService {
     return result;
   }
 
-  async getAllData(): Promise<any> {
+  async getAllKeyValues(): Promise<any> {
     const keys = await this.cacheManager.store.keys();
 
-    const data = await Promise.all(
-      keys.map(async (key) => {
-        const value = await this.get(key);
-        return {key, value};
-      }),
-    );
+    const values = await Promise.all(keys.map((key) => this.get(key)));
 
-    console.log([...keys]);
-    console.log(data);
+    return keys.reduce((acc, key, index) => {
+      acc[key] = values[index];
+      return acc;
+    }, {});
   }
 }

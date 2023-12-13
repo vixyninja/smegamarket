@@ -1,10 +1,11 @@
-import {HttpBadRequest, HttpInternalServerError, HttpNotFound} from '@/core';
+import {CACHE_KEY, CACHE_KEY_TTL, HttpBadRequest, HttpInternalServerError, HttpNotFound} from '@/core';
 import {Injectable, Logger} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
 import {MediaEntity, MediaService} from '../media';
 import {CreateCategoryDTO, UpdateCategoryDTO} from './dto';
 import {CategoryEntity} from './entities';
+import {RedisxService} from '@/configs';
 
 interface CategoryServiceInterface {
   findAll(): Promise<any>;
@@ -22,6 +23,7 @@ export class CategoryService implements CategoryServiceInterface {
     @InjectRepository(CategoryEntity)
     private readonly categoryRepository: Repository<CategoryEntity>,
     private readonly mediaService: MediaService,
+    private readonly redisxService: RedisxService,
   ) {}
 
   async findAll(): Promise<any> {
@@ -62,17 +64,21 @@ export class CategoryService implements CategoryServiceInterface {
 
   async readOne(categoryId: string): Promise<any> {
     try {
-      const category = await this.categoryRepository
-        .createQueryBuilder('category')
-        .loadAllRelationIds()
-        .where('category.uuid = :uuid', {uuid: categoryId})
-        .getOne();
+      return await this.redisxService.wrap(
+        `${CACHE_KEY.CATEGORY}:${categoryId}`,
+        async () => {
+          const category = await this.categoryRepository
+            .createQueryBuilder('category')
+            .loadAllRelationIds()
+            .where('category.uuid = :uuid', {uuid: categoryId})
+            .getOne();
 
-      if (!category) {
-        return new HttpBadRequest('Category not found');
-      }
-
-      return category;
+          if (!category) {
+            return new HttpBadRequest('Category not found');
+          }
+        },
+        CACHE_KEY_TTL.CATEGORY,
+      );
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
@@ -99,7 +105,7 @@ export class CategoryService implements CategoryServiceInterface {
       if (file) {
         _icon = await this.mediaService.uploadFile(file);
       } else {
-        _icon = await this.mediaService.findFile('2c3659a3-c8f9-421a-998f-74c2a119a87c');
+        // _icon = await this.mediaService.findFile('2c3659a3-c8f9-421a-998f-74c2a119a87c');
       }
 
       const createCategory = await this.categoryRepository
@@ -174,9 +180,19 @@ export class CategoryService implements CategoryServiceInterface {
         return new HttpBadRequest('Error updating category');
       }
 
-      const result = await this.findOne(categoryId);
+      return await this.redisxService.forceWrap(
+        `${CACHE_KEY.CATEGORY}:${categoryId}`,
+        async () => {
+          const result = await this.findOne(categoryId);
 
-      return result;
+          if (!result) {
+            return new HttpBadRequest('Error updating category');
+          }
+
+          return result;
+        },
+        CACHE_KEY_TTL.CATEGORY,
+      );
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
@@ -194,6 +210,8 @@ export class CategoryService implements CategoryServiceInterface {
       if (!result) {
         return new HttpBadRequest('Error deleting category');
       }
+
+      await this.redisxService.delKey(`${CACHE_KEY.CATEGORY}:${categoryId}`);
 
       return 'Deleted successfully';
     } catch (e) {

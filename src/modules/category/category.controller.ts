@@ -27,7 +27,7 @@ export class CategoryController {
   @Post('import')
   async import(): Promise<any> {
     try {
-      faker.fakerVI.seed(123);
+      faker.fakerEN.seed(123);
 
       let cateRnd: string[] = [
         'Vegetables',
@@ -49,15 +49,15 @@ export class CategoryController {
 
       for (let i = 0; i < cateRnd.length; i++) {
         const category: CreateCategoryDTO = {
-          name: cateRnd[i].toString() + i,
-          description: faker.fakerVI.lorem.paragraph(),
+          name: cateRnd[i],
+          description: faker.fakerEN.commerce.productDescription(),
         };
         const response = await this.categoryService.create(category, null);
         result.push(response);
       }
 
       return HandlerFilter(result, {
-        message: 'Import categories successfully',
+        message: 'SUCCESS',
         data: result,
       });
     } catch (e) {
@@ -70,7 +70,7 @@ export class CategoryController {
     const categories = await this.categoryService.findAll();
 
     return HandlerFilter(categories, {
-      message: 'Get all categories successfully',
+      message: 'SUCCESS',
       data: categories,
     });
   }
@@ -92,7 +92,7 @@ export class CategoryController {
     const category = await this.categoryService.create(createCategoryDTO, icon);
 
     return HandlerFilter(category, {
-      message: 'Create category successfully',
+      message: 'SUCCESS',
       data: category,
     });
   }
@@ -107,7 +107,7 @@ export class CategoryController {
     }
     const category = await this.categoryService.readOne(categoryId);
     return HandlerFilter(category, {
-      message: 'Get category successfully',
+      message: 'SUCCESS',
       data: category,
     });
   }
@@ -136,7 +136,7 @@ export class CategoryController {
 
     const category = await this.categoryService.update(categoryId, updateCategoryDTO, file);
     return HandlerFilter(category, {
-      message: 'Update category successfully',
+      message: 'SUCCESS',
       data: category,
     });
   }

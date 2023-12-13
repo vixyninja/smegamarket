@@ -19,4 +19,6 @@ import {CachexService} from './cache.service';
     CachexService,
   ],
 })
-export class CachexModule {}
+export class CachexModule {
+  constructor() {}
+}

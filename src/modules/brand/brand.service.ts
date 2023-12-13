@@ -1,12 +1,12 @@
+import {CachexService, RedisxService} from '@/configs';
 import {CACHE_KEY, CACHE_KEY_TTL, HttpBadRequest, HttpForbidden, HttpInternalServerError} from '@/core';
 import {Meta, QueryOptions} from '@/core/interface';
-import {Inject, Injectable} from '@nestjs/common';
+import {Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
 import {MediaEntity, MediaService} from '../media';
 import {CreateBrandDTO, UpdateBrandDTO} from './dto';
 import {BrandEntity} from './entities';
-import {CachexService} from '@/configs';
 
 interface BrandServiceInterface {
   findOne(brandId: string): Promise<any>;
@@ -26,7 +26,7 @@ export class BrandService implements BrandServiceInterface {
     @InjectRepository(BrandEntity)
     private readonly brandRepository: Repository<BrandEntity>,
     private readonly mediaService: MediaService,
-    private readonly cachexService: CachexService,
+    private readonly redisxService: RedisxService,
   ) {}
 
   async findOne(brandId: string): Promise<any> {
@@ -133,7 +133,7 @@ export class BrandService implements BrandServiceInterface {
 
   async readOne(brandId: string): Promise<any> {
     try {
-      return await this.cachexService.wrap(
+      return await this.redisxService.wrap(
         `${CACHE_KEY.BRAND}:${brandId}`,
         async () => {
           const brand = await this.brandRepository
@@ -156,31 +156,28 @@ export class BrandService implements BrandServiceInterface {
 
   async readName(name: string): Promise<any> {
     try {
-      return await this.cachexService.wrap(
-        `${CACHE_KEY.BRAND}:${name}`,
-        async () => {
-          return await this.brandRepository
-            .createQueryBuilder('brand')
-            .loadAllRelationIds()
-            .where('LOWER(brand.name) LIKE LOWER(:name)', {name: `%${name}%`})
-            .getMany();
-        },
-        CACHE_KEY_TTL.BRAND,
-      );
+      const brands = await this.brandRepository
+        .createQueryBuilder('brand')
+        .loadAllRelationIds()
+        .where('LOWER(brand.name) LIKE LOWER(:name)', {name: `%${name}%`})
+        .getMany();
+
+      if (!brands) {
+        return new HttpForbidden('Brand not found');
+      }
+
+      return brands;
     } catch (e) {
+      console.log(e);
       throw new HttpInternalServerError(e.message);
     }
   }
 
   async readAll(): Promise<any> {
     try {
-      return await this.cachexService.wrap(
-        CACHE_KEY.BRAND,
-        async () => {
-          return await this.brandRepository.createQueryBuilder('brand').loadAllRelationIds().getMany();
-        },
-        CACHE_KEY_TTL.BRAND,
-      );
+      const brands = await this.brandRepository.createQueryBuilder('brand').loadAllRelationIds().getMany();
+
+      return brands;
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
@@ -241,9 +238,7 @@ export class BrandService implements BrandServiceInterface {
         return new HttpBadRequest('Error updating brand');
       }
 
-      await this.cachexService.del(`${CACHE_KEY.BRAND}`);
-
-      return await this.cachexService.forceWrap(
+      return await this.redisxService.forceWrap(
         `${CACHE_KEY.BRAND}:${brandId}`,
         async () => {
           const result = await this.findOne(brandId);
@@ -251,6 +246,8 @@ export class BrandService implements BrandServiceInterface {
           if (!result) {
             return new HttpBadRequest('Error updating brand');
           }
+
+          return result;
         },
         CACHE_KEY_TTL.BRAND,
       );
@@ -277,6 +274,8 @@ export class BrandService implements BrandServiceInterface {
         return new HttpBadRequest('Error deleting brand');
       }
 
+      await this.redisxService.delKey(`${CACHE_KEY.BRAND}`);
+
       return 'Brand deleted successfully';
     } catch (e) {
       throw new HttpInternalServerError(e.message);
@@ -301,6 +300,8 @@ export class BrandService implements BrandServiceInterface {
       if (!response) {
         return new HttpBadRequest('Error deleting image');
       }
+
+      await this.redisxService.delKey(`${CACHE_KEY.BRAND}:${brandId}`);
 
       return 'Image deleted successfully';
     } catch (e) {
