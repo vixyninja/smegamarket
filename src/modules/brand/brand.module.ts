@@ -1,4 +1,4 @@
-import {JWTService, RedisxModule} from '@/configs';
+import {CachexService, JWTService} from '@/configs';
 import {Module} from '@nestjs/common';
 import {JwtService} from '@nestjs/jwt';
 import {TypeOrmModule} from '@nestjs/typeorm';
@@ -8,9 +8,9 @@ import {BrandService} from './brand.service';
 import {BrandEntity} from './entities';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([BrandEntity]), MediaModule, RedisxModule],
+  imports: [TypeOrmModule.forFeature([BrandEntity]), MediaModule],
   controllers: [BrandController],
-  providers: [BrandService, JwtService, JWTService],
+  providers: [BrandService, JwtService, JWTService, CachexService],
   exports: [BrandService],
 })
 export class BrandModule {}

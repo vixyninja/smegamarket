@@ -50,6 +50,14 @@ services:
     environment:
       REDIS_HOST: ${REDIS_HOST}
 
+  regis-adminer:
+    image: patrikx3/p3x-redis-ui:latest
+    container_name: regis-adminer
+    ports:
+      - 7843:7843
+    volumes:
+      - /home/vixyninja/Desktop/p3x-redis-ui-settings:/settings
+
   adminer:
     container_name: adminer
     image: adminer
@@ -62,7 +70,7 @@ services:
       - postgres
     environment:
       ADMINER_PLUGINS: tables-filter tinymce
-      ADMINER_DESIGN: pepa-linha
+      ADMINER_DESIGN: dracula
 
 volumes:
   api-client:

@@ -39,7 +39,7 @@ export class CartService implements CartServiceInterface {
         return new HttpNotFound('User not found');
       }
 
-      const cartRedis = await this.redisxService.getKey(`${CACHE_KEY.cart}:${userId}`);
+      const cartRedis = await this.redisxService.getKey(`${CACHE_KEY.CART}:${userId}`);
 
       if (cartRedis) {
         return {
@@ -59,7 +59,7 @@ export class CartService implements CartServiceInterface {
         return new HttpBadRequest('Something went wrong');
       }
 
-      await this.redisxService.setKey(`${CACHE_KEY.cart}:${userId}`, JSON.stringify(cart));
+      await this.redisxService.setKey(`${CACHE_KEY.CART}:${userId}`, JSON.stringify(cart));
 
       return {
         message: 'Get cart successfully',

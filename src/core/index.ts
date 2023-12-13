@@ -7,3 +7,4 @@ export * from './pipes';
 export * from './constants';
 export * from './base';
 export * from './logger';
+export * from './utils';

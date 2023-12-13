@@ -1,6 +1,7 @@
 import {AuthGuard, HandlerFilter, HttpInternalServerError, RoleEnum, Roles, RolesGuard} from '@/core';
 import {QueryOptions} from '@/core/interface';
 import * as faker from '@faker-js/faker';
+import {CacheInterceptor} from '@nestjs/cache-manager';
 import {
   Body,
   Controller,
@@ -30,21 +31,22 @@ export class BrandController {
   @Post('import')
   async import(): Promise<any> {
     try {
-      faker.fakerVI.seed(124);
-      for (let i = 0; i < 20; i++) {
+      faker.fakerEN.seed(124);
+      let brands = [];
+      for (let i = 0; i < 10; i++) {
         const brand = new BrandEntity();
-        brand.name =
-          faker.fakerVI.commerce.department() + ' ' + faker.fakerVI.helpers.arrayElement(['Co., Ltd', 'JSC']);
-        brand.description = faker.fakerVI.lorem.paragraph();
-        brand.address = faker.fakerVI.location.streetAddress();
-        brand.phone = faker.fakerVI.phone.number();
-        brand.email = faker.fakerVI.internet.email();
-        brand.website = faker.fakerVI.internet.url();
-
-        await this.brandService.create(brand, null);
+        brand.name = faker.fakerEN.company.name();
+        brand.description = faker.fakerEN.company.catchPhraseDescriptor();
+        brand.address = faker.fakerEN.location.streetAddress();
+        brand.phone = faker.fakerEN.phone.number();
+        brand.email = faker.fakerEN.internet.email();
+        brand.website = faker.fakerEN.internet.url();
+        let res = await this.brandService.create(brand, null);
+        brands.push(res);
       }
       return {
-        message: 'Brands imported successfully',
+        message: 'SUCCESS',
+        data: brands,
       };
     } catch (e) {
       throw new HttpInternalServerError(e.message);
@@ -52,21 +54,23 @@ export class BrandController {
   }
 
   @Get()
+  @UseInterceptors(CacheInterceptor)
   async getAll(): Promise<any> {
     const brands = await this.brandService.readAll();
 
     return HandlerFilter(brands, {
-      message: 'Get brands successfully',
+      message: 'SUCCESS',
       data: brands,
     });
   }
 
   @Get('q')
+  @UseInterceptors(CacheInterceptor)
   async query(@Query() query: QueryOptions): Promise<any> {
     const brands = await this.brandService.query(query);
 
     return HandlerFilter(brands, {
-      message: 'Get brands successfully',
+      message: 'SUCCESS',
       data: brands.data,
       meta: brands.meta,
     });
@@ -82,17 +86,17 @@ export class BrandController {
     const brand = await this.brandService.readOne(brandId);
 
     return HandlerFilter(brand, {
-      message: 'Get brand successfully',
+      message: 'SUCCESS',
       data: brand,
     });
   }
 
   @Get('name/:name')
   async findByName(@Param('name') name: string): Promise<any> {
-    const brand = await this.brandService.findByName(name);
+    const brand = await this.brandService.readName(name);
 
     return HandlerFilter(brand, {
-      message: 'Get brand successfully',
+      message: 'SUCCESS',
       data: brand,
     });
   }
@@ -111,7 +115,7 @@ export class BrandController {
     }
 
     return HandlerFilter(brand, {
-      message: 'Create brand successfully',
+      message: 'SUCCESS',
       data: brand,
     });
   }
@@ -140,7 +144,7 @@ export class BrandController {
     const brand = await this.brandService.update(brandId, updateBrandDTO, file);
 
     return HandlerFilter(brand, {
-      message: 'Update brand successfully',
+      message: 'SUCCESS',
       data: brand,
     });
   }

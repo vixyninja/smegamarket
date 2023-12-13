@@ -1,7 +1,7 @@
 import {CanActivate, ExecutionContext, Injectable} from '@nestjs/common';
 import {Reflector} from '@nestjs/core';
 import {RoleEnum} from './role.enum';
-import {HttpBadRequest} from '../filter';
+import {HttpUnauthorized} from '../filter';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -17,11 +17,11 @@ export class RolesGuard implements CanActivate {
       const user = request.user;
       const hasRole = () => requiredRoles.every((role) => user.role?.includes(role));
       if (!(user && user.role && hasRole())) {
-        throw new HttpBadRequest('You do not have permission to access this resource');
+        throw new HttpUnauthorized('You do not have permission to access this resource');
       }
       return true;
     } catch (e) {
-      throw new HttpBadRequest(e.message);
+      throw e;
     }
   }
 }

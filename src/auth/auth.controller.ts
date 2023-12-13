@@ -24,7 +24,7 @@ export class AuthController {
   async signInEmailAndPassword(@Body() signInEmailDTO: SignInEmailDTO): Promise<any> {
     const credentials = await this.authService.signInEmailAndPassword(signInEmailDTO);
     return HandlerFilter(credentials, {
-      message: 'Sign in successfully',
+      message: 'SUCCESS',
       data: credentials,
       status: 200,
     });
@@ -37,7 +37,7 @@ export class AuthController {
     const credentials = await this.authService.signUpEmailAndPassword(signUpEmailDTO);
 
     return HandlerFilter(credentials, {
-      message: 'Sign up successfully',
+      message: 'SUCCESS',
       data: credentials,
       status: 201,
     });
@@ -48,7 +48,7 @@ export class AuthController {
     const credentials = await this.authService.signInWithGoogle(signInGoogleDTO);
 
     return HandlerFilter(credentials, {
-      message: 'Sign in with google successfully',
+      message: 'SUCCESS',
       data: credentials,
     });
   }
@@ -58,7 +58,7 @@ export class AuthController {
     if (!token.token) return new BadRequestException('Refresh token is required');
     const credentials = await this.authService.refreshToken(token.token);
     return HandlerFilter(credentials, {
-      message: 'Refresh token successfully',
+      message: 'SUCCESS',
       data: credentials,
     });
   }
@@ -67,7 +67,7 @@ export class AuthController {
   async signOut(@Query() information: {information: string}): Promise<any> {
     await this.authService.logOut(information.information);
     return {
-      message: 'Log out successfully',
+      message: 'SUCCESS',
     };
   }
 

@@ -1,7 +1,6 @@
 import {CanActivate, ExecutionContext, Injectable, UnauthorizedException} from '@nestjs/common';
 import {Reflector} from '@nestjs/core';
 import {Observable} from 'rxjs';
-
 import {JWTService} from 'src/configs';
 import {HttpUnauthorized, IS_PUBLIC_KEY} from 'src/core';
 
@@ -26,7 +25,7 @@ export class AuthGuard implements CanActivate {
       request['user'] = decoded;
       return true;
     } catch (error) {
-      throw new HttpUnauthorized();
+      throw error;
     }
   }
 

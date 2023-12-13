@@ -1,7 +1,7 @@
 import {HttpException, HttpStatus} from '@nestjs/common';
-import * as TEXT from '../constants';
+import {CLIENT_ERROR_RESPONSES} from '../constants';
 export class HttpBadRequest extends HttpException {
   constructor(error?: any) {
-    super(error || TEXT.HTTP_BAD_REQUEST, HttpStatus.BAD_REQUEST);
+    super(error || CLIENT_ERROR_RESPONSES.BAD_REQUEST, HttpStatus.BAD_REQUEST);
   }
 }
