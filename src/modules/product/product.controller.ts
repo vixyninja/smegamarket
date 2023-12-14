@@ -10,11 +10,12 @@ import {
   Post,
   Put,
   Query,
+  UploadedFile,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import {FilesInterceptor} from '@nestjs/platform-express';
+import {FileInterceptor, FilesInterceptor} from '@nestjs/platform-express';
 import {isBase64, isUUID} from 'class-validator';
 import {BrandEntity, BrandService} from '../brand';
 import {CategoryEntity, CategoryService} from '../category';
@@ -42,11 +43,14 @@ export class ProductController {
     const brandsData: BrandEntity[] = await this.brandService.findAll();
     const brands = brandsData.map((brand) => brand.uuid);
 
+    console.log(categories);
+    console.log(brands);
+
     for (let index = 0; index < 20; index++) {
       let dto: CreateProductDTO = {
         name: faker.fakerEN.commerce.productName() + ' ' + faker.fakerEN.number.int({min: 1, max: 100}),
         category: faker.fakerEN.helpers.arrayElements(categories, {
-          min: 2,
+          min: 3,
           max: 7,
         }),
         brandId: faker.fakerEN.helpers.arrayElements(brands, 1)[0],
@@ -55,7 +59,7 @@ export class ProductController {
         link: faker.fakerEN.internet.url(),
       };
 
-      const product = await this.productService.createProduct(dto, []);
+      const product = await this.productService.createProduct(dto, null);
       products.push(product);
     }
 
@@ -94,18 +98,16 @@ export class ProductController {
 
   @Roles([RoleEnum.ADMIN])
   @UseGuards(RolesGuard)
-  @UseInterceptors(FilesInterceptor('files'))
+  @UseInterceptors(FileInterceptor('file'))
   @Post()
-  async createProduct(@Body() createProductDTO: CreateProductDTO, @UploadedFiles() files: Express.Multer.File[]) {
-    files.forEach((file) => {
-      if (!isBase64(Buffer.from(file.buffer).toString('base64'))) {
-        return {
-          message: 'File is not valid',
-        };
-      }
-    });
+  async createProduct(@Body() createProductDTO: CreateProductDTO, @UploadedFile() file: Express.Multer.File) {
+    if (!isBase64(Buffer.from(file[0].buffer).toString('base64'))) {
+      return {
+        message: 'File is not valid',
+      };
+    }
 
-    const product = await this.productService.createProduct(createProductDTO, files);
+    const product = await this.productService.createProduct(createProductDTO, file);
 
     return HandlerFilter(product, {
       message: 'SUCCESS',

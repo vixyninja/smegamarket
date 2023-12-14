@@ -45,5 +45,10 @@ export class ProductInformationEntity extends BaseEntity {
       foreignKeyConstraintName: 'FK_MEDIA_PRODUCT_INFORMATION',
     },
   })
-  medias: MediaEntity[];
+  media: MediaEntity[];
+
+  constructor(partial: Partial<ProductInformationEntity>) {
+    super();
+    Object.assign(this, partial);
+  }
 }
