@@ -10,6 +10,7 @@ import {BrandEntity} from './entities';
 
 interface BrandServiceInterface {
   findOne(brandId: string): Promise<any>;
+  findAll(): Promise<any>;
   create(arg: CreateBrandDTO, file: Express.Multer.File): Promise<any>;
   query(query: QueryOptions): Promise<any>;
   readOne(brandId: string): Promise<any>;
@@ -31,11 +32,17 @@ export class BrandService implements BrandServiceInterface {
 
   async findOne(brandId: string): Promise<any> {
     try {
-      const brand = await this.brandRepository
-        .createQueryBuilder('brand')
-        .loadAllRelationIds()
-        .where({uuid: brandId})
-        .getOne();
+      const brand = await this.brandRepository.createQueryBuilder('brand').where({uuid: brandId}).getOne();
+
+      return brand;
+    } catch (e) {
+      throw new HttpInternalServerError(e.message);
+    }
+  }
+
+  async findAll(): Promise<any> {
+    try {
+      const brand = await this.brandRepository.createQueryBuilder('brand').getMany();
 
       return brand;
     } catch (e) {

@@ -18,7 +18,7 @@ import {FilesInterceptor} from '@nestjs/platform-express';
 import {isBase64, isUUID} from 'class-validator';
 import {BrandEntity, BrandService} from '../brand';
 import {CategoryEntity, CategoryService} from '../category';
-import {CreateProductDTO, CreateProductInformationDTO, UpdateProductDTO} from './dto';
+import {CreateProductDTO, UpdateProductDTO} from './dto';
 import {ProductService} from './product.service';
 
 @UseGuards(AuthGuard)
@@ -39,13 +39,16 @@ export class ProductController {
 
     const categoryData: CategoryEntity[] = await this.cateService.findAll();
     const categories = categoryData.map((category) => category.uuid);
-    const brandsData: BrandEntity[] = await this.brandService.readAll();
+    const brandsData: BrandEntity[] = await this.brandService.findAll();
     const brands = brandsData.map((brand) => brand.uuid);
 
     for (let index = 0; index < 20; index++) {
       let dto: CreateProductDTO = {
         name: faker.fakerEN.commerce.productName() + ' ' + faker.fakerEN.number.int({min: 1, max: 100}),
-        category: faker.fakerEN.helpers.arrayElements(categories, 4),
+        category: faker.fakerEN.helpers.arrayElements(categories, {
+          min: 2,
+          max: 7,
+        }),
         brandId: faker.fakerEN.helpers.arrayElements(brands, 1)[0],
         description: faker.fakerEN.commerce.productDescription(),
         detail: faker.fakerEN.commerce.productDescription(),
