@@ -38,11 +38,7 @@ export class ProductService implements ProductServiceInterface {
 
   async findOne(productId: string): Promise<any> {
     try {
-      const product = await this.productRepository
-        .createQueryBuilder('product')
-        .loadAllRelationIds()
-        .where({uuid: productId})
-        .getOne();
+      const product = await this.productRepository.createQueryBuilder('product').where({uuid: productId}).getOne();
 
       return product;
     } catch (e) {
@@ -141,24 +137,24 @@ export class ProductService implements ProductServiceInterface {
     try {
       let {_page, _limit, _order, _sort} = QueryOptions.initialize(query);
 
-      // const [products, count] = await this.productRepository
-      //   .createQueryBuilder('product')
-      //   .loadAllRelationIds()
-      //   .skip(_limit * (_page - 1))
-      //   .take(_limit)
-      //   .orderBy(`product.${_sort}`, _order)
-      //   .getManyAndCount();
-
-      const test = await this.productRepository.createQueryBuilder('product').loadAllRelationIds().getMany();
+      const [products, count] = await this.productRepository
+        .createQueryBuilder('product')
+        .innerJoin('product.categories', 'categories')
+        .innerJoin('product.brand', 'brand')
+        .loadAllRelationIds({
+          relations: ['brand', 'categories'],
+        })
+        .skip(_limit * (_page - 1))
+        .take(_limit)
+        .orderBy(`product.${_sort}`, _order)
+        .getManyAndCount();
 
       return {
-        data: test,
+        data: products,
+        meta: new Meta(_page, _limit, products.length, Math.ceil(count / _limit), QueryOptions.initialize(query)),
       };
-      // return {
-      //   data: products,
-      //   meta: new Meta(_page, _limit, products.length, Math.ceil(count / _limit), QueryOptions.initialize(query)),
-      // };
     } catch (e) {
+      console.log(e);
       throw new HttpBadRequest(e.message);
     }
   }
@@ -227,7 +223,7 @@ export class ProductService implements ProductServiceInterface {
           link: _link,
           productInformation: [],
           detail: [],
-          brand: null,
+          brand: _brand,
           categories: [],
         })
         .execute();
@@ -240,7 +236,7 @@ export class ProductService implements ProductServiceInterface {
         _category = await this.categoryService.findMany([...category]);
 
         await this.productRepository
-          .createQueryBuilder('product_category')
+          .createQueryBuilder('product_categories')
           .relation(ProductEntity, 'categories')
           .of(product.raw[0].uuid)
           .add(_category);

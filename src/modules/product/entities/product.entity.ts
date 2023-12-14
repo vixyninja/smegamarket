@@ -25,7 +25,7 @@ export class ProductEntity extends BaseEntity {
 
   @OneToMany(() => ProductInformationEntity, (productInformation) => productInformation.uuid, {
     cascade: true,
-    nullable: true,
+    nullable: false,
   })
   @JoinColumn({
     name: 'product_information_uuid',
@@ -34,9 +34,17 @@ export class ProductEntity extends BaseEntity {
   })
   productInformation: ProductInformationEntity[];
 
-  @ManyToMany(() => CategoryEntity, (category) => category.uuid, {cascade: true, nullable: true})
+  @ManyToOne(() => BrandEntity, (brand) => brand.uuid, {cascade: true, nullable: true})
+  @JoinColumn({
+    name: 'brand_uuid',
+    foreignKeyConstraintName: 'FK_PRODUCT_BRAND',
+    referencedColumnName: 'uuid',
+  })
+  brand: BrandEntity;
+
+  @ManyToMany(() => CategoryEntity, (category) => category.uuid, {cascade: true, nullable: false})
   @JoinTable({
-    name: 'product_category',
+    name: 'product_categories',
     joinColumn: {
       name: 'product_uuid',
       referencedColumnName: 'uuid',
@@ -49,14 +57,6 @@ export class ProductEntity extends BaseEntity {
     },
   })
   categories: CategoryEntity[];
-
-  @ManyToOne(() => BrandEntity, (brand) => brand.uuid, {cascade: true, nullable: true})
-  @JoinColumn({
-    name: 'brand_uuid',
-    foreignKeyConstraintName: 'FK_PRODUCT_BRAND',
-    referencedColumnName: 'uuid',
-  })
-  brand: BrandEntity;
 
   constructor(partial: Partial<ProductEntity>) {
     super();

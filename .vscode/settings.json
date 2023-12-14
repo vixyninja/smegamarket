@@ -5,6 +5,7 @@
     "cloudinary",
     "DBNAME",
     "flushall",
+    "gosing",
     "INITDB",
     "maxlength",
     "metatype",
