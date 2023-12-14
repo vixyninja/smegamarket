@@ -1,6 +1,6 @@
 import {BaseEntity} from '@/core';
-import {Column, Entity, JoinColumn, JoinTable, OneToOne} from 'typeorm';
-import {UserEntity} from '../../user';
+import {UserEntity} from '@/modules/user';
+import {Column, Entity, JoinColumn, OneToOne} from 'typeorm';
 
 @Entity({
   name: 'cart',
