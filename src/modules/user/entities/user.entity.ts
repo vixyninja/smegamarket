@@ -41,11 +41,11 @@ export class UserEntity extends BaseEntity {
   @Column({type: 'varchar', length: 225, default: null})
   deviceType: string;
 
-  @JoinColumn({name: 'avatar', foreignKeyConstraintName: 'FK_USER_AVATAR', referencedColumnName: 'uuid'})
+  @JoinColumn({name: 'avatar_uuid', foreignKeyConstraintName: 'FK_USER_AVATAR', referencedColumnName: 'uuid'})
   @OneToOne(() => MediaEntity, {cascade: true, nullable: true})
   avatar: MediaEntity;
 
-  @JoinColumn({name: 'cover', foreignKeyConstraintName: 'FK_USER_COVER', referencedColumnName: 'uuid'})
+  @JoinColumn({name: 'cover_uuid', foreignKeyConstraintName: 'FK_USER_COVER', referencedColumnName: 'uuid'})
   @OneToOne(() => MediaEntity, {cascade: true, nullable: true})
   cover: MediaEntity;
 

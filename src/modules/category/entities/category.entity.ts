@@ -15,7 +15,7 @@ export class CategoryEntity extends BaseEntity {
   @Column({type: 'varchar', length: 225, nullable: true})
   description: string;
 
-  @JoinColumn({name: 'icon', foreignKeyConstraintName: 'FK_CATEGORY_ICON', referencedColumnName: 'uuid'})
+  @JoinColumn({name: 'icon_uuid', foreignKeyConstraintName: 'FK_CATEGORY_ICON', referencedColumnName: 'uuid'})
   @ManyToOne(() => MediaEntity, (media) => media.uuid, {nullable: true, cascade: true})
   icon: MediaEntity;
 }

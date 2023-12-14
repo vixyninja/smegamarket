@@ -44,7 +44,7 @@ export class ProductController {
 
     for (let index = 0; index < 20; index++) {
       let dto: CreateProductDTO = {
-        name: faker.fakerEN.commerce.productName(),
+        name: faker.fakerEN.commerce.productName() + ' ' + faker.fakerEN.number.int({min: 1, max: 100}),
         category: faker.fakerEN.helpers.arrayElements(categories, 4),
         brandId: faker.fakerEN.helpers.arrayElements(brands, 1)[0],
         description: faker.fakerEN.commerce.productDescription(),
@@ -107,35 +107,6 @@ export class ProductController {
     return HandlerFilter(product, {
       message: 'SUCCESS',
       data: product,
-    });
-  }
-
-  @Roles([RoleEnum.ADMIN])
-  @UseGuards(RolesGuard)
-  @UseInterceptors(FilesInterceptor('files'))
-  @Post(':productId')
-  async createProductInformation(
-    @Body() createProductInformationDTO: CreateProductInformationDTO,
-    @UploadedFiles() files: Express.Multer.File[],
-    @Param('productId') productId: string,
-  ) {
-    files.forEach((file) => {
-      if (!isBase64(Buffer.from(file.buffer).toString('base64'))) {
-        return {
-          message: 'File is not valid',
-        };
-      }
-    });
-
-    const productInformation = await this.productService.createProductInformation(
-      productId,
-      createProductInformationDTO,
-      files,
-    );
-
-    return HandlerFilter(productInformation, {
-      message: 'SUCCESS',
-      data: productInformation,
     });
   }
 

@@ -52,7 +52,7 @@ export class CategoryService implements CategoryServiceInterface {
     try {
       const categories = await this.categoryRepository
         .createQueryBuilder('category')
-        .loadAllRelationIds()
+        // .loadAllRelationIds()
         .where('category.uuid IN (:...uuid)', {uuid: categoryIds})
         .getMany();
 

@@ -5,13 +5,13 @@ import {TypeOrmModule} from '@nestjs/typeorm';
 import {BrandModule} from '../brand';
 import {CategoryModule} from '../category';
 import {MediaModule} from '../media';
-import {ProductEntity, ProductInformationEntity, ProductMediaEntity} from './entities';
+import {ProductEntity, ProductInformationEntity} from './entities';
 import {ProductController} from './product.controller';
 import {ProductService} from './product.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ProductEntity, ProductInformationEntity, ProductMediaEntity]),
+    TypeOrmModule.forFeature([ProductEntity, ProductInformationEntity]),
     MediaModule,
     CategoryModule,
     BrandModule,
