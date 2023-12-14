@@ -6,9 +6,8 @@ import {Repository} from 'typeorm';
 import {BrandEntity, BrandService} from '../brand';
 import {CategoryEntity, CategoryService} from '../category';
 import {MediaEntity, MediaService} from '../media';
-import {CreateProductDTO, CreateProductInformationDTO, UpdateProductDTO, UpdateProductInformationDTO} from './dto';
-import {ProductEntity, ProductInformationEntity, ProductMediaEntity} from './entities';
-import {ProductEnum, SaleEnum, SizeEnum, StatusEnum} from './enum';
+import {CreateProductDTO, UpdateProductDTO} from './dto';
+import {ProductEntity} from './entities';
 
 interface ProductServiceInterface {
   findAll(query: QueryOptions): Promise<any>;
@@ -19,18 +18,11 @@ interface ProductServiceInterface {
   readByBrand(brandId: string, query: QueryOptions): Promise<any>;
   readByCategory(categoryId: string, query: QueryOptions): Promise<any>;
   createProduct(arg: CreateProductDTO, files: Express.Multer.File[]): Promise<any>;
-  createProductInformation(
-    productId: string,
-    arg: CreateProductInformationDTO,
-    files: Express.Multer.File[],
-  ): Promise<any>;
   updateProduct(productId: string, arg: UpdateProductDTO, files: Express.Multer.File[]): Promise<any>;
-  updateProductInformation(
-    productId: string,
-    productInformationId: string,
-    arg: UpdateProductInformationDTO,
-    files: Express.Multer.File[],
-  ): Promise<any>;
+
+  updateProductCategory(productId: string, categoryId: string[]): Promise<any>;
+  updateProductMedia(productId: string, mediaId: Express.Multer.File[]): Promise<any>;
+  updateProductBrand(productId: string, brandId: string): Promise<any>;
   deleteProduct(productId: string): Promise<any>;
 }
 
@@ -39,10 +31,6 @@ export class ProductService implements ProductServiceInterface {
   constructor(
     @InjectRepository(ProductEntity)
     private readonly productRepository: Repository<ProductEntity>,
-    @InjectRepository(ProductInformationEntity)
-    private readonly productInformationRepository: Repository<ProductInformationEntity>,
-    @InjectRepository(ProductMediaEntity)
-    private readonly productMediaRepository: Repository<ProductMediaEntity>,
     private readonly brandService: BrandService,
     private readonly categoryService: CategoryService,
     private readonly mediaService: MediaService,
@@ -153,18 +141,23 @@ export class ProductService implements ProductServiceInterface {
     try {
       let {_page, _limit, _order, _sort} = QueryOptions.initialize(query);
 
-      const [products, count] = await this.productRepository
-        .createQueryBuilder('product')
-        .loadAllRelationIds()
-        .skip(_limit * (_page - 1))
-        .take(_limit)
-        .orderBy(`product.${_sort}`, _order)
-        .getManyAndCount();
+      // const [products, count] = await this.productRepository
+      //   .createQueryBuilder('product')
+      //   .loadAllRelationIds()
+      //   .skip(_limit * (_page - 1))
+      //   .take(_limit)
+      //   .orderBy(`product.${_sort}`, _order)
+      //   .getManyAndCount();
+
+      const test = await this.productRepository.createQueryBuilder('product').loadAllRelationIds().getMany();
 
       return {
-        data: products,
-        meta: new Meta(_page, _limit, products.length, Math.ceil(count / _limit), QueryOptions.initialize(query)),
+        data: test,
       };
+      // return {
+      //   data: products,
+      //   meta: new Meta(_page, _limit, products.length, Math.ceil(count / _limit), QueryOptions.initialize(query)),
+      // };
     } catch (e) {
       throw new HttpBadRequest(e.message);
     }
@@ -190,82 +183,75 @@ export class ProductService implements ProductServiceInterface {
 
   async createProduct(arg: CreateProductDTO, files: Express.Multer.File[]): Promise<any> {
     try {
-      const {brandId, description, link, name, category, detail} = arg;
+      const {brandId, category, description, detail, link, name} = arg;
 
-      const existProduct = await this.productRepository.createQueryBuilder('product').where({name: name}).getOne();
+      var _brand: BrandEntity;
+      var _category: CategoryEntity[];
+      var _media: MediaEntity[];
+      var _detail: string[];
+      var _description: string;
+      var _link: string;
+      var _name: string;
 
-      if (existProduct) {
-        return new HttpNotFound('Product already exist');
+      if (brandId) {
+        _brand = await this.brandService.findOne(brandId);
       }
 
-      var _name: string,
-        _description: string,
-        _link: string,
-        _media: MediaEntity[],
-        _detail: string[],
-        _brand: BrandEntity,
-        _category: CategoryEntity[];
-
-      _name = name ?? 'No name';
-      _link = link ?? 'No link';
-      _description = description ?? 'No description';
-      _detail = detail instanceof Array ? detail : [detail];
-
-      // _brand = await this.brandService.findOne(brandId);
-
-      if (!_brand) {
-        return new HttpNotFound('Brand is not exist');
+      if (files) {
+        _media = await this.mediaService.uploadFiles([...files]);
       }
 
-      _category = await this.categoryService.findMany([...category]);
-
-      if (!_category) {
-        return new HttpNotFound('Category is not exist');
+      if (detail) {
+        _detail = detail instanceof Array ? detail : [detail];
       }
 
-      if (files.length != 0) {
-        _media = await this.mediaService.uploadFiles(files);
-
-        if (!_media) {
-          return new HttpBadRequest('Upload file failed');
-        }
+      if (description) {
+        _description = description.trim();
       }
 
-      const createProduct = await this.productRepository
+      if (link) {
+        _link = link.trim();
+      }
+
+      if (name) {
+        _name = name.trim();
+      }
+
+      const product = await this.productRepository
         .createQueryBuilder('product')
         .insert()
         .into(ProductEntity)
         .values({
           name: _name,
-          brand: _brand,
           description: _description,
-          detail: _detail,
           link: _link,
           productInformation: [],
+          detail: [],
+          brand: null,
+          categories: [],
         })
         .execute();
 
-      if (!createProduct) {
+      if (!product) {
         return new HttpBadRequest('Create product failed');
       }
 
-      _media &&
-        (await this.productRepository
-          .createQueryBuilder('product_media')
-          .insert()
-          .into('product_media')
-          .values(_media.map((file) => ({productId: createProduct.raw[0].uuid, imageId: file.uuid})))
-          .execute());
+      if (category) {
+        _category = await this.categoryService.findMany([...category]);
 
-      _category &&
-        (await this.productRepository
+        await this.productRepository
           .createQueryBuilder('product_category')
-          .insert()
-          .into('product_category')
-          .values(_category.map((cate) => ({productId: createProduct.raw[0].uuid, categoryId: cate.uuid})))
-          .execute());
+          .relation(ProductEntity, 'categories')
+          .of(product.raw[0].uuid)
+          .add(_category);
+      }
 
-      const response = await this.findOne(createProduct.raw[0].uuid);
+      const response = await this.productRepository
+        .createQueryBuilder('product')
+        .where({uuid: product.raw[0].uuid})
+        .getOne();
+
+      console.log(response);
 
       if (!response) {
         return new HttpBadRequest('Create product failed');
@@ -279,112 +265,36 @@ export class ProductService implements ProductServiceInterface {
     }
   }
 
-  async createProductInformation(
-    productId: string,
-    arg: CreateProductInformationDTO,
-    files: Express.Multer.File[],
-  ): Promise<any> {
+  async updateProduct(productId: string, arg: UpdateProductDTO, files: Express.Multer.File[]): Promise<any> {
     try {
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
   }
 
-  async updateProduct(productId: string, arg: UpdateProductDTO, files: Express.Multer.File[]): Promise<any> {
+  async updateProductBrand(productId: string, brandId: string): Promise<any> {
     try {
-      const {brandId, description, link, name, category, detail} = arg;
-
-      const existProduct = await this.productRepository.createQueryBuilder('product').where({name: name}).getOne();
+      const existProduct = await this.findOne(productId);
 
       if (!existProduct) {
         return new HttpNotFound('Product is not exist');
       }
 
-      var _name: string,
-        _description: string,
-        _link: string,
-        _media: MediaEntity[],
-        _detail: string[],
-        _brand: BrandEntity,
-        _category: CategoryEntity[];
+      const existBrand = await this.brandService.findOne(brandId);
 
-      _name = name ?? 'No name';
-      _link = link ?? '';
-      _description = description ?? '';
-      _detail = detail instanceof Array ? detail : [detail];
-
-      _brand = await this.brandService.findOne(brandId);
-
-      if (!_brand) {
+      if (!existBrand) {
         return new HttpNotFound('Brand is not exist');
-      } else {
-        existProduct.brand = _brand;
-      }
-
-      _category = await this.categoryService.findMany([...category]);
-
-      if (!_category) {
-        return new HttpNotFound('Category is not exist');
-      }
-
-      if (files.length != 0) {
-        const temp = await this.mediaService.uploadFiles(files);
-
-        if (!temp) {
-          return new HttpBadRequest('Upload file failed');
-        }
-
-        _media = [...temp];
-
-        if (!_media) {
-          return new HttpBadRequest('Upload file failed');
-        }
       }
 
       const updateProduct = await this.productRepository
         .createQueryBuilder('product')
+        .where({uuid: productId})
         .update()
-        .set({
-          name: _name,
-          brand: _brand,
-          description: _description,
-          detail: _detail,
-          link: _link,
-        })
+        .set({brand: existBrand})
         .execute();
 
       if (!updateProduct) {
         return new HttpBadRequest('Update product failed');
-      }
-
-      if (_media) {
-        await this.productRepository
-          .createQueryBuilder('product_media')
-          .delete()
-          .where({productId: updateProduct.raw[0].uuid})
-          .execute();
-
-        await this.productRepository
-          .createQueryBuilder('product_media')
-          .insert()
-          .into('product_media')
-          .values(_media.map((file) => ({productId: updateProduct.raw[0].uuid, imageId: file.uuid})))
-          .execute();
-      }
-
-      if (_category) {
-        await this.productRepository
-          .createQueryBuilder('product_category')
-          .delete()
-          .where({productId: updateProduct.raw[0].uuid})
-          .execute();
-
-        await this.productRepository
-          .createQueryBuilder('product_category')
-          .insert()
-          .into('product_category')
-          .values(_category.map((cate) => ({productId: updateProduct.raw[0].uuid, categoryId: cate.uuid})))
-          .execute();
       }
 
       const response = await this.findOne(updateProduct.raw[0].uuid);
@@ -399,22 +309,82 @@ export class ProductService implements ProductServiceInterface {
     }
   }
 
-  async updateProductInformation(
-    productId: string,
-    productInformationId: string,
-    arg: UpdateProductInformationDTO,
-    files: Express.Multer.File[],
-  ): Promise<any> {
-    throw new Error('Method not implemented.');
+  async updateProductCategory(productId: string, categoryId: string[]): Promise<any> {
+    try {
+      const existProduct = await this.findOne(productId);
+
+      if (!existProduct) {
+        return new HttpNotFound('Product is not exist');
+      }
+
+      const existCategory: CategoryEntity[] = await this.categoryService.findMany([...categoryId]);
+
+      if (existCategory.length != 0) {
+        const updateProduct = await this.productRepository
+          .createQueryBuilder('product')
+          .where({uuid: productId})
+          .update()
+          .set({categories: existCategory})
+          .execute();
+
+        if (!updateProduct) {
+          return new HttpBadRequest('Update product failed');
+        }
+
+        const response = await this.findOne(updateProduct.raw[0].uuid);
+
+        if (!response) {
+          return new HttpBadRequest('Update product failed');
+        }
+
+        return response;
+      }
+    } catch (e) {
+      throw new HttpInternalServerError(e.message);
+    }
+  }
+
+  async updateProductMedia(productId: string, mediaId: Express.Multer.File[]): Promise<any> {
+    try {
+      const existProduct = await this.findOne(productId);
+
+      if (!existProduct) {
+        return new HttpNotFound('Product is not exist');
+      }
+
+      const existMedia: MediaEntity[] = await this.mediaService.uploadFiles([...mediaId]);
+
+      if (existMedia.length != 0) {
+        const updateProduct = await this.productRepository
+          .createQueryBuilder('product')
+          .where({uuid: productId})
+          .update()
+          .set({productInformation: existMedia})
+          .execute();
+
+        if (!updateProduct) {
+          return new HttpBadRequest('Update product failed');
+        }
+
+        const response = await this.findOne(updateProduct.raw[0].uuid);
+
+        if (!response) {
+          return new HttpBadRequest('Update product failed');
+        }
+
+        return response;
+      }
+    } catch (e) {
+      throw new HttpInternalServerError(e.message);
+    }
   }
 
   async deleteProduct(productId: string): Promise<any> {
     try {
       const response = await this.productRepository
-        .createQueryBuilder()
-        .delete()
-        .from(ProductEntity)
+        .createQueryBuilder('product')
         .where({uuid: productId})
+        .delete()
         .execute();
 
       if (!response) {
