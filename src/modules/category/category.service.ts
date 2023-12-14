@@ -28,7 +28,7 @@ export class CategoryService implements CategoryServiceInterface {
 
   async findAll(): Promise<any> {
     try {
-      return await this.categoryRepository.createQueryBuilder('category').getMany();
+      return await this.categoryRepository.createQueryBuilder('category').loadAllRelationIds().getMany();
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
@@ -37,7 +37,6 @@ export class CategoryService implements CategoryServiceInterface {
   async findOne(categoryId: string): Promise<any> {
     try {
       const category = await this.categoryRepository.createQueryBuilder('category').where({uuid: categoryId}).getOne();
-
       return category;
     } catch (e) {
       throw new HttpInternalServerError(e.message);
@@ -48,7 +47,6 @@ export class CategoryService implements CategoryServiceInterface {
     try {
       const categories = await this.categoryRepository
         .createQueryBuilder('category')
-        // .loadAllRelationIds()
         .where('category.uuid IN (:...uuid)', {uuid: categoryIds})
         .getMany();
 

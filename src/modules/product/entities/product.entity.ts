@@ -1,8 +1,9 @@
 import {BaseEntity} from '@/core';
 import {BrandEntity} from '@/modules/brand';
 import {CategoryEntity} from '@/modules/category';
-import {Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany} from 'typeorm';
+import {Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne} from 'typeorm';
 import {ProductInformationEntity} from './product_information.entity';
+import {MediaEntity} from '@/modules/media';
 
 @Entity({
   name: 'product',
@@ -25,7 +26,7 @@ export class ProductEntity extends BaseEntity {
 
   @OneToMany(() => ProductInformationEntity, (productInformation) => productInformation.uuid, {
     cascade: true,
-    nullable: false,
+    nullable: true,
   })
   @JoinColumn({
     name: 'product_information_uuid',
@@ -57,6 +58,14 @@ export class ProductEntity extends BaseEntity {
     },
   })
   categories: CategoryEntity[];
+
+  @OneToOne(() => MediaEntity, (media) => media.uuid, {cascade: true, nullable: true})
+  @JoinColumn({
+    name: 'media_uuid',
+    referencedColumnName: 'uuid',
+    foreignKeyConstraintName: 'FK_PRODUCT_MEDIA',
+  })
+  media: MediaEntity;
 
   constructor(partial: Partial<ProductEntity>) {
     super();
