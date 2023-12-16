@@ -3,10 +3,9 @@ import {Module} from '@nestjs/common';
 import {JwtService} from '@nestjs/jwt';
 import {TypeOrmModule} from '@nestjs/typeorm';
 import {MediaModule} from '../media';
+import {AdminController, UserController} from './controllers';
 import {UserEntity} from './entities';
-import {UserController} from './user.controller';
-import {UserService} from './user.service';
-import {AdminController} from './admin.controller';
+import {UserService} from './services';
 
 @Module({
   imports: [TypeOrmModule.forFeature([UserEntity]), RedisxModule, MediaModule],

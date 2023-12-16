@@ -1,38 +1,17 @@
 import {RedisxService} from '@/configs';
 import {CACHE_KEY, HttpBadRequest, HttpInternalServerError, HttpNotFound, RoleEnum} from '@/core';
+import {Meta, QueryOptions} from '@/core/interface';
 import {Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
-import {MediaService} from '../media';
-import {CreateUserDTO, UpdateUserDTO} from './dto';
-import {UserEntity} from './entities';
-import {StatusUser} from './enum';
-import {Meta, QueryOptions} from '@/core/interface';
+import {MediaService} from '../../media';
+import {CreateUserDTO, UpdateUserDTO} from '../dto';
+import {UserEntity} from '../entities';
+import {StatusUser} from '../enum';
+import {IUserService} from '../interfaces';
 
-interface UserServiceInterface {
-  // user
-  findForAuth(email: string): Promise<any>;
-  findByEmail(email: string): Promise<any>;
-  findByPhone(phone: string): Promise<any>;
-  findByUuid(uuid: string): Promise<any>;
-  createUser(arg: CreateUserDTO): Promise<any>;
-  readUser(uuid: string): Promise<any>;
-  query(query: QueryOptions): Promise<any>;
-  updateUser(uuid: string, arg: UpdateUserDTO): Promise<any>;
-  updateUserPassword(uuid: string, password: string): Promise<any>;
-  updateUserAvatar(uuid: string, avatar: Express.Multer.File): Promise<any>;
-  updateUserCover(uuid: string, cover: Express.Multer.File): Promise<any>;
-  updateUserPhone(uuid: string, phone: string): Promise<any>;
-  updateUserEmail(uuid: string, email: string): Promise<any>;
-
-  //   admin
-  readUsers(): Promise<any>;
-  updateUserStatus(uuid: string, status: StatusUser): Promise<any>;
-  updateUserRole(uuid: string, role: RoleEnum): Promise<any>;
-  deleteUser(uuid: string): Promise<any>;
-}
 @Injectable()
-export class UserService implements UserServiceInterface {
+export class UserService implements IUserService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,

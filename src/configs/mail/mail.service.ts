@@ -1,6 +1,5 @@
 import {MailerService} from '@nestjs-modules/mailer';
 import {Injectable} from '@nestjs/common';
-
 import {GROUP_EMAIL, HttpInternalServerError} from 'src/core';
 
 @Injectable()
