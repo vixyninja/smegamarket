@@ -13,6 +13,7 @@ import {
 import {LoggerModule} from './core';
 import {EventModule} from './event';
 import {BrandModule, CartModule, CategoryModule, MediaModule, OrderModule, ProductModule, UserModule} from './modules';
+import { AbcModule } from './abc/abc.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import {BrandModule, CartModule, CategoryModule, MediaModule, OrderModule, Produ
     CategoryModule,
     CartModule,
     OrderModule,
+    AbcModule,
   ],
   providers: [],
   controllers: [AppController],

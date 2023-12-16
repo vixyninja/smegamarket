@@ -1,9 +1,9 @@
-import {Body, Controller, Delete, Get, Injectable, Param, Patch, Put, Query, UseGuards} from '@nestjs/common';
-import {UserService} from './user.service';
-import {QueryOptions} from '@/core/interface';
 import {AuthGuard, HandlerFilter, HttpBadRequest, RoleEnum, Roles, RolesGuard} from '@/core';
+import {QueryOptions} from '@/core/interface';
+import {Body, Controller, Delete, Get, Param, Put, Query, UseGuards} from '@nestjs/common';
 import {isUUID} from 'class-validator';
-import {StatusUser} from './enum';
+import {StatusUser} from '../enum';
+import {UserService} from '../services';
 
 @UseGuards(AuthGuard)
 @Controller('admin')

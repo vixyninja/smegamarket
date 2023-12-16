@@ -11,14 +11,14 @@ import {
 import {Server, Socket} from 'socket.io';
 
 @WebSocketGateway({
-  // namespace: 'event',
-  // path: 'event',
-  // cors: {
-  //   origin: '*',
-  //   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  //   allowedHeaders: ['Content-Type', 'Authorization'],
-  //   credentials: true,
-  // },
+  namespace: 'event',
+  path: '/event',
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  },
 })
 export class EventGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()

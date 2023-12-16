@@ -1,9 +1,9 @@
-import {AuthGuard, HandlerFilter, HttpBadRequest, RoleEnum, UserDynamic} from '@/core';
-import {Body, Controller, Get, Patch, Put, UploadedFile, UseGuards, UseInterceptors} from '@nestjs/common';
+import {AuthGuard, HandlerFilter, HttpBadRequest, UserDynamic} from '@/core';
+import {Body, Controller, Get, Put, UploadedFile, UseGuards, UseInterceptors} from '@nestjs/common';
 import {FileInterceptor} from '@nestjs/platform-express';
 import {isEmail, isPhoneNumber, isUUID} from 'class-validator';
-import {UpdateUserDTO} from './dto';
-import {UserService} from './user.service';
+import {UpdateUserDTO} from '../dto';
+import {UserService} from '../services';
 
 @UseGuards(AuthGuard)
 @Controller('user')
