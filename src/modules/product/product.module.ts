@@ -6,8 +6,8 @@ import {BrandModule} from '../brand';
 import {CategoryModule} from '../category';
 import {MediaModule} from '../media';
 import {ProductEntity, ProductInformationEntity} from './entities';
-import {ProductController} from './product.controller';
-import {ProductService} from './product.service';
+import {ProductController} from './controllers';
+import {ProductService} from './services';
 
 @Module({
   imports: [

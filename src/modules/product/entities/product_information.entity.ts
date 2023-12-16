@@ -1,7 +1,7 @@
 import {BaseEntity} from '@/core';
-import {Column, Entity, JoinTable, ManyToMany} from 'typeorm';
-import {ProductEnum, SaleEnum, SizeEnum, StatusEnum} from '../enum';
 import {MediaEntity} from '@/modules/media';
+import {Column, Entity, JoinColumn, OneToMany} from 'typeorm';
+import {ProductEnum, SaleEnum, SizeEnum, StatusEnum} from '../enum';
 
 @Entity({
   name: 'product_information',
@@ -31,19 +31,11 @@ export class ProductInformationEntity extends BaseEntity {
   @Column({type: 'text', nullable: true})
   description: string;
 
-  @ManyToMany(() => MediaEntity, (media) => media.uuid, {cascade: true, nullable: true})
-  @JoinTable({
-    name: 'product_information_file',
-    joinColumn: {
-      name: 'product_information_id',
-      referencedColumnName: 'uuid',
-      foreignKeyConstraintName: 'FK_PRODUCT_INFORMATION_FILE',
-    },
-    inverseJoinColumn: {
-      name: 'media_uuid',
-      referencedColumnName: 'uuid',
-      foreignKeyConstraintName: 'FK_MEDIA_PRODUCT_INFORMATION',
-    },
+  @OneToMany(() => MediaEntity, (media) => media.uuid, {cascade: true, nullable: true})
+  @JoinColumn({
+    name: 'media_uuid',
+    referencedColumnName: 'uuid',
+    foreignKeyConstraintName: 'FK_PRODUCT_INFORMATION_MEDIA',
   })
   media: MediaEntity[];
 
