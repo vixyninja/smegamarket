@@ -24,17 +24,6 @@ export class ProductEntity extends BaseEntity {
   @Column({type: 'varchar', length: 225, nullable: true})
   link: string;
 
-  @OneToMany(() => ProductInformationEntity, (productInformation) => productInformation.uuid, {
-    cascade: true,
-    nullable: true,
-  })
-  @JoinColumn({
-    name: 'product_information_uuid',
-    foreignKeyConstraintName: 'FK_PRODUCT_PRODUCT_INFORMATION',
-    referencedColumnName: 'uuid',
-  })
-  productInformation: ProductInformationEntity[];
-
   @ManyToOne(() => BrandEntity, (brand) => brand.uuid, {cascade: true, nullable: true})
   @JoinColumn({
     name: 'brand_uuid',
@@ -66,6 +55,17 @@ export class ProductEntity extends BaseEntity {
     foreignKeyConstraintName: 'FK_PRODUCT_MEDIA',
   })
   media: MediaEntity;
+
+  @OneToMany(() => ProductInformationEntity, (productInformation) => productInformation.uuid, {
+    cascade: true,
+    nullable: true,
+  })
+  @JoinColumn({
+    name: 'product_information_uuid',
+    foreignKeyConstraintName: 'FK_PRODUCT_PRODUCT_INFORMATION',
+    referencedColumnName: 'uuid',
+  })
+  productInformation: ProductInformationEntity[];
 
   constructor(partial: Partial<ProductEntity>) {
     super();

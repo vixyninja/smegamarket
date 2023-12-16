@@ -1,44 +1,32 @@
 import {HttpBadRequest, HttpInternalServerError, HttpNotFound} from '@/core';
 import {Meta, QueryOptions} from '@/core/interface';
+import {BrandEntity, BrandService} from '@/modules/brand';
+import {CategoryEntity, CategoryService} from '@/modules/category';
+import {MediaEntity, MediaService} from '@/modules/media';
 import {Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
-import {Repository} from 'typeorm';
-import {BrandEntity, BrandService} from '../brand';
-import {CategoryEntity, CategoryService} from '../category';
-import {MediaEntity, MediaService} from '../media';
-import {CreateProductDTO, UpdateProductDTO} from './dto';
-import {ProductEntity} from './entities';
-
-interface ProductServiceInterface {
-  findAll(query: QueryOptions): Promise<any>;
-  findOne(productId: string): Promise<any>;
-
-  readOne(productId: string): Promise<any>;
-  readByName(name: string, query: QueryOptions): Promise<any>;
-  readByBrand(brandId: string, query: QueryOptions): Promise<any>;
-  readByCategory(categoryId: string, query: QueryOptions): Promise<any>;
-  createProduct(arg: CreateProductDTO, file: Express.Multer.File): Promise<any>;
-  updateProduct(productId: string, arg: UpdateProductDTO, files: Express.Multer.File[]): Promise<any>;
-
-  updateProductCategory(productId: string, categoryId: string[]): Promise<any>;
-  updateProductMedia(productId: string, file: Express.Multer.File): Promise<any>;
-  updateProductBrand(productId: string, brandId: string): Promise<any>;
-  deleteProduct(productId: string): Promise<any>;
-}
+import {Repository, SelectQueryBuilder} from 'typeorm';
+import {CreateProductDTO, UpdateProductDTO} from '../dto';
+import {ProductEntity} from '../entities';
+import {IProductService} from '../interfaces';
 
 @Injectable()
-export class ProductService implements ProductServiceInterface {
+export class ProductService implements IProductService {
+  private queryBuilder: SelectQueryBuilder<ProductEntity>;
+
   constructor(
     @InjectRepository(ProductEntity)
     private readonly productRepository: Repository<ProductEntity>,
     private readonly brandService: BrandService,
     private readonly categoryService: CategoryService,
     private readonly mediaService: MediaService,
-  ) {}
+  ) {
+    this.queryBuilder = this.productRepository.createQueryBuilder('product');
+  }
 
   async findOne(productId: string): Promise<any> {
     try {
-      const product = await this.productRepository.createQueryBuilder('product').where({uuid: productId}).getOne();
+      const product = await this.queryBuilder.where({uuid: productId}).getOne();
 
       return product;
     } catch (e) {

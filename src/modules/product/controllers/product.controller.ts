@@ -17,10 +17,10 @@ import {
 } from '@nestjs/common';
 import {FileInterceptor, FilesInterceptor} from '@nestjs/platform-express';
 import {isBase64, isUUID} from 'class-validator';
-import {BrandEntity, BrandService} from '../brand';
-import {CategoryEntity, CategoryService} from '../category';
-import {CreateProductDTO, UpdateProductDTO} from './dto';
-import {ProductService} from './product.service';
+import {BrandEntity, BrandService} from '../../brand';
+import {CategoryEntity, CategoryService} from '../../category';
+import {CreateProductDTO, UpdateProductDTO} from '../dto';
+import {ProductService} from '../services/product.service';
 
 @UseGuards(AuthGuard)
 @Controller('product')
