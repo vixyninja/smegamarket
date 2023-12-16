@@ -11,6 +11,7 @@ RUN npm install --force && npm cache clean --force
 COPY --chown=node:node . .
 USER node
 
+
 ###################
 # BUILD FOR PRODUCTION
 ###################
