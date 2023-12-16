@@ -1,23 +1,24 @@
 import {Module} from '@nestjs/common';
 import {AppController} from './app.controller';
-import {AuthModule} from './auth/auth.module';
+import {AuthModule} from './auth';
 import {
   CachexModule,
   CdnModule,
   CloudinaryModule,
   MailModule,
-  MongodbModule,
   PostgresDBModule,
   RedisxModule,
   ThrottlerxModule,
 } from './configs';
 import {LoggerModule} from './core';
+import {EventModule} from './event';
 import {BrandModule, CartModule, CategoryModule, MediaModule, OrderModule, ProductModule, UserModule} from './modules';
 
 @Module({
   imports: [
     PostgresDBModule,
-    MongodbModule,
+    // MongodbModule,
+    EventModule,
     CdnModule,
     MailModule,
     CloudinaryModule,

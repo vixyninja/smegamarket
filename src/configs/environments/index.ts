@@ -58,6 +58,9 @@ const API_SECRET: string = process.env.API_SECRET;
 // firebase
 const GOOGLE_CLIENT_ID: string = process.env.GOOGLE_CLIENT_ID;
 
+// web socket
+const SOCKET_PORT: number = +process.env.SOCKET_PORT;
+
 export const Environment = {
   GOOGLE_CLIENT_ID,
   ACCESS_TOKEN_EXPIRATION_TIME,
@@ -94,4 +97,5 @@ export const Environment = {
   THROTTLE_TTL,
   SERVER_NAME,
   FOLDER_NAME,
+  SOCKET_PORT,
 };
