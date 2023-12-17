@@ -1,4 +1,4 @@
-export enum ProductEnum {
+export enum ProductTypeEnum {
   Vegetable = 'Vegetable',
   Fruit = 'Fruit',
   Meat = 'Meat',
@@ -6,20 +6,20 @@ export enum ProductEnum {
   Etc = 'Etc',
 }
 
-export enum StatusEnum {
+export enum ProductStatusEnum {
   Active = 'Active',
   Inactive = 'Inactive',
   Deleted = 'Deleted',
 }
 
-export enum SizeEnum {
+export enum ProductSizeEnum {
   None = 'None',
   Small = 'Small',
   Medium = 'Medium',
   Large = 'Large',
 }
 
-export enum SaleEnum {
+export enum ProductSaleEnum {
   None = 'None',
   One = '5',
   Two = '10',

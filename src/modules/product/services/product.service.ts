@@ -7,7 +7,7 @@ import {Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository, SelectQueryBuilder} from 'typeorm';
 import {CreateProductDTO, UpdateProductDTO} from '../dto';
-import {ProductEntity} from '../entities';
+import {ProductEntity, ProductInformationEntity} from '../entities';
 import {IProductService} from '../interfaces';
 
 @Injectable()
@@ -166,7 +166,7 @@ export class ProductService implements IProductService {
     }
   }
 
-  async createProduct(arg: CreateProductDTO, file: Express.Multer.File): Promise<any> {
+  async createProduct(arg: CreateProductDTO, media: Express.Multer.File): Promise<any> {
     try {
       const {brandId, category, description, detail, link, name} = arg;
 
@@ -182,8 +182,8 @@ export class ProductService implements IProductService {
         _brand = await this.brandService.findOne(brandId);
       }
 
-      if (file) {
-        _media = await this.mediaService.uploadFile(file);
+      if (media) {
+        _media = await this.mediaService.uploadFile(media);
       }
 
       if (detail) {
@@ -244,6 +244,41 @@ export class ProductService implements IProductService {
 
   async updateProduct(productId: string, arg: UpdateProductDTO, files: Express.Multer.File[]): Promise<any> {
     try {
+    } catch (e) {
+      throw new HttpInternalServerError(e.message);
+    }
+  }
+
+  async updateProductInformation(productId: string, productInformation: ProductInformationEntity): Promise<any> {
+    try {
+      const existProduct = await this.findOne(productId);
+
+      if (!existProduct) {
+        return new HttpNotFound('Product is not exist');
+      }
+
+      console.log(productInformation);
+
+      const updateProduct = await this.productRepository
+        .createQueryBuilder('product')
+        .where({uuid: productId})
+        .update()
+        .set({
+          productInformation: [...existProduct.productInformation, productInformation],
+        })
+        .execute();
+
+      if (!updateProduct) {
+        return new HttpBadRequest('Update product failed');
+      }
+
+      const response = await this.findOne(productId);
+
+      if (!response) {
+        return new HttpNotFound('Product is not exist');
+      }
+
+      return response;
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
@@ -328,20 +363,20 @@ export class ProductService implements IProductService {
       const existProduct = await this.findOne(productId);
 
       if (!existProduct) {
-        return new HttpNotFound('Product is not exist');
+        return new HttpNotFound('Product is not found');
       }
 
       const existMedia: MediaEntity = await this.mediaService.uploadFile(file);
 
       if (!existMedia) {
-        return new HttpNotFound('Media is not exist');
+        return new HttpBadRequest('Upload media failed');
       }
 
       const updateProduct = await this.productRepository
         .createQueryBuilder('product')
-        .where({uuid: productId})
         .update()
         .set({media: existMedia})
+        .where('product.uuid = :productId', {productId})
         .execute();
 
       if (!updateProduct) {
@@ -351,7 +386,7 @@ export class ProductService implements IProductService {
       const response = await this.findOne(productId);
 
       if (!response) {
-        return new HttpBadRequest('Update product failed');
+        return new HttpNotFound('Product is not found');
       }
 
       return response;

@@ -1,5 +1,6 @@
 import {QueryOptions} from 'mongoose';
 import {CreateProductDTO, UpdateProductDTO} from '../dto';
+import {ProductInformationEntity} from '../entities';
 
 export interface IProductService {
   // ! CORE METHODS
@@ -17,6 +18,7 @@ export interface IProductService {
 
   // ! UPDATE
   updateProduct(productId: string, arg: UpdateProductDTO, files: Express.Multer.File[]): Promise<any>;
+  updateProductInformation(productId: string, productInformation: ProductInformationEntity): Promise<any>;
   updateProductCategory(productId: string, categoryId: string[]): Promise<any>;
   updateProductMedia(productId: string, file: Express.Multer.File): Promise<any>;
   updateProductBrand(productId: string, brandId: string): Promise<any>;
