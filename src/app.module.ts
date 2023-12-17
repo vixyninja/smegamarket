@@ -7,19 +7,20 @@ import {
   CloudinaryModule,
   MailModule,
   PostgresDBModule,
+  QueuesModule,
   RedisxModule,
   ThrottlerxModule,
 } from './configs';
 import {LoggerModule} from './core';
 import {EventModule} from './event';
 import {BrandModule, CartModule, CategoryModule, MediaModule, OrderModule, ProductModule, UserModule} from './modules';
-import { AbcModule } from './abc/abc.module';
 
 @Module({
   imports: [
     PostgresDBModule,
     // MongodbModule,
     EventModule,
+    QueuesModule,
     CdnModule,
     MailModule,
     CloudinaryModule,
@@ -37,7 +38,6 @@ import { AbcModule } from './abc/abc.module';
     CategoryModule,
     CartModule,
     OrderModule,
-    AbcModule,
   ],
   providers: [],
   controllers: [AppController],

@@ -1,7 +1,6 @@
 import {HandlerFilter, Public} from '@/core';
 import {BadRequestException, Body, Controller, Get, Post, Query} from '@nestjs/common';
 import {SkipThrottle} from '@nestjs/throttler';
-import {AuthService} from './auth.service';
 import {
   ChangePasswordDTO,
   ForgotPasswordDTO,
@@ -12,7 +11,8 @@ import {
   VerifyEmailDTO,
   VerifyOtpDTO,
   VerifyPhoneDTO,
-} from './dto';
+} from '../dto';
+import {AuthService} from '../services/auth.service';
 
 @Public()
 @SkipThrottle()
@@ -23,6 +23,7 @@ export class AuthController {
   @Post('sign-in')
   async signInEmailAndPassword(@Body() signInEmailDTO: SignInEmailDTO): Promise<any> {
     const credentials = await this.authService.signInEmailAndPassword(signInEmailDTO);
+
     return HandlerFilter(credentials, {
       message: 'SUCCESS',
       data: credentials,
@@ -73,9 +74,10 @@ export class AuthController {
 
   @Post('forgot-password')
   async forgotPassword(@Body() forgotPasswordDTO: ForgotPasswordDTO): Promise<any> {
-    const message = await this.authService.forgotPassword(forgotPasswordDTO);
-    return HandlerFilter(message, {
-      message: message,
+    const result = await this.authService.forgotPassword(forgotPasswordDTO);
+    return HandlerFilter(result, {
+      message: result.message,
+      data: result.data,
     });
   }
 
@@ -93,18 +95,20 @@ export class AuthController {
   async changePassword(@Body() changePasswordDTO: ChangePasswordDTO): Promise<any> {
     if (changePasswordDTO.password !== changePasswordDTO.confirmPassword)
       return new BadRequestException('Password and confirm password not match');
-    const message = await this.authService.changePassword(changePasswordDTO);
-    return HandlerFilter(message, {
-      message: message,
+    const result = await this.authService.changePassword(changePasswordDTO);
+    return HandlerFilter(result, {
+      message: result.message,
+      data: result.data,
     });
   }
 
   @Post('verify-email')
   async verifyEmail(@Body() verifyEmailDTO: VerifyEmailDTO): Promise<any> {
-    const message = await this.authService.verifyEmail(verifyEmailDTO);
+    const result = await this.authService.verifyEmail(verifyEmailDTO);
 
-    return HandlerFilter(message, {
-      message: message,
+    return HandlerFilter(result, {
+      message: result.message,
+      data: result.data,
     });
   }
 

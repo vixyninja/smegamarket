@@ -8,3 +8,4 @@ export * from './constants';
 export * from './base';
 export * from './logger';
 export * from './utils';
+export * from './interface';
