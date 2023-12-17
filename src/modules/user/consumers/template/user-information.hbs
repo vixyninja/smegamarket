@@ -1,0 +1,75 @@
+<head>
+  <title>Confirm your email</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <style>
+    body {
+      font-family: 'Monaco', 'Poppins', 'Arial', 'Helvetica', 'sans-serif';
+      background-color: #cbd5e1;
+    }
+
+    .container {
+      margin: 0 auto;
+      width: 800px;
+      padding: 10px 30px 30px 30px;
+      box-shadow: 2 2 4px #ddd;
+      background-color: #f3f4f6;
+      border-radius: 20px;
+    }
+
+    a.link {
+      border: solid 1px #0ea5e9;
+      background-color: #0ea5e9;
+      text-decoration: none;
+      color: #fff;
+      font-weight: bold;
+      display: block;
+      width: 400px;
+      text-align: center;
+      padding: 10px 0;
+      margin-top: 50px;
+      border-radius: 5px;
+    }
+
+    .text-blue {
+      color: #0ea5e9;
+    }
+
+    .text-blue h1 {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .text-email {
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .link {
+      color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="text-blue">
+      <h1>Confirm your email</h1>
+    </div>
+    <p>Hey <span class="text-email">{{name}}</span>,</p>
+    <p>Please click below to confirm your email</p>
+    <p>
+      <a class="link" href="{{link}}">Confirm email</a>
+    </p>
+
+    <p>If you did not request this email you can safely ignore it.</p>
+    <p>
+      Regards,
+      <br />
+      <em>Mega Market Group</em>
+      <br />
+      <br />
+
+      <img src="public/asset/buildings.png" width="150px" height="150px" />
+    </p>
+  </div>
+</body>

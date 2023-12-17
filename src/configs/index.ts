@@ -7,3 +7,4 @@ export * from './throttlerx';
 export * from './cdn';
 export * from './cache';
 export * from './redisx';
+export * from './queues';

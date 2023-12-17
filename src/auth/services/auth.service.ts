@@ -1,4 +1,4 @@
-import {Environment, JWTService, MailService, RedisxService} from '@/configs';
+import {Environment, JWTService, RedisxService} from '@/configs';
 import {JWTPayload} from '@/configs/jwt/typedef';
 import {
   CACHE_KEY,
@@ -11,7 +11,7 @@ import {
   RoleEnum,
   randomOTP,
 } from '@/core';
-import {CreateUserDTO, StatusUser, UserEntity, UserService} from '@/modules/user';
+import {CreateUserDTO, StatusUser, UserEntity, UserMailService, UserService} from '@/modules/user';
 import {Injectable} from '@nestjs/common';
 import {isEmail, isPhoneNumber} from 'class-validator';
 import {LoginTicket, OAuth2Client, TokenPayload} from 'google-auth-library';
@@ -25,30 +25,16 @@ import {
   VerifyEmailDTO,
   VerifyOtpDTO,
   VerifyPhoneDTO,
-} from './dto';
-
-interface AuthServiceInterface {
-  signInEmailAndPassword(arg: SignInEmailDTO): Promise<any>;
-  signUpEmailAndPassword(arg: SignUpEmailDTO): Promise<any>;
-  signInWithGoogle(arg: SignInGoogleDTO): Promise<any>;
-  signInWithFacebook(): Promise<any>;
-  refreshToken(arg: string): Promise<any>;
-  logOut(information: string): Promise<any>;
-  forgotPassword(arg: ForgotPasswordDTO): Promise<any>;
-  resetPasswordOtp(arg: ResetPasswordOtpDTO): Promise<any>;
-  changePassword(arg: ChangePasswordDTO): Promise<any>;
-  verifyEmail(arg: VerifyEmailDTO): Promise<any>;
-  verifyPhone(arg: VerifyPhoneDTO): Promise<any>;
-  verifyOtp(arg: VerifyOtpDTO): Promise<any>;
-}
+} from '../dto';
+import {IAuthService} from '../interfaces';
 
 @Injectable()
-export class AuthService implements AuthServiceInterface {
+export class AuthService implements IAuthService {
   constructor(
     private readonly userService: UserService,
+    private readonly userMailService: UserMailService,
     private readonly redisService: RedisxService,
     private readonly jwtService: JWTService,
-    private readonly mailService: MailService,
   ) {}
 
   async signInEmailAndPassword(arg: SignInEmailDTO): Promise<any> {
@@ -225,6 +211,7 @@ export class AuthService implements AuthServiceInterface {
       if (!user) return new HttpForbidden('User not found');
 
       await this.redisService.delKey(`${CACHE_KEY.VERIFY_FORGOT_PASSWORD}:${email}`);
+
       let code = randomOTP();
       await this.redisService.setKey(
         `${CACHE_KEY.VERIFY_FORGOT_PASSWORD}:${email}`,
@@ -232,8 +219,13 @@ export class AuthService implements AuthServiceInterface {
         CACHE_KEY_TTL.VERIFY_FORGOT_PASSWORD,
       );
 
-      await this.mailService.sendUserResetPasswordOtp(`${user.firstName} ${user.lastName}`, email, code);
-      return 'OTP sent to your email, you have 5 minutes to reset password !!!';
+      const result = await this.userMailService.sendUserResetPasswordOtp(
+        `${user.firstName} ${user.lastName}`,
+        email,
+        code,
+      );
+
+      return result;
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
@@ -267,8 +259,11 @@ export class AuthService implements AuthServiceInterface {
       await this.userService.updateUserPassword(user.uuid, password);
       await this.redisService.delKey(`${CACHE_KEY.USER}:${user.uuid}`);
 
-      await this.mailService.sendUserResetPasswordSuccess(`${user.firstName} ${user.lastName}`, email);
-      return 'Change password successfully !!!, please login again !!!';
+      const result = await this.userMailService.sendUserResetPasswordSuccess(
+        `${user.firstName} ${user.lastName}`,
+        email,
+      );
+      return result;
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
@@ -285,8 +280,8 @@ export class AuthService implements AuthServiceInterface {
       let code = randomOTP();
       await this.redisService.setKey(`${CACHE_KEY.VERIFY_EMAIL}:${email}`, code, CACHE_KEY_TTL.VERIFY_EMAIL);
 
-      await this.mailService.sendUserVerifyCode(`${user.firstName} ${user.lastName}`, email, code);
-      return 'OTP sent to your email, you have 5 minutes to verify !!!';
+      const result = await this.userMailService.sendUserVerifyCode(`${user.firstName} ${user.lastName}`, email, code);
+      return result;
     } catch (e) {
       throw new HttpInternalServerError(e.message);
     }
