@@ -3,7 +3,7 @@ import {CACHE_KEY, HttpBadRequest, HttpInternalServerError, HttpNotFound} from '
 import {Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
-import {ProductEntity, ProductService, SizeEnum} from '../product';
+import {ProductEntity, ProductService, ProductSizeEnum} from '../product';
 import {UserService} from '../user';
 import {CreateCartItemDTO, UpdateCartDTO, UpdateCartItemDTO} from './dto';
 import {CartEntity, CartItemEntity} from './entities';
@@ -167,7 +167,7 @@ export class CartService implements CartServiceInterface {
         return new HttpNotFound('Product not found');
       }
 
-      if (SizeEnum[size] === undefined) {
+      if (ProductSizeEnum[size] === undefined) {
         return new HttpBadRequest('Size is not valid');
       }
 
@@ -176,7 +176,7 @@ export class CartService implements CartServiceInterface {
         brandId: brandId,
         price: price,
         product: product,
-        size: SizeEnum[size],
+        size: ProductSizeEnum[size],
         quantity: quantity,
       });
 

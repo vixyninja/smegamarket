@@ -1,6 +1,6 @@
 import {Column, Entity, JoinColumn, ManyToOne, OneToOne} from 'typeorm';
 import {CartEntity} from './cart.entity';
-import {ProductEntity, SizeEnum} from '@/modules/product';
+import {ProductEntity, ProductSizeEnum} from '@/modules/product';
 import {BaseEntity} from '@/core';
 
 @Entity({
@@ -29,8 +29,8 @@ export class CartItemEntity extends BaseEntity {
   @Column({type: 'numeric', nullable: false, default: 0})
   quantity: number;
 
-  @Column({type: 'enum', enum: SizeEnum, default: SizeEnum.None, nullable: false})
-  size: SizeEnum;
+  @Column({type: 'enum', enum: ProductSizeEnum, default: ProductSizeEnum.None, nullable: false})
+  size: ProductSizeEnum;
 
   @Column({type: 'numeric', nullable: false, default: 0})
   price: number;

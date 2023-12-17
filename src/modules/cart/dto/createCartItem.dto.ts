@@ -1,4 +1,4 @@
-import {SizeEnum} from '@/modules/product';
+import {ProductSizeEnum} from '@/modules/product';
 import {IsEnum, IsNotEmpty, IsNumber, IsString} from 'class-validator';
 
 export class CreateCartItemDTO {
@@ -10,7 +10,7 @@ export class CreateCartItemDTO {
   quantity: number;
 
   @IsNotEmpty()
-  @IsEnum(SizeEnum, {message: `Size must be one of these values: ${Object.values(SizeEnum)}`})
+  @IsEnum(ProductSizeEnum, {message: `Size must be one of these values: ${Object.values(ProductSizeEnum)}`})
   size: string;
 
   @IsNotEmpty()

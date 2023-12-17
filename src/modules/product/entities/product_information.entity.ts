@@ -1,7 +1,8 @@
 import {BaseEntity} from '@/core';
 import {MediaEntity} from '@/modules/media';
-import {Column, Entity, JoinColumn, OneToMany} from 'typeorm';
-import {ProductEnum, SaleEnum, SizeEnum, StatusEnum} from '../enum';
+import {Column, Entity, JoinColumn, ManyToOne, OneToMany} from 'typeorm';
+import {ProductTypeEnum, ProductSaleEnum, ProductSizeEnum, ProductStatusEnum} from '../enum';
+import {ProductEntity} from './product.entity';
 
 @Entity({
   name: 'product_information',
@@ -13,17 +14,17 @@ export class ProductInformationEntity extends BaseEntity {
   @Column({type: 'numeric', nullable: false, default: 0})
   price: number;
 
-  @Column({type: 'enum', enum: ProductEnum, default: ProductEnum.Etc})
-  type: ProductEnum;
+  @Column({type: 'enum', enum: ProductTypeEnum, default: ProductTypeEnum.Etc})
+  type: ProductTypeEnum;
 
-  @Column({type: 'enum', enum: StatusEnum, default: StatusEnum.Active})
-  status: StatusEnum;
+  @Column({type: 'enum', enum: ProductStatusEnum, default: ProductStatusEnum.Active})
+  status: ProductStatusEnum;
 
-  @Column({type: 'enum', enum: SizeEnum, default: SizeEnum.None})
-  size: SizeEnum;
+  @Column({type: 'enum', enum: ProductSizeEnum, default: ProductSizeEnum.None})
+  size: ProductSizeEnum;
 
-  @Column({type: 'enum', enum: SaleEnum, default: SaleEnum.None})
-  sale: SaleEnum;
+  @Column({type: 'enum', enum: ProductSaleEnum, default: ProductSaleEnum.None})
+  sale: ProductSaleEnum;
 
   @Column({type: 'varchar', length: 225, nullable: true})
   link: string;
@@ -38,6 +39,14 @@ export class ProductInformationEntity extends BaseEntity {
     foreignKeyConstraintName: 'FK_PRODUCT_INFORMATION_MEDIA',
   })
   media: MediaEntity[];
+
+  @ManyToOne(() => ProductEntity, (product) => product.uuid, {cascade: true, nullable: false})
+  @JoinColumn({
+    name: 'product_uuid',
+    referencedColumnName: 'uuid',
+    foreignKeyConstraintName: 'FK_PRODUCT_INFORMATION_PRODUCT',
+  })
+  product: ProductEntity;
 
   constructor(partial: Partial<ProductInformationEntity>) {
     super();

@@ -1,4 +1,5 @@
-import {QueryOptions} from '@/core';
+import { QueryOptions } from '@/core';
+import { CreateProductInformationDTO } from '../dto';
 
 export interface IProductInformationService {
   // ! CORE METHODS
@@ -13,11 +14,11 @@ export interface IProductInformationService {
   readBySale(sale: string, query: QueryOptions): Promise<any>;
 
   // ! CREATE
-  createProductInformation(arg: any): Promise<any>;
+  createProductInformation(productInformationId: string, arg: CreateProductInformationDTO, media: Express.Multer.File[]): Promise<any>;
 
   // ! UPDATE
   updateProductInformation(productInformationId: string, arg: any): Promise<any>;
-  updateProductInformationMedia(productInformationId: string, files: Express.Multer.File[]): Promise<any>;
+  updateProductInformationMedia(productInformationId: string, media: Express.Multer.File[]): Promise<any>;
 
   // ! DELETE
   deleteProductInformation(productInformationId: string): Promise<any>;
