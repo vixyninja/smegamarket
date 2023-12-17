@@ -12,7 +12,7 @@ import {
   VerifyOtpDTO,
   VerifyPhoneDTO,
 } from '../dto';
-import {AuthService} from '../services/auth.service';
+import {AuthService} from '../services';
 
 @Public()
 @SkipThrottle()

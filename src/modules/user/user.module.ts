@@ -5,6 +5,7 @@ import {JwtService} from '@nestjs/jwt';
 import {TypeOrmModule} from '@nestjs/typeorm';
 import {join} from 'path';
 import {MediaModule} from '../media';
+import {EmailConsumer} from './consumers';
 import {AdminController, UserController} from './controllers';
 import {UserEntity} from './entities';
 import {UserMailService, UserService} from './services';
@@ -16,13 +17,13 @@ import {UserMailService, UserService} from './services';
     MediaModule,
     MailModule,
     BullModule.registerQueue(
-      {name: 'email', processors: [join(__dirname, 'consumers', 'email.consumer.ts')]},
+      {name: 'email', processors: [join(__dirname, 'consumers', 'email.consumer.js')]},
       {name: 'sms'},
       {name: 'notification'},
     ),
   ],
   controllers: [UserController, AdminController],
-  providers: [UserService, UserMailService, JwtService, JWTService],
+  providers: [UserService, UserMailService, JwtService, JWTService, EmailConsumer],
   exports: [UserService, UserMailService],
 })
 export class UserModule {}

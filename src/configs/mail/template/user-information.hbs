@@ -1,5 +1,5 @@
 <head>
-  <title>Verify information</title>
+  <title>Confirm your email</title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <style>
     body {
@@ -43,31 +43,25 @@
       font-size: 16px;
       font-weight: bold;
     }
+
+    .link {
+      color: #fff;
+    }
   </style>
 </head>
 
 <body>
   <div class="container">
-    <h1 class="text-blue">Verify your information</h1>
-    <div>Hello <b class="text-blue">{{name}}</b> !</div>
+    <div class="text-blue">
+      <h1>Confirm your email</h1>
+    </div>
+    <p>Hey <span class="text-email">{{name}}</span>,</p>
+    <p>Please click below to confirm your email</p>
     <p>
-      You recently registered an account with Mega Market Group.
-      <br /><br />
-      Your account information:
-      <br /><br />
-      <span class="text-email">
-        Information :
-        <span class="text-blue">{{information}}</span>
-      </span>
-      <br /><br />
-      Please enter the following code to verify your information:
+      <a class="link" href="{{link}}">Confirm email</a>
     </p>
-    <p>
-      <span class="text-email">
-        Code:
-        <span class="text-orange">{{code}}</span>
-      </span>
-    </p>
+
+    <p>If you did not request this email you can safely ignore it.</p>
     <p>
       Regards,
       <br />
@@ -75,7 +69,7 @@
       <br />
       <br />
 
-      <img src="public/asset/buildings.png" width="150px" height="150px" />
+
     </p>
   </div>
 </body>

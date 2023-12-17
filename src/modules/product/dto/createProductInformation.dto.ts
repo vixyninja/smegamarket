@@ -1,28 +1,24 @@
 import {IsNotEmpty, IsOptional} from 'class-validator';
-import {ProductEnum, SaleEnum, SizeEnum, StatusEnum} from '../enum';
 
 export class CreateProductInformationDTO {
   @IsNotEmpty()
   readonly price: number;
 
   @IsOptional()
-  readonly type: ProductEnum;
+  readonly type: string;
 
   @IsOptional()
-  readonly status: StatusEnum;
+  readonly status: string;
 
   @IsOptional()
-  readonly size: SizeEnum;
+  readonly size: string;
 
   @IsOptional()
-  readonly detail: string | string[];
+  readonly sale: string;
 
   @IsOptional()
-  readonly benefit: string | string[];
+  readonly link: string;
 
   @IsOptional()
-  readonly caution: string | string[];
-
-  @IsOptional()
-  readonly sale: SaleEnum;
+  readonly description: string;
 }

@@ -1,14 +1,16 @@
 import {HttpInternalServerError, IMail} from '@/core';
 import {MailerService} from '@nestjs-modules/mailer';
 import {Process, Processor} from '@nestjs/bull';
+import {Job} from 'bull';
 
 @Processor('email')
 export class EmailConsumer {
   constructor(private readonly mailerService: MailerService) {}
 
   @Process('sendUserConfirmation')
-  async sendUserConfirmation(data: IMail) {
+  async sendUserConfirmation(job: Job<IMail>) {
     try {
+      const {data} = job;
       const {from, subject, text, to, link, name} = data;
 
       await this.mailerService.sendMail({
@@ -17,7 +19,7 @@ export class EmailConsumer {
         text: text,
         to: to,
         date: new Date(),
-        template: './user-information',
+        template: 'user-information',
         context: {
           name: name,
           link: link,
@@ -29,16 +31,20 @@ export class EmailConsumer {
   }
 
   @Process('sendUserResetPasswordOtp')
-  async sendUserResetPasswordOtp(data: IMail) {
+  async sendUserResetPasswordOtp(job: Job<IMail>) {
     try {
+      const {data} = job;
       const {from, subject, text, to, code, email, name} = data;
+
+      console.log(job);
+
       await this.mailerService.sendMail({
         from: from,
         subject: subject,
         text: text,
         to: to,
         date: new Date(),
-        template: './reset-password',
+        template: 'reset-password',
         context: {
           code: code,
           name: name,
@@ -60,7 +66,7 @@ export class EmailConsumer {
         text: text,
         to: to,
         date: new Date(),
-        template: './reset-password-success',
+        template: 'reset-password-success',
         context: {
           name: name,
           email: email,
@@ -81,7 +87,7 @@ export class EmailConsumer {
         text: text,
         to: to,
         date: new Date(),
-        template: './verify-code',
+        template: 'verify-code',
         context: {
           name: name,
           information: information,

@@ -1,5 +1,7 @@
 import {AuthGuard, HandlerFilter, RoleEnum, Roles, RolesGuard} from '@/core';
 import {QueryOptions} from '@/core/interface';
+import {BrandEntity, BrandService} from '@/modules/brand';
+import {CategoryEntity, CategoryService} from '@/modules/category';
 import * as faker from '@faker-js/faker';
 import {
   Body,
@@ -17,8 +19,6 @@ import {
 } from '@nestjs/common';
 import {FileInterceptor, FilesInterceptor} from '@nestjs/platform-express';
 import {isBase64, isUUID} from 'class-validator';
-import {BrandEntity, BrandService} from '../../brand';
-import {CategoryEntity, CategoryService} from '../../category';
 import {CreateProductDTO, UpdateProductDTO} from '../dto';
 import {ProductService} from '../services/product.service';
 
@@ -42,9 +42,6 @@ export class ProductController {
     const categories = categoryData.map((category) => category.uuid);
     const brandsData: BrandEntity[] = await this.brandService.findAll();
     const brands = brandsData.map((brand) => brand.uuid);
-
-    console.log(categories);
-    console.log(brands);
 
     for (let index = 0; index < 20; index++) {
       let dto: CreateProductDTO = {
