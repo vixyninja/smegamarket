@@ -85,3 +85,6 @@ volumes:
   redis:
     name: vredis
     driver: local
+  redis-adminer:
+    name: vredis-adminer
+    driver: local

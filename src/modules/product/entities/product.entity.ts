@@ -62,8 +62,8 @@ export class ProductEntity extends BaseEntity {
   })
   @JoinColumn({
     name: 'product_information_uuid',
-    foreignKeyConstraintName: 'FK_PRODUCT_PRODUCT_INFORMATION',
     referencedColumnName: 'uuid',
+    foreignKeyConstraintName: 'FK_PRODUCT_PRODUCT_INFORMATION',
   })
   productInformation: ProductInformationEntity[];
 

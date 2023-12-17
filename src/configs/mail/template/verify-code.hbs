@@ -1,5 +1,5 @@
 <head>
-  <title>Registration confirmation</title>
+  <title>Verify information</title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <style>
     body {
@@ -48,22 +48,22 @@
 
 <body>
   <div class="container">
-    <h1 class="text-blue">Verify your account reset password</h1>
+    <h1 class="text-blue">Verify your information</h1>
     <div>Hello <b class="text-blue">{{name}}</b> !</div>
     <p>
-      Your account has been created on our platform
+      You recently registered an account with Mega Market Group.
       <br /><br />
-      Find your login information below:
+      Your account information:
       <br /><br />
       <span class="text-email">
-        Email address :
-        <span class="text-blue">{{email}}</span>
+        Information :
+        <span class="text-blue">{{information}}</span>
       </span>
       <br /><br />
-      To confirm the validity of your email address, please send otp code to verify screen
+      Please enter the following code to verify your information:
     </p>
     <p>
-      <span style="font-size: 20px; font-weight: bold">
+      <span class="text-email">
         Code:
         <span class="text-orange">{{code}}</span>
       </span>
@@ -75,7 +75,7 @@
       <br />
       <br />
 
-      <img src="public/asset/buildings.png" width="150px" height="150px" />
+
     </p>
   </div>
 </body>
