@@ -6,7 +6,6 @@ import {
   CdnModule,
   CloudinaryModule,
   FirebaseAdminModule,
-  I18nModulex,
   MailModule,
   PostgresDBModule,
   QueuesModule,
@@ -15,6 +14,7 @@ import {
 } from './configs';
 import {LoggerModule, LoggersMiddleware, OriginMiddleware} from './core';
 import {EventModule} from './event';
+import {I18nModulex} from './i18n';
 import {BrandModule, CartModule, CategoryModule, MediaModule, OrderModule, ProductModule, UserModule} from './modules';
 
 @Module({

@@ -12,8 +12,4 @@ import {join} from 'path';
   providers: [],
   controllers: [],
 })
-export class CdnModule {
-  constructor() {
-    console.log('CdnModule', join(__dirname, '..', '..', 'public'));
-  }
-}
+export class CdnModule {}
