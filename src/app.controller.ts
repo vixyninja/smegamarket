@@ -1,7 +1,7 @@
 import {Controller, Get} from '@nestjs/common';
 import {I18n, I18nContext} from 'nestjs-i18n';
-import {I18nTranslations} from './configs';
 import {Public} from './core';
+import {I18nTranslations} from './i18n';
 
 @Controller()
 export class AppController {
@@ -9,7 +9,7 @@ export class AppController {
 
   @Get()
   @Public()
-  async getHello(@I18n() i18n: I18nContext) {
+  getHello(@I18n() i18n: I18nContext<I18nTranslations>) {
     return {
       data: {
         timestamp: new Date().toISOString(),
@@ -18,7 +18,7 @@ export class AppController {
         port: process.env.PORT,
         host: process.env.HOST,
         language: i18n.lang.toString(),
-        foo: i18n.t(`Foo`),
+        foo: i18n.t(`content.auth.lastName.required`),
       },
     };
   }

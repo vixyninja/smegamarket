@@ -7,7 +7,7 @@
     "assets": [
       "configs/mail/template/*",
       {
-        "include": "configs/i18n/**/*",
+        "include": "i18n/**/*",
         "watchAssets": true
       }
     ]

@@ -1,0 +1,28 @@
+{
+  "auth": {
+    "email": {
+      "notValid": "Email is not valid",
+      "required": "Email is required"
+    },
+    "password": {
+      "required": "Password is required",
+      "minLength": "Password must be at least 6 characters long"
+    },
+    "confirmPassword": {
+      "required": "Confirm password is required",
+      "mustMatch": "Passwords must match"
+    },
+    "firstName": {
+      "required": "First name is required"
+    },
+    "lastName": {
+      "required": "Last name is required"
+    },
+    "deviceType": {
+      "required": "Device type is required"
+    },
+    "deviceToken": {
+      "required": "Device token is required"
+    }
+  }
+}

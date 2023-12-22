@@ -23,17 +23,11 @@ import {Server, Socket} from 'socket.io';
 export class EventGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
-  constructor() {
-    console.log('EventGateway constructor');
-  }
+  constructor() {}
 
-  afterInit(@ConnectedSocket() socket: Socket) {
-    console.log('EventGateway afterInit');
-  }
+  afterInit(@ConnectedSocket() socket: Socket) {}
 
   handleConnection(@ConnectedSocket() socket: Socket, ...args: any[]) {
-    console.log('EventGateway handleConnection');
-
     console.log('socket.id', socket.id);
   }
 
@@ -49,7 +43,5 @@ export class EventGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
     return id;
   }
 
-  handleDisconnect(@ConnectedSocket() socket: Socket) {
-    console.log('EventGateway handleDisconnect');
-  }
+  handleDisconnect(@ConnectedSocket() socket: Socket) {}
 }

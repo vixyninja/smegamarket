@@ -1,0 +1,28 @@
+{
+  "auth": {
+    "email": {
+      "notValid": "Email không hợp lệ",
+      "required": "Email là bắt buộc"
+    },
+    "password": {
+      "required": "Mật khẩu là bắt buộc",
+      "minlength": "Mật khẩu phải có ít nhất 6 ký tự"
+    },
+    "confirmPassword": {
+      "required": "Xác nhận mật khẩu là bắt buộc",
+      "mustMatch": "Xác nhận mật khẩu không khớp"
+    },
+    "firstName": {
+      "required": "Tên là bắt buộc"
+    },
+    "lastName": {
+      "required": "Họ là bắt buộc"
+    },
+    "deviceType": {
+      "required": "Thiết bị là bắt buộc"
+    },
+    "deviceToken": {
+      "required": "Token là bắt buộc"
+    }
+  }
+}
