@@ -2,10 +2,11 @@ import {Controller, Get} from '@nestjs/common';
 import {I18n, I18nContext} from 'nestjs-i18n';
 import {Public} from './core';
 import {I18nTranslations} from './i18n';
+import {UserMailService} from './modules';
 
 @Controller()
 export class AppController {
-  constructor() {}
+  constructor(private readonly UserMailService: UserMailService) {}
 
   @Get()
   @Public()
@@ -21,5 +22,11 @@ export class AppController {
         foo: i18n.t(`content.auth.lastName.required`),
       },
     };
+  }
+
+  @Get('ping')
+  @Public()
+  async ping() {
+    return await this.UserMailService.ping();
   }
 }

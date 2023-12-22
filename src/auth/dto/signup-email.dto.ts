@@ -1,24 +1,28 @@
-import {IsEmail, IsNotEmpty} from 'class-validator';
+import {I18nTranslations} from '@/i18n';
+import {Equals, IsEmail, IsNotEmpty} from 'class-validator';
+import {i18nValidationMessage} from 'nestjs-i18n';
 
 export class SignUpEmailDTO {
-  @IsEmail({}, {message: 'Email is invalid'})
+  @IsEmail({}, {message: i18nValidationMessage<I18nTranslations>('content.auth.email.notValid')})
+  @IsNotEmpty({message: i18nValidationMessage<I18nTranslations>('content.auth.email.required')})
   readonly email: string;
 
-  @IsNotEmpty({message: 'Password is required'})
+  @IsNotEmpty({message: i18nValidationMessage<I18nTranslations>('content.auth.password.required')})
   readonly password: string;
 
-  @IsNotEmpty({message: 'Re-password is required'})
+  @IsNotEmpty({message: i18nValidationMessage<I18nTranslations>('content.auth.passwordConfirmation.required')})
+  @Equals('password', {message: i18nValidationMessage<I18nTranslations>('validation.NOT_EMPTY')})
   readonly confirmPassword: string;
 
-  @IsNotEmpty({message: 'Device token is required'})
+  @IsNotEmpty({message: i18nValidationMessage<I18nTranslations>('content.auth.deviceToken.required')})
   readonly deviceToken: string;
 
-  @IsNotEmpty({message: 'Device type is required'})
+  @IsNotEmpty({message: i18nValidationMessage<I18nTranslations>('content.auth.deviceType.required')})
   readonly deviceType: string;
 
-  @IsNotEmpty({message: 'First name is required'})
+  @IsNotEmpty({message: i18nValidationMessage<I18nTranslations>('content.auth.firstName.required')})
   readonly firstName: string;
 
-  @IsNotEmpty({message: 'Last name is required'})
+  @IsNotEmpty({message: i18nValidationMessage<I18nTranslations>('content.auth.lastName.required')})
   readonly lastName: string;
 }

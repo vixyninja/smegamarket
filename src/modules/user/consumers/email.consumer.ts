@@ -1,4 +1,4 @@
-import {HttpInternalServerError, IMail} from '@/core';
+import {GROUP_EMAIL, HttpInternalServerError, IMail} from '@/core';
 import {MailerService} from '@nestjs-modules/mailer';
 import {Process, Processor} from '@nestjs/bull';
 import {Job} from 'bull';
@@ -96,6 +96,32 @@ export class EmailConsumer {
       });
     } catch (e) {
       throw new HttpInternalServerError(e.message);
+    }
+  }
+
+  @Process('ping')
+  async ping() {
+    try {
+      await this.mailerService
+        .sendMail({
+          from: GROUP_EMAIL,
+          subject: 'Ping 😆',
+          text: 'NIGGA WHAT?',
+          to: 'hhvy2003.dev@gmail.com',
+          date: new Date(),
+          template: 'verify-code',
+          context: {
+            name: GROUP_EMAIL,
+            information: 'NIGGA WHAT?',
+            code: '123456',
+          },
+        })
+        .then((res) => {
+          console.log(res);
+          return res;
+        });
+    } catch (error) {
+      throw new HttpInternalServerError(error.message);
     }
   }
 }
