@@ -1,17 +1,11 @@
 import {Logger, RequestMethod} from '@nestjs/common';
 import {NestFactory} from '@nestjs/core';
-import helmet from 'helmet';
-import {AppModule} from './app.module';
 import * as express from 'express';
-import {
-  FormatResponseInterceptor,
-  HttpExceptionFilter,
-  LogsInterceptor,
-  StatusInterceptor,
-  TimeoutInterceptor,
-  ValidationPipe,
-} from './core';
+import helmet from 'helmet';
 import {join} from 'path';
+import {AppModule} from './app.module';
+import {FormatResponseInterceptor, HttpExceptionFilter, TimeoutInterceptor, ValidationPipe} from './core';
+import {I18nValidationExceptionFilter, I18nValidationPipe} from 'nestjs-i18n';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -21,14 +15,7 @@ async function bootstrap() {
 
   app.use(helmet());
 
-  app.enableCors({
-    origin: true,
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Access-Control-Allow-Origin'],
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    maxAge: 3600,
-    exposedHeaders: ['Content-Range', 'X-Content-Range'],
-  });
+  app.enableCors();
 
   app.setGlobalPrefix(prefix, {
     exclude: [{path: 'health', method: RequestMethod.GET}],
@@ -36,16 +23,17 @@ async function bootstrap() {
 
   app.use(express.static(join(__dirname, '..', 'public')));
 
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe(), new I18nValidationPipe());
 
-  app.useGlobalInterceptors(
-    new LogsInterceptor(),
-    new TimeoutInterceptor(),
-    new FormatResponseInterceptor(),
-    new StatusInterceptor(),
+  app.useGlobalInterceptors(new TimeoutInterceptor(), new FormatResponseInterceptor());
+
+  app.useGlobalFilters(
+    new HttpExceptionFilter(),
+    new I18nValidationExceptionFilter({
+      detailedErrors: false,
+      errorHttpStatusCode: 422,
+    }),
   );
-
-  app.useGlobalFilters(new HttpExceptionFilter());
 
   await app.listen(port);
 }
