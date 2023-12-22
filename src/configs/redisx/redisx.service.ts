@@ -1,6 +1,7 @@
-import {Injectable} from '@nestjs/common';
-import {InjectRedis, Redis} from '@nestjs-modules/ioredis';
 import {CACHE_KEY_TTL} from '@/core';
+import {InjectRedis} from '@nestjs-modules/ioredis';
+import {Injectable} from '@nestjs/common';
+import {Redis} from 'ioredis';
 
 @Injectable()
 export class RedisxService {

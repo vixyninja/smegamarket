@@ -8,3 +8,4 @@ export * from './cdn';
 export * from './cache';
 export * from './redisx';
 export * from './queues';
+export * from './firebasex';
