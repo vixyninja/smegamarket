@@ -4,6 +4,7 @@
     "Cachex",
     "cloudinary",
     "DBNAME",
+    "firebasex",
     "flushall",
     "gosing",
     "INITDB",

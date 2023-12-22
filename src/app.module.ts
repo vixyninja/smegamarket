@@ -5,6 +5,7 @@ import {
   CachexModule,
   CdnModule,
   CloudinaryModule,
+  FirebaseAdminModule,
   MailModule,
   PostgresDBModule,
   QueuesModule,
@@ -19,6 +20,7 @@ import {BrandModule, CartModule, CategoryModule, MediaModule, OrderModule, Produ
   imports: [
     PostgresDBModule,
     // MongodbModule,
+    FirebaseAdminModule,
     EventModule,
     QueuesModule,
     CdnModule,

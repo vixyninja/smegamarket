@@ -50,14 +50,6 @@ services:
     environment:
       REDIS_HOST: ${REDIS_HOST}
 
-  regis-adminer:
-    image: patrikx3/p3x-redis-ui:latest
-    container_name: regis-adminer
-    ports:
-      - 7843:7843
-    volumes:
-      - /home/vixyninja/Desktop/p3x-redis-ui-settings:/settings
-
   adminer:
     container_name: adminer
     image: adminer
@@ -84,7 +76,4 @@ volumes:
     driver: local
   redis:
     name: vredis
-    driver: local
-  redis-adminer:
-    name: vredis-adminer
     driver: local
