@@ -69,6 +69,7 @@
   },
   "devDependencies": {
     "@faker-js/faker": "^8.2.0",
+    "@localazy/cli": "^1.7.5",
     "@nestjs/cli": "^10.0.0",
     "@nestjs/schematics": "^10.0.0",
     "@nestjs/testing": "^10.0.0",

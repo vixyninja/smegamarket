@@ -9,9 +9,7 @@ export class AppController {
 
   @Get()
   @Public()
-  async getHello(@I18n() i18n: I18nContext<I18nTranslations>) {
-    let foo = await i18n.t('Foo');
-
+  async getHello(@I18n() i18n: I18nContext) {
     return {
       data: {
         timestamp: new Date().toISOString(),
@@ -20,7 +18,7 @@ export class AppController {
         port: process.env.PORT,
         host: process.env.HOST,
         language: i18n.lang.toString(),
-        foo: foo,
+        foo: i18n.t(`Foo`),
       },
     };
   }

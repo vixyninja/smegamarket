@@ -23,7 +23,7 @@ async function bootstrap() {
 
   app.use(express.static(join(__dirname, '..', 'public')));
 
-  app.useGlobalPipes(new ValidationPipe(), new I18nValidationPipe());
+  app.useGlobalPipes(new I18nValidationPipe());
 
   app.useGlobalInterceptors(new TimeoutInterceptor(), new FormatResponseInterceptor());
 
