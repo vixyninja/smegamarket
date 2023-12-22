@@ -4,7 +4,7 @@ import * as express from 'express';
 import helmet from 'helmet';
 import {join} from 'path';
 import {AppModule} from './app.module';
-import {FormatResponseInterceptor, HttpExceptionFilter, TimeoutInterceptor, ValidationPipe} from './core';
+import {FormatResponseInterceptor, HttpExceptionFilter, TimeoutInterceptor} from './core';
 import {I18nValidationExceptionFilter, I18nValidationPipe} from 'nestjs-i18n';
 
 async function bootstrap() {
@@ -23,7 +23,11 @@ async function bootstrap() {
 
   app.use(express.static(join(__dirname, '..', 'public')));
 
-  app.useGlobalPipes(new I18nValidationPipe());
+  app.useGlobalPipes(
+    new I18nValidationPipe({
+      transform: true,
+    }),
+  );
 
   app.useGlobalInterceptors(new TimeoutInterceptor(), new FormatResponseInterceptor());
 

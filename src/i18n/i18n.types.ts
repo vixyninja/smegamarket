@@ -27,4 +27,11 @@ export interface I18nTranslations {
       };
     };
   };
+  validation: {
+    NOT_EMPTY: string;
+    INVALID_EMAIL: string;
+    INVALID_PHONE: string;
+    MIN: string;
+    MAX: string;
+  };
 }

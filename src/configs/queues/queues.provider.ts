@@ -10,10 +10,10 @@ export class QueuesProvider implements SharedBullConfigurationFactory {
         host: Environment.REDIS_HOST,
         port: Environment.REDIS_PORT,
       },
-      prefix: 'queue_', // prefix for all queues
+      prefix: 'queue', // prefix for all queues
       defaultJobOptions: {
-        removeOnComplete: true,
-        removeOnFail: true,
+        removeOnComplete: false,
+        removeOnFail: false,
       },
     };
   }

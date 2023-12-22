@@ -7,6 +7,15 @@ import {Queue} from 'bull';
 export class UserMailService {
   constructor(@InjectQueue('email') private readonly emailQueue: Queue) {}
 
+  async ping() {
+    const job = await this.emailQueue.add('ping');
+
+    return {
+      message: 'Email service is running',
+      data: job,
+    };
+  }
+
   async sendUserConfirmation(email: string, name: string) {
     const data: IMail = {
       from: GROUP_EMAIL,
