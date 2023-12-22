@@ -61,6 +61,9 @@ const GOOGLE_CLIENT_ID: string = process.env.GOOGLE_CLIENT_ID;
 // web socket
 const SOCKET_PORT: number = +process.env.SOCKET_PORT;
 
+// language
+const FALLBACK_LANGUAGE: string = process.env.FALLBACK_LANGUAGE;
+
 export const Environment = {
   GOOGLE_CLIENT_ID,
   ACCESS_TOKEN_EXPIRATION_TIME,
@@ -98,4 +101,5 @@ export const Environment = {
   SERVER_NAME,
   FOLDER_NAME,
   SOCKET_PORT,
+  FALLBACK_LANGUAGE,
 };

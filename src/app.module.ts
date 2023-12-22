@@ -1,4 +1,4 @@
-import {Module} from '@nestjs/common';
+import {MiddlewareConsumer, Module, NestModule} from '@nestjs/common';
 import {AppController} from './app.controller';
 import {AuthModule} from './auth';
 import {
@@ -6,13 +6,14 @@ import {
   CdnModule,
   CloudinaryModule,
   FirebaseAdminModule,
+  I18nModulex,
   MailModule,
   PostgresDBModule,
   QueuesModule,
   RedisxModule,
   ThrottlerxModule,
 } from './configs';
-import {LoggerModule} from './core';
+import {LoggerModule, LoggersMiddleware, OriginMiddleware} from './core';
 import {EventModule} from './event';
 import {BrandModule, CartModule, CategoryModule, MediaModule, OrderModule, ProductModule, UserModule} from './modules';
 
@@ -21,6 +22,7 @@ import {BrandModule, CartModule, CategoryModule, MediaModule, OrderModule, Produ
     PostgresDBModule,
     // MongodbModule,
     FirebaseAdminModule,
+    I18nModulex,
     EventModule,
     QueuesModule,
     CdnModule,
@@ -44,4 +46,9 @@ import {BrandModule, CartModule, CategoryModule, MediaModule, OrderModule, Produ
   providers: [],
   controllers: [AppController],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggersMiddleware).forRoutes('*');
+    consumer.apply(OriginMiddleware).forRoutes('*');
+  }
+}

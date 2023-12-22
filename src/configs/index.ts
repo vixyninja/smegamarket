@@ -9,3 +9,4 @@ export * from './cache';
 export * from './redisx';
 export * from './queues';
 export * from './firebasex';
+export * from './i18n';

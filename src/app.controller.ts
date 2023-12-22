@@ -1,4 +1,6 @@
 import {Controller, Get} from '@nestjs/common';
+import {I18n, I18nContext} from 'nestjs-i18n';
+import {I18nTranslations} from './configs';
 import {Public} from './core';
 
 @Controller()
@@ -7,7 +9,9 @@ export class AppController {
 
   @Get()
   @Public()
-  getHello(): Object {
+  async getHello(@I18n() i18n: I18nContext<I18nTranslations>) {
+    let foo = await i18n.t('Foo');
+
     return {
       data: {
         timestamp: new Date().toISOString(),
@@ -15,6 +19,8 @@ export class AppController {
         env: process.env.NODE_ENV,
         port: process.env.PORT,
         host: process.env.HOST,
+        language: i18n.lang.toString(),
+        foo: foo,
       },
     };
   }

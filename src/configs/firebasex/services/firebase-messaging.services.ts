@@ -1,7 +1,7 @@
 import {Inject, Injectable} from '@nestjs/common';
 import * as admin from 'firebase-admin';
-import {FIREBASE_ADMIN_PROVIDER} from '../constants';
 import {FcmPayload} from '../interfaces';
+import {FIREBASE_ADMIN_PROVIDER} from '../constant';
 
 @Injectable()
 export class FirebaseMessagingService {
