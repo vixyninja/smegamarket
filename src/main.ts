@@ -25,7 +25,7 @@ async function bootstrap() {
 
   app.useGlobalPipes(
     new I18nValidationPipe({
-      transform: true,
+      errorHttpStatusCode: 422,
     }),
   );
 

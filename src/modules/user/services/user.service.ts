@@ -1,137 +1,80 @@
-import {RedisxService} from '@/configs';
-import {CACHE_KEY, HttpBadRequest, HttpInternalServerError, HttpNotFound, RoleEnum} from '@/core';
-import {Meta, QueryOptions} from '@/core/interface';
+import {HttpBadRequest, HttpNotFound, Meta, QueryOptions, RoleEnum} from '@/core';
+import {I18nTranslations} from '@/i18n';
+import {MediaService} from '@/modules/media';
 import {Injectable} from '@nestjs/common';
-import {InjectRepository} from '@nestjs/typeorm';
-import {Repository} from 'typeorm';
-import {MediaService} from '../../media';
+import {isEmail, isPhoneNumber} from 'class-validator';
+import {I18nService} from 'nestjs-i18n';
 import {CreateUserDTO, UpdateUserDTO} from '../dto';
 import {UserEntity} from '../entities';
 import {StatusUser} from '../enum';
 import {IUserService} from '../interfaces';
+import {UserRepository} from '../repository';
 
 @Injectable()
 export class UserService implements IUserService {
   constructor(
-    @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>,
-    private readonly redisxService: RedisxService,
+    private readonly userRepository: UserRepository,
     private readonly mediaService: MediaService,
+    private readonly i18nService: I18nService<I18nTranslations>,
   ) {}
 
-  async findForAuth(email: string): Promise<any> {
+  async createUser(args: CreateUserDTO): Promise<UserEntity> {
     try {
-      const user = await this.userRepository
-        .createQueryBuilder('user')
-        .loadAllRelationIds()
-        .addSelect('user.hashPassword')
-        .addSelect('user.salt')
-        .where('user.email = :email', {email: email})
-        .getOne();
-
-      return user;
-    } catch (e) {
-      throw new HttpInternalServerError(e.message);
-    }
+      const {email, password, firstName, lastName, deviceToken, deviceType} = args;
+      const user = await this.userRepository.findByEmail(email);
+      if (user) {
+        throw new HttpBadRequest(this.i18nService.translate('content.auth.signUp.emailExists'));
+      }
+      const createUser = await this.userRepository.createUser(args);
+      if (!createUser) {
+        throw new HttpBadRequest(this.i18nService.translate('content.auth.signUp.error'));
+      }
+      return createUser;
+    } catch (e) {}
   }
 
-  async findByEmail(email: string): Promise<any> {
+  async readUserForAuth(information: string): Promise<UserEntity> {
     try {
-      const user = await this.userRepository
-        .createQueryBuilder('user')
-        .loadAllRelationIds()
-        .where('user.email = :email', {email: email})
-        .getOne();
-
-      return user;
-    } catch (e) {
-      throw new HttpInternalServerError(e.message);
-    }
-  }
-
-  async findByPhone(phone: string): Promise<any> {
-    try {
-      const user = await this.userRepository
-        .createQueryBuilder('user')
-        .loadAllRelationIds()
-        .where('user.phone = :phone', {phone: phone})
-        .getOne();
-
-      return user;
-    } catch (e) {
-      throw new HttpInternalServerError(e.message);
-    }
-  }
-
-  async findByUuid(uuid: string): Promise<any> {
-    try {
-      const user = await this.userRepository
-        .createQueryBuilder('user')
-        .loadAllRelationIds()
-        .where('user.uuid = :uuid', {uuid: uuid})
-        .getOne();
-
-      return user;
-    } catch (e) {
-      throw new HttpInternalServerError(e.message);
-    }
-  }
-
-  async createUser(arg: CreateUserDTO): Promise<any> {
-    try {
-      const {email, firstName, lastName, password} = arg;
-
-      const user = new UserEntity({
-        email: email,
-        firstName: firstName,
-        lastName: lastName,
-        role: email === 'nevergiveup2k3@gmail.com' ? RoleEnum.ADMIN : RoleEnum.USER,
-        status: email === 'nevergiveup2k3@gmail.com' ? StatusUser.ACTIVE : StatusUser.INACTIVE,
-        hashPassword: password,
-      });
-
-      const saveUser = await this.userRepository.createQueryBuilder('user').insert().values(user).execute();
-
-      if (!saveUser) return new HttpBadRequest('Create user failed');
-
-      const userCreated = await this.userRepository.findOne({where: {uuid: saveUser.raw.insertId}});
-
-      return userCreated;
-    } catch (e) {
-      throw new HttpInternalServerError(e.message);
-    }
-  }
-
-  async readUser(uuid: string): Promise<any> {
-    try {
-      const isExist = await this.redisxService.getKey(`${CACHE_KEY.USER}:${uuid}`);
-
-      if (isExist) return JSON.parse(isExist);
-
-      const user = await this.findByUuid(uuid);
-
-      if (!user) {
-        return new HttpNotFound('User not found');
+      let user: UserEntity;
+      if (isEmail(information)) {
+        user = await this.userRepository.findForAuthEmail(information);
+      } else if (isPhoneNumber(information)) {
+        user = await this.userRepository.findForAuthPhone(information);
       }
 
-      await this.redisxService.setKey(`${CACHE_KEY.USER}:${uuid}`, JSON.stringify(user));
+      if (!user) throw new HttpNotFound(this.i18nService.translate('content.auth.signIn.notFound'));
 
       return user;
     } catch (e) {
-      throw new HttpInternalServerError(e.message);
+      throw e;
     }
   }
 
-  async query(query: QueryOptions): Promise<any> {
+  async readUser(uuid: string): Promise<UserEntity> {
     try {
-      const {_limit, _order, _page, _sort} = QueryOptions.initialize(query);
+      const user = await this.userRepository.findByUuid(uuid);
+      if (!user) {
+        throw new HttpNotFound(this.i18nService.translate('content.auth.signIn.notFound'));
+      }
+      return user;
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  async query(query: QueryOptions): Promise<{
+    data: UserEntity[];
+    meta: Meta;
+  }> {
+    try {
+      const {_page, _limit, _order, _sort} = QueryOptions.initialize(query);
 
       const [users, total] = await this.userRepository
         .createQueryBuilder('user')
         .loadAllRelationIds()
         .skip((_page - 1) * _limit)
         .take(_limit)
-        .orderBy(`user.${_sort}`, _order === 'ASC' ? 'ASC' : 'DESC')
+        .orderBy(`user.${_sort}`, _order)
         .getManyAndCount();
 
       return {
@@ -139,324 +82,209 @@ export class UserService implements IUserService {
         meta: new Meta(_page, _limit, total, Math.ceil(total / _limit), QueryOptions.initialize(query)),
       };
     } catch (e) {
-      throw new HttpInternalServerError(e.message);
+      throw e;
     }
   }
 
-  async readUsers(): Promise<any> {
+  async updateUser(uuid: string, arg: UpdateUserDTO): Promise<UserEntity> {
     try {
-      const users = await this.userRepository.createQueryBuilder('user').loadAllRelationIds().getMany();
-      return users;
+      const user = await this.readUser(uuid);
+      const updatedUser = await this.userRepository.updateUser(user.uuid, arg);
+      return updatedUser;
     } catch (e) {
-      throw new HttpInternalServerError(e.message);
+      throw e;
     }
   }
 
-  async updateUser(uuid: string, updateUserDTO: UpdateUserDTO): Promise<any> {
+  async updateUserPassword(uuid: string, password: string): Promise<UserEntity> {
     try {
-      const isExist = await this.redisxService.getKey(`${CACHE_KEY.USER}:${uuid}`);
+      const user = await this.readUser(uuid);
 
-      if (isExist) await this.redisxService.delKey(`${CACHE_KEY.USER}:${uuid}`);
+      user.updatePassword(password);
 
-      const user = await this.findByUuid(uuid);
+      const updatedUser = await this.userRepository.save(user);
 
-      if (!user) {
-        throw new HttpNotFound('User not found');
+      if (!updatedUser) {
+        throw new HttpBadRequest(this.i18nService.translate('content.profile.update.error'));
       }
 
-      const {deviceToken, deviceType, firstName, lastName} = updateUserDTO;
+      return updatedUser;
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  async updateUserAvatar(uuid: string, avatar: Express.Multer.File): Promise<UserEntity> {
+    try {
+      const user = await this.readUser(uuid);
+
+      const media = await this.mediaService.uploadFile(avatar);
+
+      if (!media) {
+        throw new HttpBadRequest(this.i18nService.translate('content.profile.update.avatar'));
+      }
+
+      const updatedUser = await this.userRepository
+        .createQueryBuilder('user')
+        .update()
+        .set({avatar: media})
+        .where('user.uuid = :uuid', {uuid: user.uuid})
+        .returning('*')
+        .execute()
+        .then((res) => res.raw[0]);
+
+      if (!updatedUser) {
+        throw new HttpBadRequest(this.i18nService.translate('content.profile.update.avatar'));
+      }
+
+      return updatedUser;
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  async updateUserCover(uuid: string, cover: Express.Multer.File): Promise<UserEntity> {
+    try {
+      const user = await this.readUser(uuid);
+
+      const media = await this.mediaService.uploadFile(cover);
+
+      if (!media) {
+        throw new HttpBadRequest(this.i18nService.translate('content.profile.update.cover'));
+      }
+
+      const updatedUser = await this.userRepository
+        .createQueryBuilder('user')
+        .update()
+        .set({cover: media})
+        .where('user.uuid = :uuid', {uuid: user.uuid})
+        .returning('*')
+        .execute()
+        .then((res) => res.raw[0]);
+
+      if (!updatedUser) {
+        throw new HttpBadRequest(this.i18nService.translate('content.profile.update.cover'));
+      }
+
+      return updatedUser;
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  async updateUserPhone(uuid: string, phone: string): Promise<UserEntity> {
+    try {
+      const user = await this.userRepository.findByPhone(phone);
+
+      if (user) {
+        throw new HttpBadRequest(this.i18nService.translate('content.auth.signUp.phoneExists'));
+      }
+
+      await this.readUser(uuid);
 
       const updateUser = await this.userRepository
         .createQueryBuilder('user')
-        .update(UserEntity)
-        .set({
-          deviceToken: deviceToken ?? user.deviceToken,
-          deviceType: deviceType ?? user.deviceType,
-          firstName: firstName ?? user.firstName,
-          lastName: lastName ?? user.lastName,
-        })
-        .where('uuid = :uuid', {uuid: uuid})
-        .execute();
+        .update()
+        .set({phone: phone})
+        .where('user.uuid = :uuid', {uuid: uuid})
+        .execute()
+        .then((res) => res.raw[0]);
 
-      if (!updateUser) return new HttpBadRequest('Update user failed');
-
-      const userUpdated = await this.findByUuid(uuid);
-
-      if (!userUpdated) {
-        return new HttpNotFound('User not found');
+      if (!updateUser) {
+        throw new HttpBadRequest(this.i18nService.translate('content.profile.update.phone'));
       }
-
-      await this.redisxService.setKey(`${CACHE_KEY.USER}:${uuid}`, JSON.stringify(userUpdated));
-
-      return userUpdated;
-    } catch (e) {
-      throw new HttpInternalServerError(e.message);
-    }
-  }
-
-  async updateUserPassword(uuid: string, password: string): Promise<any> {
-    try {
-      const isExist = await this.redisxService.getKey(`${CACHE_KEY.USER}:${uuid}`);
-
-      if (isExist) await this.redisxService.delKey(`${CACHE_KEY.USER}:${uuid}`);
-
-      const user = await this.findByUuid(uuid);
-
-      if (!user) return new HttpNotFound('User not found');
-
-      await user.updatePassword(password);
-
-      const saveUser = await this.userRepository.save(user);
-
-      if (!saveUser) return new HttpBadRequest('Update user failed');
-
-      const updateUser = await this.findByUuid(uuid);
-
-      if (!updateUser) return new HttpBadRequest('Update user failed');
-
-      await this.redisxService.setKey(`${CACHE_KEY.USER}:${uuid}`, JSON.stringify(updateUser));
 
       return updateUser;
     } catch (e) {
-      throw new HttpInternalServerError(e.message);
+      throw e;
     }
   }
 
-  async updateUserAvatar(uuid: string, file: Express.Multer.File): Promise<any> {
+  async updateUserEmail(uuid: string, email: string): Promise<UserEntity> {
     try {
-      const isExist = await this.redisxService.getKey(`${CACHE_KEY.USER}:${uuid}`);
+      const user = await this.userRepository.findByEmail(email);
 
-      if (isExist) await this.redisxService.delKey(`${CACHE_KEY.USER}:${uuid}`);
-
-      const user = await this.findByUuid(uuid);
-
-      if (!user) return new HttpNotFound('User not found');
-
-      const avatarUpload = await this.mediaService.uploadFile(file, 'avatar');
-
-      if (!avatarUpload) return new HttpBadRequest('Upload avatar failed');
-
-      const updateUser = await this.userRepository
-        .createQueryBuilder('user')
-        .update(UserEntity)
-        .set({avatar: avatarUpload ?? user.avatar})
-        .where('uuid = :uuid', {uuid: uuid})
-        .execute();
-
-      if (!updateUser) return new HttpBadRequest('Update user failed');
-
-      const userUpdated = await this.findByUuid(uuid);
-
-      if (!userUpdated) {
-        return new HttpNotFound('User not found');
+      if (user) {
+        throw new HttpBadRequest(this.i18nService.translate('content.auth.signUp.emailExists'));
       }
 
-      await this.redisxService.setKey(`${CACHE_KEY.USER}:${uuid}`, JSON.stringify(userUpdated));
-
-      return userUpdated;
-    } catch (e) {
-      throw new HttpInternalServerError(e.message);
-    }
-  }
-
-  async updateUserCover(uuid: string, file: Express.Multer.File): Promise<any> {
-    try {
-      const isExist = await this.redisxService.getKey(`${CACHE_KEY.USER}:${uuid}`);
-
-      if (isExist) await this.redisxService.delKey(`${CACHE_KEY.USER}:${uuid}`);
-
-      const user = await this.findByUuid(uuid);
-
-      if (!user) return new HttpNotFound('User not found');
-
-      const coverUpload = await this.mediaService.uploadFile(file, 'cover');
-
-      if (!coverUpload) return new HttpBadRequest('Upload cover failed');
+      await this.readUser(uuid);
 
       const updateUser = await this.userRepository
         .createQueryBuilder('user')
-        .update(UserEntity)
-        .set({cover: coverUpload})
-        .where('uuid = :uuid', {uuid: uuid})
-        .execute();
-
-      if (!updateUser) return new HttpBadRequest('Update user failed');
-
-      const userUpdated = await this.findByUuid(uuid);
-
-      if (!userUpdated) {
-        return new HttpNotFound('User not found');
-      }
-
-      await this.redisxService.setKey(`${CACHE_KEY.USER}:${uuid}`, JSON.stringify(userUpdated));
-
-      return userUpdated;
-    } catch (e) {
-      throw new HttpInternalServerError(e.message);
-    }
-  }
-
-  async updateUserStatus(uuid: string, status: StatusUser): Promise<any> {
-    try {
-      const isExist = await this.redisxService.getKey(`${CACHE_KEY.USER}:${uuid}`);
-
-      if (isExist) await this.redisxService.delKey(`${CACHE_KEY.USER}:${uuid}`);
-
-      const user = await this.findByUuid(uuid);
-
-      if (!user) return new HttpNotFound('User not found');
-
-      const updateUser = await this.userRepository
-        .createQueryBuilder('user')
-        .update(UserEntity)
-        .set({status: status})
-        .where('uuid = :uuid', {uuid: uuid})
-        .execute();
-
-      if (!updateUser) return new HttpBadRequest('Update user failed');
-
-      const userUpdated = await this.findByUuid(uuid);
-
-      if (!userUpdated) {
-        return new HttpNotFound('User not found');
-      }
-
-      await this.redisxService.setKey(`${CACHE_KEY.USER}:${uuid}`, JSON.stringify(userUpdated));
-
-      return userUpdated;
-    } catch (e) {
-      throw new HttpInternalServerError(e.message);
-    }
-  }
-
-  async updateUserPhone(uuid: string, phone: string): Promise<any> {
-    try {
-      const isExist = await this.redisxService.getKey(`${CACHE_KEY.USER}:${uuid}`);
-
-      if (isExist) await this.redisxService.delKey(`${CACHE_KEY.USER}:${uuid}`);
-
-      const userExist = await this.userRepository
-        .createQueryBuilder('user')
-        .where('phone = :phone', {phone: phone})
-        .getOne();
-
-      if (userExist) return new HttpBadRequest('Phone already exists');
-
-      const user = await this.findByUuid(uuid);
-
-      if (!user) return new HttpNotFound('User not found');
-
-      const updateUser = await this.userRepository
-        .createQueryBuilder('user')
-        .update(UserEntity)
-        .set({phone: phone})
-        .where('uuid = :uuid', {uuid: uuid})
-        .execute();
-
-      if (!updateUser) return new HttpBadRequest('Update user failed');
-
-      const userUpdated = await this.findByUuid(uuid);
-
-      if (!userUpdated) {
-        return new HttpNotFound('User not found');
-      }
-
-      await this.redisxService.setKey(`${CACHE_KEY.USER}:${uuid}`, JSON.stringify(userUpdated));
-
-      return userUpdated;
-    } catch (e) {
-      throw new HttpInternalServerError(e.message);
-    }
-  }
-
-  async updateUserEmail(uuid: string, email: string): Promise<any> {
-    try {
-      const isExist = await this.redisxService.getKey(`${CACHE_KEY.USER}:${uuid}`);
-
-      if (isExist) await this.redisxService.delKey(`${CACHE_KEY.USER}:${uuid}`);
-
-      const userExist = await this.userRepository
-        .createQueryBuilder('user')
-        .where('email = :email', {email: email})
-        .getOne();
-
-      if (userExist) return new HttpBadRequest('Email already exists');
-
-      const user = await this.findByUuid(uuid);
-
-      if (!user) return new HttpNotFound('User not found');
-
-      const updateUser = await this.userRepository
-        .createQueryBuilder('user')
-        .update(UserEntity)
+        .update()
         .set({email: email})
-        .where('uuid = :uuid', {uuid: uuid})
-        .execute();
+        .where('user.uuid = :uuid', {uuid: uuid})
+        .execute()
+        .then((res) => res.raw[0]);
 
-      if (!updateUser) return new HttpBadRequest('Update user failed');
-
-      const userUpdated = await this.findByUuid(uuid);
-
-      if (!userUpdated) {
-        return new HttpNotFound('User not found');
+      if (!updateUser) {
+        throw new HttpBadRequest(this.i18nService.translate('content.profile.update.email'));
       }
 
-      await this.redisxService.setKey(`${CACHE_KEY.USER}:${uuid}`, JSON.stringify(userUpdated));
-
-      return userUpdated;
+      return updateUser;
     } catch (e) {
-      throw new HttpInternalServerError(e.message);
+      throw e;
     }
   }
 
-  async updateUserRole(uuid: string, role: RoleEnum): Promise<any> {
+  async readUsers(): Promise<UserEntity[]> {
     try {
-      const isExist = await this.redisxService.getKey(`${CACHE_KEY.USER}:${uuid}`);
+      return await this.userRepository.find();
+    } catch (e) {
+      throw e;
+    }
+  }
 
-      if (isExist) await this.redisxService.delKey(`${CACHE_KEY.USER}:${uuid}`);
+  async updateUserStatus(uuid: string, status: StatusUser): Promise<UserEntity> {
+    try {
+      await this.readUser(uuid);
 
       const updateUser = await this.userRepository
         .createQueryBuilder('user')
-        .update(UserEntity)
-        .set({role: role})
-        .where('uuid = :uuid', {uuid: uuid})
-        .execute();
+        .update()
+        .set({status: status})
+        .where('user.uuid = :uuid', {uuid: uuid})
+        .execute()
+        .then((res) => res.raw[0]);
 
-      if (!updateUser) return new HttpBadRequest('Update user failed');
+      if (!updateUser) {
+        throw new HttpBadRequest(this.i18nService.translate('content.profile.update.error'));
+      }
 
-      const user = await this.findByUuid(uuid);
-
-      if (!user) return new HttpNotFound('User not found');
-
-      await this.redisxService.setKey(`${CACHE_KEY.USER}:${uuid}`, JSON.stringify(user));
-
-      return user;
+      return updateUser;
     } catch (e) {
-      throw new HttpInternalServerError(e.message);
+      throw e;
     }
   }
 
-  async deleteUser(uuid: string): Promise<any> {
+  async updateUserRole(uuid: string, role: RoleEnum): Promise<UserEntity> {
     try {
-      const isExist = await this.redisxService.getKey(`${CACHE_KEY.USER}:${uuid}`);
+      await this.readUser(uuid);
 
-      if (isExist) await this.redisxService.delKey(`${CACHE_KEY.USER}:${uuid}`);
-
-      const user = await this.userRepository
+      const updateUser = await this.userRepository
         .createQueryBuilder('user')
-        .where('uuid = :uuid', {uuid: uuid})
-        .softDelete()
-        .execute();
+        .update()
+        .set({role: role})
+        .where('user.uuid = :uuid', {uuid: uuid})
+        .execute()
+        .then((res) => res.raw[0]);
 
-      if (!user) return new HttpNotFound('User not found');
+      if (!updateUser) {
+        throw new HttpBadRequest(this.i18nService.translate('content.profile.update.error'));
+      }
 
-      const deleteUser = await this.findByUuid(uuid);
-
-      if (!deleteUser) return new HttpBadRequest('Delete user failed');
-
-      return 'Delete user success';
+      return updateUser;
     } catch (e) {
-      throw new HttpInternalServerError(e.message);
+      throw e;
+    }
+  }
+
+  async deleteUserSoft(uuid: string): Promise<UserEntity> {
+    try {
+      return await this.userRepository.deleteUserSoft(uuid);
+    } catch (e) {
+      throw e;
     }
   }
 }

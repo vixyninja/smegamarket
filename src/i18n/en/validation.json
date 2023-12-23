@@ -1,7 +1,16 @@
 {
   "NOT_EMPTY": "{property} cannot be empty",
-  "INVALID_EMAIL": "email is invalid",
-  "INVALID_PHONE": "{property} is not a valid phone number",
-  "MIN": "{property} with value: \"{value}\" needs to be at least {constraints.0}, ow and {message}",
-  "MAX": "{property} with value: \"{value}\" needs to be less than {constraints.0}, ow and {message}"
+  "MAX_LENGTH": "{property} cannot be longer than {length} characters",
+  "MIN_LENGTH": "{property} cannot be shorter than {length} characters",
+  "INVALID_DATE": "{property} is not a valid date",
+  "EQUALS": "{property} must be equal to {value}",
+  "PASSWORDS_MUST_MATCH": "Passwords must match",
+  "NOT_EQUALS": "{property} cannot be equal to {value}",
+  "GREATER_THAN": "{property} must be greater than {value}",
+  "IS_EMAIL": "{property} must be a valid email address",
+  "IS_PHONE": "{property} must be a valid phone number",
+  "IS_DATE": "{property} must be a valid date",
+  "IS_NUMBER": "{property} must be a valid number",
+  "IS_BOOLEAN": "{property} must be a valid boolean",
+  "IS_STRING": "{property} must be a valid string"
 }

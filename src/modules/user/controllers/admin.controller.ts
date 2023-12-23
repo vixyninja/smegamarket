@@ -87,7 +87,7 @@ export class AdminController {
       return new HttpBadRequest('UserUUID is not valid');
     }
 
-    const user = await this.adminService.deleteUser(userId);
+    const user = await this.adminService.deleteUserSoft(userId);
     return {
       data: user,
       message: 'Update active successfully',
