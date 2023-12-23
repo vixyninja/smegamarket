@@ -1,8 +1,7 @@
 import {HttpNotFound} from '@/core';
-import {I18nTranslations} from '@/i18n';
 import {Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
-import {I18nContext, I18nService} from 'nestjs-i18n';
+import {I18nService} from 'nestjs-i18n';
 import {Repository} from 'typeorm';
 import {CreateUserDTO, UpdateUserDTO} from '../dto';
 import {UserEntity} from '../entities';
@@ -13,7 +12,7 @@ export class UserRepository extends Repository<UserEntity> implements IUserRepos
   constructor(
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
-    private readonly i18nService: I18nService<I18nTranslations>,
+    private readonly i18nService: I18nService,
   ) {
     super(userRepository.target, userRepository.manager, userRepository.queryRunner);
   }

@@ -1,5 +1,4 @@
 import {HttpBadRequest, HttpNotFound, Meta, QueryOptions, RoleEnum} from '@/core';
-import {I18nTranslations} from '@/i18n';
 import {MediaService} from '@/modules/media';
 import {Injectable} from '@nestjs/common';
 import {isEmail, isPhoneNumber} from 'class-validator';
@@ -15,7 +14,7 @@ export class UserService implements IUserService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly mediaService: MediaService,
-    private readonly i18nService: I18nService<I18nTranslations>,
+    private readonly i18nService: I18nService,
   ) {}
 
   async createUser(args: CreateUserDTO): Promise<UserEntity> {
