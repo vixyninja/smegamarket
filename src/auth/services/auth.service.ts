@@ -1,11 +1,10 @@
 import {Environment, JWTService} from '@/configs';
 import {JWTPayload} from '@/configs/jwt/typedef';
 import {HttpBadRequest, RoleEnum} from '@/core';
-import {I18nTranslations} from '@/i18n';
 import {CreateUserDTO, UserEntity, UserMailService, UserService} from '@/modules/user';
 import {Injectable} from '@nestjs/common';
 import {LoginTicket, OAuth2Client, TokenPayload} from 'google-auth-library';
-import {I18n, I18nLang, I18nService} from 'nestjs-i18n';
+import {I18nContext, I18nService} from 'nestjs-i18n';
 import {
   ChangePasswordDTO,
   ForgotPasswordDTO,
@@ -25,7 +24,7 @@ export class AuthService implements IAuthService {
     private readonly userService: UserService,
     private readonly userMailService: UserMailService,
     private readonly jwtService: JWTService,
-    @I18nLang() private i18nService: I18nService<I18nTranslations>,
+    private i18nService: I18nService,
   ) {}
 
   async signInEmailAndPassword(
@@ -36,7 +35,9 @@ export class AuthService implements IAuthService {
       const user = await this.userService.readUserForAuth(email);
       const isMatch: boolean = await user.validatePassword(password);
       if (!isMatch) {
-        throw new HttpBadRequest(this.i18nService.translate('content.auth.signIn.wrongCredentials'));
+        throw new HttpBadRequest(
+          this.i18nService.translate('content.auth.signIn.wrongCredentials', {lang: I18nContext.current().lang}),
+        );
       }
       const payloadJWT: JWTPayload = {
         uuid: user.uuid,
@@ -71,8 +72,6 @@ export class AuthService implements IAuthService {
       const {firstName, lastName, email, password, deviceToken, deviceType} = args;
 
       const existUser = await this.userService.readUserForAuth(email);
-
-      console.log(this.i18nService);
 
       if (existUser) {
         throw new HttpBadRequest(this.i18nService.translate('content.auth.signUp.emailExists'));

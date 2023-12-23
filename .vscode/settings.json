@@ -18,6 +18,7 @@
     "signout",
     "streamifier",
     "Throttlerx",
-    "typeorm"
+    "typeorm",
+    "websockets"
   ]
 }

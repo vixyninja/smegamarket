@@ -1,5 +1,4 @@
 import {JWTService, MailModule, RedisxModule} from '@/configs';
-import {I18nModulex} from '@/i18n';
 import {BullModule} from '@nestjs/bull';
 import {Module} from '@nestjs/common';
 import {JwtService} from '@nestjs/jwt';
@@ -14,7 +13,6 @@ import {UserMailService, UserService} from './services';
 
 @Module({
   imports: [
-    I18nModulex,
     TypeOrmModule.forFeature([UserEntity]),
     RedisxModule,
     MediaModule,
