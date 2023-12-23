@@ -10,7 +10,8 @@
     },
     "confirmPassword": {
       "required": "Xác nhận mật khẩu là bắt buộc",
-      "mustMatch": "Xác nhận mật khẩu không khớp"
+      "mustMatch": "Xác nhận mật khẩu không khớp",
+      "minlength": "Mật khẩu phải có ít nhất 6 ký tự"
     },
     "firstName": {
       "required": "Tên là bắt buộc"
@@ -23,6 +24,40 @@
     },
     "deviceToken": {
       "required": "Token là bắt buộc"
+    },
+    "signUp": {
+      "success": "Đăng ký thành công",
+      "error": "Lỗi đăng ký, vui lòng thử lại",
+      "emailExist": "Email đã tồn tại",
+      "phoneExists": "Số điện thoại đã tồn tại"
+    },
+    "signIn": {
+      "success": "Đăng nhập thành công",
+      "error": "Lỗi đăng nhập, vui lòng thử lại",
+      "wrongCredentials": "Email hoặc mật khẩu không đúng",
+      "notFound": "Không tìm thấy tài khoản"
+    },
+    "refreshToken": {
+      "success": "Lấy token mới thành công",
+      "error": "Lỗi lấy token mới, vui lòng thử lại",
+      "missing": "Không tìm thấy token"
+    }
+  },
+  "user": {
+    "update": {
+      "success": "Cập nhật thông tin thành công",
+      "error": "Lỗi cập nhật thông tin, vui lòng thử lại",
+      "role": "Vai trò không hợp lệ",
+      "avatar": "Ảnh đại diện không hợp lệ",
+      "cover": "Ảnh bìa không hợp lệ",
+      "phone": "Số điện thoại không hợp lệ",
+      "email": "Email không hợp lệ",
+      "firstName": "Tên không hợp lệ",
+      "lastName": "Họ không hợp lệ"
+    },
+    "get": {
+      "success": "Lấy thông tin thành công",
+      "error": "Lỗi lấy thông tin, vui lòng thử lại"
     }
   }
 }

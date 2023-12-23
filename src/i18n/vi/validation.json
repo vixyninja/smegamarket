@@ -1,7 +1,15 @@
 {
   "NOT_EMPTY": "{property} không được để trống",
-  "INVALID_EMAIL": "email không đúng định dạng",
-  "INVALID_PHONE": "{property} không đúng định dạng số điện thoại",
-  "MIN": "{property} với giá trị: \"{value}\" phải lớn hơn {constraints.0}",
-  "MAX": "{property} với giá trị: \"{value}\" phải nhỏ hơn {constraints.0}"
+  "MAX_LENGTH": "{property} không được dài hơn {length} ký tự",
+  "MIN_LENGTH": "{property} không được ngắn hơn {length} ký tự",
+  "INVALID_DATE": "{property} không phải là ngày hợp lệ",
+  "EQUALS": "{property} phải bằng {value}",
+  "NOT_EQUALS": "{property} không được bằng {value}",
+  "GREATER_THAN": "{property} phải lớn hơn {value}",
+  "IS_EMAIL": "{property} phải là email hợp lệ",
+  "IS_PHONE": "{property} phải là số điện thoại hợp lệ",
+  "IS_DATE": "{property} phải là ngày hợp lệ",
+  "IS_NUMBER": "{property} phải là số hợp lệ",
+  "IS_BOOLEAN": "{property} phải là true hoặc false",
+  "IS_STRING": "{property} phải là chuỗi hợp lệ"
 }

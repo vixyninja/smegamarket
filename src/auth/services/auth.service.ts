@@ -1,20 +1,11 @@
-import {Environment, JWTService, RedisxService} from '@/configs';
+import {Environment, JWTService} from '@/configs';
 import {JWTPayload} from '@/configs/jwt/typedef';
-import {
-  CACHE_KEY,
-  CACHE_KEY_TTL,
-  HttpBadRequest,
-  HttpForbidden,
-  HttpInternalServerError,
-  HttpNotFound,
-  HttpUnauthorized,
-  RoleEnum,
-  randomOTP,
-} from '@/core';
-import {CreateUserDTO, StatusUser, UserEntity, UserMailService, UserService} from '@/modules/user';
+import {HttpBadRequest, RoleEnum} from '@/core';
+import {I18nTranslations} from '@/i18n';
+import {CreateUserDTO, UserEntity, UserMailService, UserService} from '@/modules/user';
 import {Injectable} from '@nestjs/common';
-import {isEmail, isPhoneNumber} from 'class-validator';
 import {LoginTicket, OAuth2Client, TokenPayload} from 'google-auth-library';
+import {I18n, I18nLang, I18nService} from 'nestjs-i18n';
 import {
   ChangePasswordDTO,
   ForgotPasswordDTO,
@@ -33,82 +24,95 @@ export class AuthService implements IAuthService {
   constructor(
     private readonly userService: UserService,
     private readonly userMailService: UserMailService,
-    private readonly redisService: RedisxService,
     private readonly jwtService: JWTService,
+    @I18nLang() private i18nService: I18nService<I18nTranslations>,
   ) {}
 
-  async signInEmailAndPassword(arg: SignInEmailDTO): Promise<any> {
+  async signInEmailAndPassword(
+    args: SignInEmailDTO,
+  ): Promise<{token: any; user: Omit<UserEntity, 'hashPassword' | 'salt'>}> {
     try {
-      const {email, password, deviceToken, deviceType} = arg;
-      const user: UserEntity = await this.userService.findForAuth(email);
-      if (!user) return new HttpNotFound('User not found');
-
-      const userEntity = new UserEntity(user);
-      const isMatchPassword = await userEntity.validatePassword(password);
-      if (!isMatchPassword) return new HttpUnauthorized("Password doesn't match");
-
-      const payload: JWTPayload = {
+      const {email, password, deviceToken, deviceType} = args;
+      const user = await this.userService.readUserForAuth(email);
+      const isMatch: boolean = await user.validatePassword(password);
+      if (!isMatch) {
+        throw new HttpBadRequest(this.i18nService.translate('content.auth.signIn.wrongCredentials'));
+      }
+      const payloadJWT: JWTPayload = {
+        uuid: user.uuid,
+        role: user.role,
         deviceToken: deviceToken,
         deviceType: deviceType,
         email: user.email,
-        uuid: user.uuid,
-        role: user.role,
       };
-      const token = await Promise.all([
-        await this.jwtService.signToken(payload, 'accessToken'),
-        await this.jwtService.signToken(payload, 'refreshToken'),
+
+      const [accessToken, refreshToken] = await Promise.all([
+        await this.jwtService.signToken(payloadJWT, 'accessToken'),
+        await this.jwtService.signToken(payloadJWT, 'refreshToken'),
       ]);
 
       return {
-        accessToken: token[0],
-        refreshToken: token[1],
+        token: {
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+        },
         user: user,
       };
     } catch (e) {
-      throw new HttpInternalServerError(e.message);
+      throw e;
     }
   }
 
-  async signUpEmailAndPassword(arg: SignUpEmailDTO): Promise<any> {
+  async signUpEmailAndPassword(args: SignUpEmailDTO): Promise<{
+    token: any;
+    user: Omit<UserEntity, 'hashPassword' | 'salt'>;
+  }> {
     try {
-      const {deviceToken, deviceType, email, password, firstName, lastName} = arg;
-      const user: UserEntity = await this.userService.findForAuth(email);
-      if (user) return new HttpBadRequest('User already exists');
+      const {firstName, lastName, email, password, deviceToken, deviceType} = args;
 
-      const createUserDTO: CreateUserDTO = {
-        email: email,
-        firstName: firstName,
-        lastName: lastName,
-        password: password,
+      const existUser = await this.userService.readUserForAuth(email);
+
+      console.log(this.i18nService);
+
+      if (existUser) {
+        throw new HttpBadRequest(this.i18nService.translate('content.auth.signUp.emailExists'));
+      }
+
+      const user = await this.userService.createUser(args);
+
+      if (!user) {
+        throw new HttpBadRequest(this.i18nService.translate('content.auth.signUp.error'));
+      }
+
+      const payloadJWT: JWTPayload = {
+        uuid: user.uuid,
+        role: user.role,
         deviceToken: deviceToken,
         deviceType: deviceType,
+        email: user.email,
       };
-      const newUser: UserEntity = await this.userService.createUser(createUserDTO);
 
-      const payload: JWTPayload = {
-        deviceToken: deviceToken,
-        deviceType: deviceType,
-        email: newUser.email,
-        uuid: newUser.uuid,
-        role: RoleEnum.USER,
-      };
-      const token = await Promise.all([
-        await this.jwtService.signToken(payload, 'accessToken'),
-        await this.jwtService.signToken(payload, 'refreshToken'),
+      const [accessToken, refreshToken] = await Promise.all([
+        await this.jwtService.signToken(payloadJWT, 'accessToken'),
+        await this.jwtService.signToken(payloadJWT, 'refreshToken'),
       ]);
 
       return {
-        accessToken: token[0],
-        refreshToken: token[1],
+        token: {
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+        },
+        user: user,
       };
     } catch (e) {
-      throw new HttpInternalServerError(e.message);
+      throw e;
     }
   }
 
-  async signInWithGoogle(signInGoogleDTO: SignInGoogleDTO): Promise<any> {
+  async signInWithGoogle(args: SignInGoogleDTO): Promise<any> {
     try {
-      const {deviceToken, deviceType, idToken} = signInGoogleDTO;
+      const {idToken, deviceToken, deviceType} = args;
+
       const client: OAuth2Client = new OAuth2Client(Environment.GOOGLE_CLIENT_ID);
       const ticker: LoginTicket = await client.verifyIdToken({
         idToken: idToken,
@@ -117,7 +121,8 @@ export class AuthService implements IAuthService {
       });
 
       const payload: TokenPayload = ticker.getPayload();
-      const existUser: UserEntity = await this.userService.findForAuth(payload.email);
+      const existUser: UserEntity = await this.userService.readUserForAuth(payload.email);
+
       if (existUser) {
         const jwtPayLoad: JWTPayload = {
           deviceToken: deviceToken,
@@ -126,13 +131,13 @@ export class AuthService implements IAuthService {
           uuid: existUser.uuid,
           role: existUser.role,
         };
-        const token = await Promise.all([
+        const [accessToken, refreshToken] = await Promise.all([
           await this.jwtService.signToken(jwtPayLoad, 'accessToken'),
           await this.jwtService.signToken(jwtPayLoad, 'refreshToken'),
         ]);
         return {
-          accessToken: token[0],
-          refreshToken: token[1],
+          accessToken: accessToken,
+          refreshToken: refreshToken,
           user: existUser,
         };
       } else {
@@ -144,7 +149,9 @@ export class AuthService implements IAuthService {
           deviceToken: deviceToken,
           deviceType: deviceType,
         };
+
         const newUser: UserEntity = await this.userService.createUser(createUserDTO);
+
         const jwtPayLoad: JWTPayload = {
           deviceToken: deviceToken,
           deviceType: deviceType,
@@ -152,205 +159,62 @@ export class AuthService implements IAuthService {
           uuid: newUser.uuid,
           role: RoleEnum.USER,
         };
-        const token = await Promise.all([
+        const [accessToken, refreshToken] = await Promise.all([
           await this.jwtService.signToken(jwtPayLoad, 'accessToken'),
           await this.jwtService.signToken(jwtPayLoad, 'refreshToken'),
         ]);
         return {
-          accessToken: token[0],
-          refreshToken: token[1],
+          accessToken: accessToken,
+          refreshToken: refreshToken,
           user: newUser,
         };
       }
     } catch (e) {
-      throw new HttpInternalServerError(e.message);
+      throw e;
     }
   }
 
-  async signInWithFacebook(): Promise<any> {
+  signInWithFacebook(): Promise<any> {
     throw new Error('Method not implemented.');
   }
 
-  async refreshToken(arg: string): Promise<any> {
+  async refreshToken(refreshToken: string): Promise<{accessToken: string; refreshToken: string}> {
     try {
-      const payload: JWTPayload = await this.jwtService.verifyToken(arg, 'refreshToken');
-      const user: UserEntity = await this.userService.findForAuth(payload.email);
-      const newPayload: JWTPayload = {
-        email: user.email,
-        role: user.role,
-        deviceToken: user.deviceToken,
-        deviceType: user.deviceType,
-        uuid: user.uuid,
-      };
+      const payload: JWTPayload = await this.jwtService.verifyToken(refreshToken, 'refreshToken');
 
-      const token = await Promise.all([
-        await this.jwtService.signToken(newPayload, 'accessToken'),
-        await this.jwtService.signToken(newPayload, 'refreshToken'),
+      const [newAccessToken, newRefreshToken] = await Promise.all([
+        await this.jwtService.signToken(payload, 'accessToken'),
+        await this.jwtService.signToken(payload, 'refreshToken'),
       ]);
+
       return {
-        accessToken: token[0],
-        refreshToken: token[1],
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
       };
     } catch (e) {
-      throw new HttpInternalServerError(e.message);
+      throw e;
     }
   }
 
-  async logOut(information: string): Promise<any> {
+  async forgotPassword(arg: ForgotPasswordDTO): Promise<any> {
     try {
-      await this.redisService.delKey(`${CACHE_KEY.USER}:${information}`);
     } catch (e) {
-      throw new HttpInternalServerError(e.message);
+      throw e;
     }
   }
-
-  async forgotPassword(forgotPasswordDTO: ForgotPasswordDTO): Promise<any> {
-    try {
-      const {email} = forgotPasswordDTO;
-      const user: UserEntity = await this.userService.findForAuth(email);
-      if (!user) return new HttpForbidden('User not found');
-
-      await this.redisService.delKey(`${CACHE_KEY.VERIFY_FORGOT_PASSWORD}:${email}`);
-
-      let code = randomOTP();
-      await this.redisService.setKey(
-        `${CACHE_KEY.VERIFY_FORGOT_PASSWORD}:${email}`,
-        code,
-        CACHE_KEY_TTL.VERIFY_FORGOT_PASSWORD,
-      );
-
-      const result = await this.userMailService.sendUserResetPasswordOtp(
-        `${user.firstName} ${user.lastName}`,
-        email,
-        code,
-      );
-
-      return result;
-    } catch (e) {
-      throw new HttpInternalServerError(e.message);
-    }
+  resetPasswordOtp(arg: ResetPasswordOtpDTO): Promise<any> {
+    throw new Error('Method not implemented.');
   }
-
-  async resetPasswordOtp(resetPasswordOtpDTO: ResetPasswordOtpDTO): Promise<any> {
-    try {
-      const {email, password, otp} = resetPasswordOtpDTO;
-      const user: UserEntity = await this.userService.findForAuth(email);
-      if (!user) return new HttpForbidden('User not found');
-
-      const isMatchCode = await this.redisService.getKey(`${CACHE_KEY.VERIFY_FORGOT_PASSWORD}:${email}`);
-      if (!isMatchCode) return new HttpBadRequest('Request invalid or expired !!!');
-      if (isMatchCode.toString() !== otp.toString())
-        return new HttpBadRequest('OTP not match !!!, please try again !!!');
-
-      await this.userService.updateUserPassword(user.uuid, password);
-      await this.redisService.delKey(`${CACHE_KEY.VERIFY_FORGOT_PASSWORD}:${email}`);
-      return 'Reset password successfully, please login again !!!';
-    } catch (e) {
-      throw new HttpInternalServerError(e.message);
-    }
+  changePassword(arg: ChangePasswordDTO): Promise<any> {
+    throw new Error('Method not implemented.');
   }
-
-  async changePassword(arg: ChangePasswordDTO): Promise<any> {
-    try {
-      const {email, password} = arg;
-      const user: UserEntity = await this.userService.findForAuth(email);
-      if (!user) return new HttpForbidden('User not found');
-
-      await this.userService.updateUserPassword(user.uuid, password);
-      await this.redisService.delKey(`${CACHE_KEY.USER}:${user.uuid}`);
-
-      const result = await this.userMailService.sendUserResetPasswordSuccess(
-        `${user.firstName} ${user.lastName}`,
-        email,
-      );
-      return result;
-    } catch (e) {
-      throw new HttpInternalServerError(e.message);
-    }
+  verifyEmail(arg: VerifyEmailDTO): Promise<any> {
+    throw new Error('Method not implemented.');
   }
-
-  async verifyEmail(arg: VerifyEmailDTO): Promise<any> {
-    try {
-      const {email} = arg;
-      const user: UserEntity = await this.userService.findForAuth(email);
-      if (!user) return new HttpForbidden('User not found');
-      if (user.status === StatusUser.ACTIVE) return new HttpBadRequest('User already verified !!!');
-
-      await this.redisService.delKey(`${CACHE_KEY.VERIFY_EMAIL}:${email}`);
-      let code = randomOTP();
-      await this.redisService.setKey(`${CACHE_KEY.VERIFY_EMAIL}:${email}`, code, CACHE_KEY_TTL.VERIFY_EMAIL);
-
-      const result = await this.userMailService.sendUserVerifyCode(`${user.firstName} ${user.lastName}`, email, code);
-      return result;
-    } catch (e) {
-      throw new HttpInternalServerError(e.message);
-    }
+  verifyPhone(arg: VerifyPhoneDTO): Promise<any> {
+    throw new Error('Method not implemented.');
   }
-
-  async verifyPhone(arg: VerifyPhoneDTO): Promise<any> {
-    try {
-      const {phone} = arg;
-      const user: UserEntity = await this.userService.findByPhone(phone);
-
-      delete user.hashPassword;
-      delete user.salt;
-
-      if (!user) return new HttpForbidden('User not found');
-
-      let code = randomOTP();
-      await this.redisService.delKey(`${CACHE_KEY.VERIFY_PHONE}:${phone}`);
-      await this.redisService.setKey(`${CACHE_KEY.VERIFY_PHONE}:${phone}`, code, CACHE_KEY_TTL.VERIFY_PHONE);
-
-      // TODO: send sms
-
-      return 'OTP sent to your phone, you have 5 minutes to verify !!!';
-    } catch (e) {
-      throw new HttpInternalServerError(e.message);
-    }
-  }
-
-  async verifyOtp(arg: VerifyOtpDTO): Promise<any> {
-    try {
-      const {otp, information} = arg;
-      var user: UserEntity;
-
-      if (isPhoneNumber(information)) {
-        user = await this.userService.findByPhone(information);
-
-        if (!user) return new HttpForbidden('User not found');
-
-        delete user.hashPassword;
-        delete user.salt;
-
-        const isMatchCode = await this.redisService.getKey(`${CACHE_KEY.VERIFY_PHONE}:${information}`);
-        if (!isMatchCode) return new HttpBadRequest('Request invalid or expired !!!');
-        if (isMatchCode.toString() !== otp.toString())
-          return new HttpBadRequest('OTP not match !!!, please try again !!!');
-
-        await this.userService.updateUserStatus(user.uuid, StatusUser.ACTIVE);
-        await this.redisService.delKey(`${CACHE_KEY.VERIFY_PHONE}:${information}`);
-        return 'Verify successfully !!!';
-      } else if (isEmail(information)) {
-        user = await this.userService.findForAuth(information);
-
-        if (!user) return new HttpForbidden('User not found');
-
-        delete user.hashPassword;
-        delete user.salt;
-
-        const isMatchCode = await this.redisService.getKey(`${CACHE_KEY.VERIFY_EMAIL}:${information}`);
-        if (!isMatchCode) return new HttpBadRequest('Request invalid or expired !!!');
-        if (isMatchCode.toString() !== otp.toString())
-          return new HttpBadRequest('OTP not match !!!, please try again !!!');
-
-        await this.userService.updateUserStatus(user.uuid, StatusUser.ACTIVE);
-        await this.redisService.delKey(`${CACHE_KEY.VERIFY_EMAIL}:${information}`);
-        return 'Verify successfully !!!';
-      } else {
-        return new HttpBadRequest('Information invalid !!!');
-      }
-    } catch (e) {
-      throw new HttpInternalServerError(e.message);
-    }
+  verifyOtp(arg: VerifyOtpDTO): Promise<any> {
+    throw new Error('Method not implemented.');
   }
 }

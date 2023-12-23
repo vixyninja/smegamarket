@@ -1,4 +1,5 @@
 import {JWTService, MailModule, RedisxModule} from '@/configs';
+import {I18nModulex} from '@/i18n';
 import {BullModule} from '@nestjs/bull';
 import {Module} from '@nestjs/common';
 import {JwtService} from '@nestjs/jwt';
@@ -8,10 +9,12 @@ import {MediaModule} from '../media';
 import {EmailConsumer} from './consumers';
 import {AdminController, UserController} from './controllers';
 import {UserEntity} from './entities';
+import {UserRepository} from './repository';
 import {UserMailService, UserService} from './services';
 
 @Module({
   imports: [
+    I18nModulex,
     TypeOrmModule.forFeature([UserEntity]),
     RedisxModule,
     MediaModule,
@@ -23,7 +26,7 @@ import {UserMailService, UserService} from './services';
     ),
   ],
   controllers: [UserController, AdminController],
-  providers: [UserService, UserMailService, JwtService, JWTService, EmailConsumer],
+  providers: [UserRepository, UserService, UserMailService, JwtService, JWTService, EmailConsumer],
   exports: [UserService, UserMailService],
 })
 export class UserModule {}

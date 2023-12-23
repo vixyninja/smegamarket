@@ -10,7 +10,8 @@
     },
     "confirmPassword": {
       "required": "Confirm password is required",
-      "mustMatch": "Passwords must match"
+      "mustMatch": "Passwords must match",
+      "minLength": "Password must be at least 6 characters long"
     },
     "firstName": {
       "required": "First name is required"
@@ -23,6 +24,40 @@
     },
     "deviceToken": {
       "required": "Device token is required"
+    },
+    "signUp": {
+      "success": "You have successfully signed up",
+      "error": "Something went wrong. Please try again later",
+      "emailExists": "Email already exists",
+      "phoneExists": "Phone already exists"
+    },
+    "signIn": {
+      "success": "You have successfully signed in",
+      "error": "Something went wrong. Please try again later",
+      "wrongCredentials": "Wrong email or password",
+      "notFound": "User not found"
+    },
+    "refreshToken": {
+      "success": "You have successfully refreshed token",
+      "error": "Something went wrong. Please try again later",
+      "missing": "Refresh token is missing"
+    }
+  },
+  "profile": {
+    "update": {
+      "success": "You have successfully updated your profile",
+      "error": "Something went wrong. Please try again later",
+      "role": "User role is not valid",
+      "avatar": "User avatar is not valid",
+      "cover": "User cover is not valid",
+      "phone": "User phone is not valid",
+      "email": "User email is not valid",
+      "firstName": "User first name is not valid",
+      "lastName": "User last name is not valid"
+    },
+    "get": {
+      "success": "You have successfully got your profile",
+      "error": "Something went wrong. Please try again later"
     }
   }
 }

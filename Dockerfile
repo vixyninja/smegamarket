@@ -33,6 +33,7 @@ USER node
 # PRODUCTION
 ###################
 
+
 FROM node:20-alpine As production
 
 COPY --chown=node:node --from=builder /usr/src/app/node_modules ./node_modules

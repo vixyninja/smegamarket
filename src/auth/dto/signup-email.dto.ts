@@ -1,5 +1,5 @@
 import {I18nTranslations} from '@/i18n';
-import {Equals, IsEmail, IsNotEmpty} from 'class-validator';
+import {IsEmail, IsNotEmpty, MinLength} from 'class-validator';
 import {i18nValidationMessage} from 'nestjs-i18n';
 
 export class SignUpEmailDTO {
@@ -8,10 +8,15 @@ export class SignUpEmailDTO {
   readonly email: string;
 
   @IsNotEmpty({message: i18nValidationMessage<I18nTranslations>('content.auth.password.required')})
+  @MinLength(6, {
+    message: i18nValidationMessage<I18nTranslations>('content.auth.password.minlength'),
+  })
   readonly password: string;
 
-  @IsNotEmpty({message: i18nValidationMessage<I18nTranslations>('content.auth.passwordConfirmation.required')})
-  @Equals('password', {message: i18nValidationMessage<I18nTranslations>('validation.NOT_EMPTY')})
+  @IsNotEmpty({message: i18nValidationMessage<I18nTranslations>('content.auth.confirmPassword.required')})
+  @MinLength(6, {
+    message: i18nValidationMessage<I18nTranslations>('content.auth.confirmPassword.minlength'),
+  })
   readonly confirmPassword: string;
 
   @IsNotEmpty({message: i18nValidationMessage<I18nTranslations>('content.auth.deviceToken.required')})
