@@ -6,12 +6,12 @@
     },
     "password": {
       "required": "Mật khẩu là bắt buộc",
-      "minlength": "Mật khẩu phải có ít nhất 6 ký tự"
+      "minLength": "Mật khẩu phải có ít nhất 6 ký tự"
     },
     "confirmPassword": {
       "required": "Xác nhận mật khẩu là bắt buộc",
       "mustMatch": "Xác nhận mật khẩu không khớp",
-      "minlength": "Mật khẩu phải có ít nhất 6 ký tự"
+      "minLength": "Mật khẩu phải có ít nhất 6 ký tự"
     },
     "firstName": {
       "required": "Tên là bắt buộc"

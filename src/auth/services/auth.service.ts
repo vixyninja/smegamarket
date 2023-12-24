@@ -33,7 +33,14 @@ export class AuthService implements IAuthService {
   ): Promise<{accessToken: string; refreshToken: string; user: Omit<UserEntity, 'password' | 'salt'>}> {
     try {
       const {email, password, deviceToken, deviceType} = args;
-      const user = await this.userService.readUserForAuth(email);
+      const user: UserEntity = await this.userService.readUserForAuth(email);
+
+      if (!user) {
+        throw new HttpBadRequest(
+          this.i18nService.translate('content.auth.signIn.wrongCredentials', {lang: I18nContext.current().lang}),
+        );
+      }
+
       const isMatch: boolean = await user.validatePassword(password);
       if (!isMatch) {
         throw new HttpBadRequest(
@@ -53,10 +60,12 @@ export class AuthService implements IAuthService {
         await this.jwtService.signToken(payloadJWT, 'refreshToken'),
       ]);
 
+      const userInfo = await this.userService.readUser(user.uuid);
+
       return {
         accessToken: accessToken,
         refreshToken: refreshToken,
-        user: user,
+        user: userInfo,
       };
     } catch (e) {
       throw e;

@@ -1,6 +1,6 @@
 import {Public} from '@/core';
 import {I18nTranslations} from '@/i18n/generated/i18n.generated';
-import {BadRequestException, Body, Controller, Get, HttpStatus, Post, Query, Res} from '@nestjs/common';
+import {Body, Controller, Get, HttpCode, HttpStatus, Post, Query, Res} from '@nestjs/common';
 import {SkipThrottle} from '@nestjs/throttler';
 import {isEmail} from 'class-validator';
 import {Response} from 'express';
@@ -20,7 +20,13 @@ export class AuthController {
     @Res() res: Response,
   ): Promise<any> {
     if (!isEmail(signInEmailDTO.email)) {
-      throw new BadRequestException(i18n.translate('content.auth.signIn.wrongCredentials', {lang: i18n.lang}));
+      return res
+        .status(HttpStatus.UNPROCESSABLE_ENTITY)
+        .json({
+          message: i18n.translate('content.auth.signIn.wrongCredentials', {lang: i18n.lang}),
+          statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+        })
+        .end();
     }
     const credentials = await this.authService.signInEmailAndPassword(signInEmailDTO);
 
@@ -40,16 +46,25 @@ export class AuthController {
     @Res() res: Response,
   ): Promise<any> {
     if (signUpEmailDTO.password !== signUpEmailDTO.confirmPassword) {
-      throw new BadRequestException(i18n.translate('content.auth.confirmPassword.mustMatch', {lang: i18n.lang}));
+      return res
+        .status(HttpStatus.UNPROCESSABLE_ENTITY)
+        .json({
+          message: i18n.translate('content.auth.confirmPassword.mustMatch', {lang: i18n.lang}),
+          statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+        })
+        .end();
     }
+
     const credentials = await this.authService.signUpEmailAndPassword(signUpEmailDTO);
 
     return res.status(HttpStatus.CREATED).json({
       message: i18n.translate('content.auth.signUp.success', {lang: i18n.lang}),
       data: credentials,
+      statusCode: HttpStatus.CREATED,
     });
   }
 
+  @HttpCode(HttpStatus.OK)
   @Post('sign-in-with-google')
   async signInGoogle(
     @Body() signInGoogleDTO: SignInGoogleDTO,
@@ -59,14 +74,15 @@ export class AuthController {
     const credentials = await this.authService.signInWithGoogle(signInGoogleDTO);
 
     return res
-      .status(HttpStatus.OK)
       .json({
         message: i18n.translate('content.auth.signIn.success', {lang: i18n.lang}),
         data: credentials,
+        statusCode: HttpStatus.OK,
       })
       .end();
   }
 
+  @HttpCode(HttpStatus.OK)
   @Get('refresh-token')
   async refreshToken(
     @Query('refresh-token') token: string,
@@ -76,16 +92,17 @@ export class AuthController {
     if (!token) {
       return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({
         message: i18n.translate('content.auth.refreshToken.missing', {lang: i18n.lang}),
+        statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
       });
     }
 
     const credentials = await this.authService.refreshToken(token);
 
     return res
-      .status(HttpStatus.OK)
       .json({
         message: i18n.translate('content.auth.signIn.success', {lang: i18n.lang}),
         data: credentials,
+        statusCode: HttpStatus.OK,
       })
       .end();
   }
