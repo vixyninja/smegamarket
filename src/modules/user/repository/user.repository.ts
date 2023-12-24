@@ -20,44 +20,41 @@ export class UserRepository extends Repository<UserEntity> implements IUserRepos
   /**
    *
    * @param email
-   * @returns returns user with hashPassword and salt
+   * @returns returns user with password and salt
    */
   async findForAuthEmail(email: string): Promise<UserEntity> {
     return await this.userRepository
       .createQueryBuilder('user')
       .where('user.email = :email', {email})
-      .addSelect('user.hashPassword')
-      .addSelect('user.salt')
+      .addSelect('user.password')
       .getOne();
   }
 
   /**
    *
    * @param phone
-   * @returns returns user with hashPassword and salt
+   * @returns returns user with password and salt
    */
   async findForAuthPhone(phone: string): Promise<UserEntity> {
     return await this.userRepository
       .createQueryBuilder('user')
       .where('user.phone = :phone', {phone})
-      .addSelect('user.hashPassword')
-      .addSelect('user.salt')
+      .addSelect('user.password')
       .getOne();
   }
 
   /**
    *
    * @param email
-   * @returns returns user without hashPassword and salt
+   * @returns returns user without password and salt
    */
   async findByEmail(email: string): Promise<UserEntity> {
     return await this.userRepository.createQueryBuilder('user').where('user.email = :email', {email}).getOne();
   }
-
   /**
    *
    * @param phone
-   * @returns returns user without hashPassword and salt
+   * @returns returns user without password and salt
    */
   async findByPhone(phone: string): Promise<UserEntity> {
     return await this.userRepository.createQueryBuilder('user').where('user.phone = :phone', {phone}).getOne();
@@ -66,7 +63,7 @@ export class UserRepository extends Repository<UserEntity> implements IUserRepos
   /**
    *
    * @param uuid
-   * @returns returns user without hashPassword and salt
+   * @returns returns user without password and salt
    */
   async findByUuid(uuid: string): Promise<UserEntity> {
     return await this.userRepository.createQueryBuilder('user').where('user.uuid = :uuid', {uuid}).getOne();
@@ -75,23 +72,18 @@ export class UserRepository extends Repository<UserEntity> implements IUserRepos
   /**
    *
    * @param args
-   * @returns returns user without hashPassword and salt
+   * @returns returns user without password and salt
    */
   async createUser(args: CreateUserDTO): Promise<UserEntity> {
     const {email, password, firstName, lastName, deviceToken, deviceType, ...props} = args;
 
+    const user = new UserEntity(args);
+
     return await this.userRepository
       .createQueryBuilder('user')
       .insert()
-      .values({
-        email,
-        firstName,
-        lastName,
-        deviceToken,
-        deviceType,
-        hashPassword: password,
-        ...props,
-      })
+      .into(UserEntity)
+      .values(user)
       .execute()
       .then((res) => res.raw[0]);
   }
@@ -113,7 +105,7 @@ export class UserRepository extends Repository<UserEntity> implements IUserRepos
         lastName: lastName || user.lastName,
         deviceToken: deviceToken || user.deviceToken,
         deviceType: deviceType || user.deviceType,
-        hashPassword: password || user.hashPassword,
+        password: password || user.password,
         ...(props || user),
       })
       .where('user.uuid = :uuid', {uuid: uuid})

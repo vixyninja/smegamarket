@@ -1,6 +1,7 @@
 import {Environment, JWTService} from '@/configs';
 import {JWTPayload} from '@/configs/jwt/typedef';
 import {HttpBadRequest, RoleEnum} from '@/core';
+import {I18nTranslations} from '@/i18n/generated/i18n.generated';
 import {CreateUserDTO, UserEntity, UserMailService, UserService} from '@/modules/user';
 import {Injectable} from '@nestjs/common';
 import {LoginTicket, OAuth2Client, TokenPayload} from 'google-auth-library';
@@ -24,12 +25,12 @@ export class AuthService implements IAuthService {
     private readonly userService: UserService,
     private readonly userMailService: UserMailService,
     private readonly jwtService: JWTService,
-    private i18nService: I18nService,
+    private i18nService: I18nService<I18nTranslations>,
   ) {}
 
   async signInEmailAndPassword(
     args: SignInEmailDTO,
-  ): Promise<{token: any; user: Omit<UserEntity, 'hashPassword' | 'salt'>}> {
+  ): Promise<{accessToken: string; refreshToken: string; user: Omit<UserEntity, 'password' | 'salt'>}> {
     try {
       const {email, password, deviceToken, deviceType} = args;
       const user = await this.userService.readUserForAuth(email);
@@ -53,10 +54,8 @@ export class AuthService implements IAuthService {
       ]);
 
       return {
-        token: {
-          accessToken: accessToken,
-          refreshToken: refreshToken,
-        },
+        accessToken: accessToken,
+        refreshToken: refreshToken,
         user: user,
       };
     } catch (e) {
@@ -65,22 +64,27 @@ export class AuthService implements IAuthService {
   }
 
   async signUpEmailAndPassword(args: SignUpEmailDTO): Promise<{
-    token: any;
-    user: Omit<UserEntity, 'hashPassword' | 'salt'>;
+    accessToken: string;
+    refreshToken: string;
+    user: Omit<UserEntity, 'password' | 'salt'>;
   }> {
     try {
-      const {firstName, lastName, email, password, deviceToken, deviceType} = args;
+      const {email, deviceToken, deviceType, ...props} = args;
 
-      const existUser = await this.userService.readUserForAuth(email);
+      const existUser = await this.userService.readUserForCreate(email);
 
       if (existUser) {
-        throw new HttpBadRequest(this.i18nService.translate('content.auth.signUp.emailExists'));
+        throw new HttpBadRequest(
+          this.i18nService.translate('content.auth.signUp.emailExists', {lang: I18nContext.current().lang}),
+        );
       }
 
       const user = await this.userService.createUser(args);
 
       if (!user) {
-        throw new HttpBadRequest(this.i18nService.translate('content.auth.signUp.error'));
+        throw new HttpBadRequest(
+          this.i18nService.translate('content.auth.signUp.error', {lang: I18nContext.current().lang}),
+        );
       }
 
       const payloadJWT: JWTPayload = {
@@ -97,10 +101,8 @@ export class AuthService implements IAuthService {
       ]);
 
       return {
-        token: {
-          accessToken: accessToken,
-          refreshToken: refreshToken,
-        },
+        accessToken: accessToken,
+        refreshToken: refreshToken,
         user: user,
       };
     } catch (e) {

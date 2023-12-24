@@ -15,11 +15,13 @@ import {UserEntity} from '@/modules';
 export interface IAuthService {
   signInEmailAndPassword(
     arg: SignInEmailDTO,
-  ): Promise<{token: TokenType; user: Omit<UserEntity, 'hashPassword' | 'salt'>}>;
+  ): Promise<{accessToken: string; refreshToken: string; user: Omit<UserEntity, 'password' | 'salt'>}>;
   signUpEmailAndPassword(
     arg: SignUpEmailDTO,
-  ): Promise<{token: TokenType; user: Omit<UserEntity, 'hashPassword' | 'salt'>}>;
-  signInWithGoogle(arg: SignInGoogleDTO): Promise<{token: TokenType; user: Omit<UserEntity, 'hashPassword' | 'salt'>}>;
+  ): Promise<{accessToken: string; refreshToken: string; user: Omit<UserEntity, 'password' | 'salt'>}>;
+  signInWithGoogle(
+    arg: SignInGoogleDTO,
+  ): Promise<{accessToken: string; refreshToken: string; user: Omit<UserEntity, 'password' | 'salt'>}>;
   signInWithFacebook(): Promise<any>;
   refreshToken(arg: string): Promise<{accessToken: string; refreshToken: string}>;
   forgotPassword(arg: ForgotPasswordDTO): Promise<any>;

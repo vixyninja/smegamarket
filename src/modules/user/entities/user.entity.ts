@@ -24,7 +24,7 @@ export class UserEntity extends BaseEntity {
   phone: string;
 
   @Column({type: 'varchar', length: 225, nullable: false, select: false})
-  hashPassword: string;
+  password: string;
 
   @Column({type: 'varchar', length: 225, nullable: false, select: false})
   salt: string;
@@ -41,28 +41,28 @@ export class UserEntity extends BaseEntity {
   @Column({type: 'varchar', length: 225, default: null})
   deviceType: string;
 
-  @JoinColumn({name: 'avatar_uuid', foreignKeyConstraintName: 'FK_USER_AVATAR', referencedColumnName: 'uuid'})
-  @OneToOne(() => MediaEntity, {cascade: true, nullable: true})
+  @JoinColumn({foreignKeyConstraintName: 'FK_USER_AVATAR'})
+  @OneToOne(() => MediaEntity, (media) => media.uuid, {cascade: true, nullable: true})
   avatar: MediaEntity;
 
-  @JoinColumn({name: 'cover_uuid', foreignKeyConstraintName: 'FK_USER_COVER', referencedColumnName: 'uuid'})
-  @OneToOne(() => MediaEntity, {cascade: true, nullable: true})
+  @JoinColumn({foreignKeyConstraintName: 'FK_USER_COVER'})
+  @OneToOne(() => MediaEntity, (media) => media.uuid, {cascade: true, nullable: true})
   cover: MediaEntity;
 
   @BeforeInsert()
-  async hashPasswordBeforeInsert() {
+  async passwordBeforeInsert() {
     this.salt = await bcryptjs.genSalt(Math.round(Math.random() * 10));
-    this.hashPassword = await bcryptjs.hash(this.hashPassword, this.salt);
+    this.password = await bcryptjs.hash(this.password, this.salt);
   }
 
   async updatePassword(password: string) {
     this.salt = await bcryptjs.genSalt(Math.round(Math.random() * 10));
-    this.hashPassword = await bcryptjs.hash(password, this.salt);
+    this.password = await bcryptjs.hash(password, this.salt);
   }
 
-  async validatePassword(password: string): Promise<boolean> {
-    const hashPassword = await bcryptjs.hash(password, this.salt);
-    return hashPassword === this.hashPassword;
+  async validatePassword(attempt: string): Promise<boolean> {
+    const password = await bcryptjs.hash(attempt, this.salt);
+    return password === this.password;
   }
 
   constructor(partial: Partial<UserEntity>) {
