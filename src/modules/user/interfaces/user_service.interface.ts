@@ -8,6 +8,7 @@ export interface IUserService {
   createUser(arg: CreateUserDTO): Promise<UserEntity>;
   readUser(uuid: string): Promise<UserEntity>;
   readUserForAuth(information: string): Promise<UserEntity>;
+  readUserForCreate(information: string): Promise<UserEntity>;
   readUsers(): Promise<UserEntity[]>;
   updateUser(uuid: string, arg: UpdateUserDTO): Promise<UserEntity>;
   updateUserPassword(uuid: string, password: string): Promise<UserEntity>;

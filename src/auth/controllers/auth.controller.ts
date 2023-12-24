@@ -1,4 +1,5 @@
 import {Public} from '@/core';
+import {I18nTranslations} from '@/i18n/generated/i18n.generated';
 import {BadRequestException, Body, Controller, Get, HttpStatus, Post, Query, Res} from '@nestjs/common';
 import {SkipThrottle} from '@nestjs/throttler';
 import {isEmail} from 'class-validator';
@@ -15,7 +16,7 @@ export class AuthController {
   @Post('sign-in')
   async signInEmailAndPassword(
     @Body() signInEmailDTO: SignInEmailDTO,
-    @I18n() i18n: I18nContext,
+    @I18n() i18n: I18nContext<I18nTranslations>,
     @Res() res: Response,
   ): Promise<any> {
     if (!isEmail(signInEmailDTO.email)) {
@@ -35,17 +36,16 @@ export class AuthController {
   @Post('sign-up')
   async signUpEmailAndPassword(
     @Body() signUpEmailDTO: SignUpEmailDTO,
-    @I18n() i18n: I18nContext,
+    @I18n() i18n: I18nContext<I18nTranslations>,
     @Res() res: Response,
   ): Promise<any> {
     if (signUpEmailDTO.password !== signUpEmailDTO.confirmPassword) {
-      throw new BadRequestException(i18n.translate('content.auth.confirmPassword.mustMatch'));
+      throw new BadRequestException(i18n.translate('content.auth.confirmPassword.mustMatch', {lang: i18n.lang}));
     }
-
     const credentials = await this.authService.signUpEmailAndPassword(signUpEmailDTO);
 
     return res.status(HttpStatus.CREATED).json({
-      message: i18n.translate('content.auth.signUp.success'),
+      message: i18n.translate('content.auth.signUp.success', {lang: i18n.lang}),
       data: credentials,
     });
   }
@@ -53,7 +53,7 @@ export class AuthController {
   @Post('sign-in-with-google')
   async signInGoogle(
     @Body() signInGoogleDTO: SignInGoogleDTO,
-    @I18n() i18n: I18nContext,
+    @I18n() i18n: I18nContext<I18nTranslations>,
     @Res() res: Response,
   ): Promise<any> {
     const credentials = await this.authService.signInWithGoogle(signInGoogleDTO);
@@ -61,7 +61,7 @@ export class AuthController {
     return res
       .status(HttpStatus.OK)
       .json({
-        message: i18n.translate('content.auth.signIn.success'),
+        message: i18n.translate('content.auth.signIn.success', {lang: i18n.lang}),
         data: credentials,
       })
       .end();
@@ -75,7 +75,7 @@ export class AuthController {
   ): Promise<any> {
     if (!token) {
       return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({
-        message: i18n.translate('content.auth.refreshToken.missing'),
+        message: i18n.translate('content.auth.refreshToken.missing', {lang: i18n.lang}),
       });
     }
 
@@ -84,7 +84,7 @@ export class AuthController {
     return res
       .status(HttpStatus.OK)
       .json({
-        message: i18n.translate('content.auth.signIn.success'),
+        message: i18n.translate('content.auth.signIn.success', {lang: i18n.lang}),
         data: credentials,
       })
       .end();

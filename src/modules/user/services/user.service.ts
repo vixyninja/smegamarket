@@ -19,7 +19,7 @@ export class UserService implements IUserService {
 
   async createUser(args: CreateUserDTO): Promise<UserEntity> {
     try {
-      const {email, password, firstName, lastName, deviceToken, deviceType} = args;
+      const {email, ...props} = args;
       const user = await this.userRepository.findByEmail(email);
       if (user) {
         throw new HttpBadRequest(this.i18nService.translate('content.auth.signUp.emailExists'));
@@ -29,7 +29,9 @@ export class UserService implements IUserService {
         throw new HttpBadRequest(this.i18nService.translate('content.auth.signUp.error'));
       }
       return createUser;
-    } catch (e) {}
+    } catch (e) {
+      throw e;
+    }
   }
 
   async readUserForAuth(information: string): Promise<UserEntity> {
@@ -41,8 +43,20 @@ export class UserService implements IUserService {
         user = await this.userRepository.findForAuthPhone(information);
       }
 
-      if (!user) throw new HttpNotFound(this.i18nService.translate('content.auth.signIn.notFound'));
+      return user;
+    } catch (e) {
+      throw e;
+    }
+  }
 
+  async readUserForCreate(information: string): Promise<UserEntity> {
+    try {
+      let user: UserEntity;
+      if (isEmail(information)) {
+        user = await this.userRepository.findByEmail(information);
+      } else if (isPhoneNumber(information)) {
+        user = await this.userRepository.findByPhone(information);
+      }
       return user;
     } catch (e) {
       throw e;

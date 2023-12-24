@@ -36,7 +36,6 @@ export type I18nTranslations = {
                 "error": string;
                 "emailExists": string;
                 "phoneExists": string;
-                "emailExist": string;
             };
             "signIn": {
                 "success": string;

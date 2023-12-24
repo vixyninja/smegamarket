@@ -28,7 +28,7 @@
     "signUp": {
       "success": "Đăng ký thành công",
       "error": "Lỗi đăng ký, vui lòng thử lại",
-      "emailExist": "Email đã tồn tại",
+      "emailExists": "Email đã tồn tại",
       "phoneExists": "Số điện thoại đã tồn tại"
     },
     "signIn": {
