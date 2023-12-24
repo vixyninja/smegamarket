@@ -11,13 +11,11 @@ export type I18nTranslations = {
             "password": {
                 "required": string;
                 "minLength": string;
-                "minlength": string;
             };
             "confirmPassword": {
                 "required": string;
                 "mustMatch": string;
                 "minLength": string;
-                "minlength": string;
             };
             "firstName": {
                 "required": string;

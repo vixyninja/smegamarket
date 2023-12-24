@@ -27,6 +27,7 @@ export class UserRepository extends Repository<UserEntity> implements IUserRepos
       .createQueryBuilder('user')
       .where('user.email = :email', {email})
       .addSelect('user.password')
+      .addSelect('user.salt')
       .getOne();
   }
 
@@ -106,7 +107,6 @@ export class UserRepository extends Repository<UserEntity> implements IUserRepos
         deviceToken: deviceToken || user.deviceToken,
         deviceType: deviceType || user.deviceType,
         password: password || user.password,
-        ...(props || user),
       })
       .where('user.uuid = :uuid', {uuid: uuid})
       .execute()
