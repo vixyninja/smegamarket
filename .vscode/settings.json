@@ -16,8 +16,10 @@
     "Redisx",
     "signin",
     "signout",
+    "Speakeasyx",
     "streamifier",
     "Throttlerx",
+    "totp",
     "typeorm",
     "websockets"
   ]

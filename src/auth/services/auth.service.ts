@@ -1,6 +1,6 @@
 import {Environment, JWTService} from '@/configs';
 import {JWTPayload} from '@/configs/jwt/typedef';
-import {HttpBadRequest, RoleEnum} from '@/core';
+import {HttpBadRequest, RoleEnum, SpeakeasyUtil} from '@/core';
 import {I18nTranslations} from '@/i18n/generated/i18n.generated';
 import {CreateUserDTO, UserEntity, UserMailService, UserService} from '@/modules/user';
 import {Injectable} from '@nestjs/common';
@@ -27,6 +27,50 @@ export class AuthService implements IAuthService {
     private readonly jwtService: JWTService,
     private i18nService: I18nService<I18nTranslations>,
   ) {}
+  async forgotPassword(arg: ForgotPasswordDTO): Promise<any> {
+    try {
+      const {email} = arg;
+
+      const user: UserEntity = await this.userService.readUserForAuth(email);
+
+      if (!user) {
+        throw new HttpBadRequest(
+          this.i18nService.translate('content.auth.signIn.wrongCredentials', {lang: I18nContext.current().lang}),
+        );
+      }
+
+      const secret: string = SpeakeasyUtil.generateSecret();
+
+      const otp: string = SpeakeasyUtil.generateToken(secret);
+
+      if (!otp) {
+        throw new HttpBadRequest(
+          this.i18nService.translate('content.auth.signIn.wrongCredentials', {lang: I18nContext.current().lang}),
+        );
+      }
+
+      const result = await this.userMailService.sendUserResetPasswordOtp(user.firstName, user.email, otp);
+
+      return result;
+    } catch (e) {
+      throw e;
+    }
+  }
+  sendOtpResetPassword(arg: ResetPasswordOtpDTO): Promise<any> {
+    throw new Error('Method not implemented.');
+  }
+  changePassword(arg: ChangePasswordDTO): Promise<any> {
+    throw new Error('Method not implemented.');
+  }
+  sendOtpEmail(arg: VerifyEmailDTO): Promise<any> {
+    throw new Error('Method not implemented.');
+  }
+  sendOtpPhone(arg: VerifyPhoneDTO): Promise<any> {
+    throw new Error('Method not implemented.');
+  }
+  verifyEmailOrPhone(arg: VerifyOtpDTO): Promise<any> {
+    throw new Error('Method not implemented.');
+  }
 
   async signInEmailAndPassword(
     args: SignInEmailDTO,
@@ -204,27 +248,5 @@ export class AuthService implements IAuthService {
     } catch (e) {
       throw e;
     }
-  }
-
-  async forgotPassword(arg: ForgotPasswordDTO): Promise<any> {
-    try {
-    } catch (e) {
-      throw e;
-    }
-  }
-  resetPasswordOtp(arg: ResetPasswordOtpDTO): Promise<any> {
-    throw new Error('Method not implemented.');
-  }
-  changePassword(arg: ChangePasswordDTO): Promise<any> {
-    throw new Error('Method not implemented.');
-  }
-  verifyEmail(arg: VerifyEmailDTO): Promise<any> {
-    throw new Error('Method not implemented.');
-  }
-  verifyPhone(arg: VerifyPhoneDTO): Promise<any> {
-    throw new Error('Method not implemented.');
-  }
-  verifyOtp(arg: VerifyOtpDTO): Promise<any> {
-    throw new Error('Method not implemented.');
   }
 }
