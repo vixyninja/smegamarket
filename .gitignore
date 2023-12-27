@@ -24,3 +24,5 @@ yarn-error.log
 vscode
 dist
 document.txt
+.env
+datasource
