@@ -64,6 +64,13 @@ const SOCKET_PORT: number = +process.env.SOCKET_PORT;
 // language
 const FALLBACK_LANGUAGE: string = process.env.FALLBACK_LANGUAGE;
 
+// speak easy
+const SPEAKEASY_SECRET: string = process.env.SPEAKEASY_SECRET;
+const SPEAKEASY_LENGTH: number = +process.env.SPEAKEASY_LENGTH;
+const SPEAKEASY_ALGORITHM: string = process.env.SPEAKEASY_ALGORITHM;
+const SPEAKEASY_ENCODING: string = process.env.SPEAKEASY_ENCODING;
+const SPEAKEASY_STEP: number = +process.env.SPEAKEASY_STEP;
+
 export const Environment = {
   GOOGLE_CLIENT_ID,
   ACCESS_TOKEN_EXPIRATION_TIME,
@@ -102,4 +109,9 @@ export const Environment = {
   FOLDER_NAME,
   SOCKET_PORT,
   FALLBACK_LANGUAGE,
+  SPEAKEASY_SECRET,
+  SPEAKEASY_ALGORITHM,
+  SPEAKEASY_ENCODING,
+  SPEAKEASY_LENGTH,
+  SPEAKEASY_STEP,
 };

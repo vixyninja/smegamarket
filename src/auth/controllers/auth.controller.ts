@@ -34,6 +34,7 @@ export class AuthController {
       .status(HttpStatus.OK)
       .json({
         message: i18n.translate('content.auth.signIn.success'),
+        statusCode: HttpStatus.OK,
         data: credentials,
       })
       .end();
@@ -59,8 +60,8 @@ export class AuthController {
 
     return res.status(HttpStatus.CREATED).json({
       message: i18n.translate('content.auth.signUp.success', {lang: i18n.lang}),
-      data: credentials,
       statusCode: HttpStatus.CREATED,
+      data: credentials,
     });
   }
 
@@ -76,8 +77,8 @@ export class AuthController {
     return res
       .json({
         message: i18n.translate('content.auth.signIn.success', {lang: i18n.lang}),
-        data: credentials,
         statusCode: HttpStatus.OK,
+        data: credentials,
       })
       .end();
   }
@@ -101,8 +102,8 @@ export class AuthController {
     return res
       .json({
         message: i18n.translate('content.auth.signIn.success', {lang: i18n.lang}),
-        data: credentials,
         statusCode: HttpStatus.OK,
+        data: credentials,
       })
       .end();
   }

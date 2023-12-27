@@ -25,9 +25,10 @@ export interface IAuthService {
   signInWithFacebook(): Promise<any>;
   refreshToken(arg: string): Promise<{accessToken: string; refreshToken: string}>;
   forgotPassword(arg: ForgotPasswordDTO): Promise<any>;
-  resetPasswordOtp(arg: ResetPasswordOtpDTO): Promise<any>;
+  sendOtpResetPassword(arg: ResetPasswordOtpDTO): Promise<any>;
   changePassword(arg: ChangePasswordDTO): Promise<any>;
-  verifyEmail(arg: VerifyEmailDTO): Promise<any>;
-  verifyPhone(arg: VerifyPhoneDTO): Promise<any>;
-  verifyOtp(arg: VerifyOtpDTO): Promise<any>;
+
+  sendOtpEmail(arg: VerifyEmailDTO): Promise<any>;
+  sendOtpPhone(arg: VerifyPhoneDTO): Promise<any>;
+  verifyEmailOrPhone(arg: VerifyOtpDTO): Promise<any>;
 }
