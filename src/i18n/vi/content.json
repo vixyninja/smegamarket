@@ -31,6 +31,11 @@
       "emailExists": "Email đã tồn tại",
       "phoneExists": "Số điện thoại đã tồn tại"
     },
+    "forgotPassword": {
+      "success": "Đặt lại mật khẩu thành công",
+      "error": "Lỗi đặt lại mật khẩu, vui lòng thử lại",
+      "notFound": "Không tìm thấy tài khoản"
+    },
     "signIn": {
       "success": "Đăng nhập thành công",
       "error": "Lỗi đăng nhập, vui lòng thử lại",

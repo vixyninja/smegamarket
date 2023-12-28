@@ -5,8 +5,6 @@ export type JWTPayload = {
   uuid: string;
   role: RoleEnum;
   email: string;
-  deviceToken: string;
-  deviceType: string;
   [key: string]: any;
 };
 

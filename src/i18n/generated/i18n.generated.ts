@@ -41,6 +41,11 @@ export type I18nTranslations = {
                 "wrongCredentials": string;
                 "notFound": string;
             };
+            "forgotPassword": {
+                "success": string;
+                "error": string;
+                "notFound": string;
+            };
             "refreshToken": {
                 "success": string;
                 "error": string;

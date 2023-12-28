@@ -17,7 +17,7 @@ import {
 } from './configs';
 import {LoggerModule, LoggersMiddleware, OriginMiddleware} from './core';
 import {EventModule} from './event';
-import {BrandModule, CartModule, CategoryModule, MediaModule, OrderModule, ProductModule, UserModule} from './modules';
+import {MediaModule, UserModule} from './modules';
 
 @Module({
   imports: [
@@ -54,11 +54,6 @@ import {BrandModule, CartModule, CategoryModule, MediaModule, OrderModule, Produ
     // MODULES
     UserModule,
     MediaModule,
-    BrandModule,
-    ProductModule,
-    CategoryModule,
-    CartModule,
-    OrderModule,
   ],
   providers: [],
   controllers: [AppController],
