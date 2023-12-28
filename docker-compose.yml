@@ -14,8 +14,8 @@ services:
     volumes:
       - docker-nest-postgres:/var/lib/postgresql/data
 
-  api-client:
-    container_name: api-client
+  api:
+    container_name: api
     build:
       dockerfile: Dockerfile
       context: .
@@ -64,17 +64,17 @@ services:
       ADMINER_PLUGINS: tables-filter tinymce
       ADMINER_DESIGN: dracula
 
-  regis-adminer:
-    image: patrikx3/p3x-redis-ui:latest
-    container_name: regis-adminer
-    ports:
-      - ${REDIS_ADMINER_PORT}:${REDIS_ADMINER_PORT}
-    volumes:
-      - /home/vixyninja/Desktop/Resources/p3x-redis-ui-settings:/settings
+  # regis-adminer:
+  #   image: patrikx3/p3x-redis-ui:latest
+  #   container_name: regis-adminer
+  #   ports:
+  #     - ${REDIS_ADMINER_PORT}:${REDIS_ADMINER_PORT}
+  #   volumes:
+  #     - /home/vixyninja/Desktop/Resources/p3x-redis-ui-settings:/settings
 
 volumes:
-  api-client:
-    name: vapi-client
+  api:
+    name: vapi
     driver: local
   docker-nest-postgres:
     name: vdocker-nest-postgres

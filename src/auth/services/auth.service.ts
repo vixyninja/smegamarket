@@ -1,5 +1,5 @@
 import {Environment, JWTService} from '@/configs';
-import {JWTPayload} from '@/configs/jwt/typedef';
+import {JWTPayload} from '@/configs/jwt/type.jwt';
 import {HttpBadRequest, RoleEnum, SpeakeasyUtil} from '@/core';
 import {I18nTranslations} from '@/i18n/generated/i18n.generated';
 import {CreateUserDTO, UserEntity, UserMailService, UserService} from '@/modules/user';
@@ -27,6 +27,7 @@ export class AuthService implements IAuthService {
     private readonly jwtService: JWTService,
     private i18nService: I18nService<I18nTranslations>,
   ) {}
+
   async forgotPassword(arg: ForgotPasswordDTO): Promise<any> {
     try {
       const {email} = arg;

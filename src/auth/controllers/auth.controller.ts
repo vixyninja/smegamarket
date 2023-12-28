@@ -1,4 +1,3 @@
-import {Public} from '@/core';
 import {I18nTranslations} from '@/i18n/generated/i18n.generated';
 import {Body, Controller, Get, HttpCode, HttpStatus, Post, Query, Res} from '@nestjs/common';
 import {SkipThrottle} from '@nestjs/throttler';
@@ -7,7 +6,6 @@ import {Response} from 'express';
 import {I18n, I18nContext} from 'nestjs-i18n';
 import {SignInEmailDTO, SignInGoogleDTO, SignUpEmailDTO} from '../dto';
 import {AuthService} from '../services';
-@Public()
 @SkipThrottle()
 @Controller('auth')
 export class AuthController {

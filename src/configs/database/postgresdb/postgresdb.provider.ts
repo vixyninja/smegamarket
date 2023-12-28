@@ -17,9 +17,9 @@ export class PostgresProvider implements TypeOrmOptionsFactory {
       autoLoadEntities: true,
       cache: true,
       connectTimeoutMS: 30000,
-      uuidExtension: 'pgcrypto',
       verboseRetryLog: true,
       nativeDriver: true,
+      subscribers: ['dist/**/*.subscriber{.ts,.js}'],
     };
   }
 }

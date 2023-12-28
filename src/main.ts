@@ -1,5 +1,6 @@
 import {HttpStatus, Logger, RequestMethod} from '@nestjs/common';
 import {NestFactory} from '@nestjs/core';
+import {NestExpressApplication} from '@nestjs/platform-express';
 import * as express from 'express';
 import helmet from 'helmet';
 import {I18nValidationExceptionFilter, I18nValidationPipe} from 'nestjs-i18n';
@@ -8,7 +9,7 @@ import {AppModule} from './app.module';
 import {CLIENT_ERROR_RESPONSES, FormatResponseInterceptor, HttpExceptionFilter, TimeoutInterceptor} from './core';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const prefix = 'api/v1';
   const port = process.env.PORT;
   app.use(helmet());
@@ -17,12 +18,7 @@ async function bootstrap() {
     exclude: [{path: 'health', method: RequestMethod.GET}],
   });
   app.use(express.static(join(__dirname, '..', 'public')));
-  app.useGlobalPipes(
-    new I18nValidationPipe({
-      errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-    }),
-  );
-  app.useGlobalInterceptors(new TimeoutInterceptor(), new FormatResponseInterceptor());
+
   app.useGlobalFilters(
     new HttpExceptionFilter(),
     new I18nValidationExceptionFilter({
@@ -35,6 +31,12 @@ async function bootstrap() {
           errors: formattedErrors,
         };
       },
+    }),
+  );
+  app.useGlobalInterceptors(new TimeoutInterceptor(), new FormatResponseInterceptor());
+  app.useGlobalPipes(
+    new I18nValidationPipe({
+      errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
     }),
   );
   await app.listen(port);

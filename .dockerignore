@@ -10,3 +10,9 @@ yarn-error.log*
 .git
 .gitattributes
 .gitignore
+
+
+dist
+node_modules
+db-data
+.vscode

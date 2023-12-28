@@ -37,6 +37,11 @@
       "wrongCredentials": "Wrong email or password",
       "notFound": "User not found"
     },
+    "forgotPassword": {
+      "success": "You have successfully sent reset password email",
+      "error": "Something went wrong. Please try again later",
+      "notFound": "User not found"
+    },
     "refreshToken": {
       "success": "You have successfully refreshed token",
       "error": "Something went wrong. Please try again later",

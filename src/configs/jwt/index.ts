@@ -1,6 +1,6 @@
 import {Injectable} from '@nestjs/common';
 import {JwtService} from '@nestjs/jwt';
-import {JWTPayload, RecordType, TokenType} from './typedef';
+import {JWTPayload, RecordType, TokenType} from './type.jwt';
 import {Environment} from '../environments';
 import {HttpUnauthorized} from '@/core';
 
