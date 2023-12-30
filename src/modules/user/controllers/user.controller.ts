@@ -1,9 +1,9 @@
-import {AuthGuard, HandlerFilter, HttpBadRequest, UserDynamic} from '@/core';
-import {Body, Controller, Get, Put, UploadedFile, UseGuards, UseInterceptors} from '@nestjs/common';
-import {FileInterceptor} from '@nestjs/platform-express';
-import {isEmail, isPhoneNumber, isUUID} from 'class-validator';
-import {UpdateUserDTO} from '../dto';
-import {UserService} from '../services';
+import { AuthGuard, HttpBadRequest, UserDynamic } from '@/core';
+import { Body, Controller, Get, Put, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { isEmail, isPhoneNumber, isUUID } from 'class-validator';
+import { UpdateUserDTO } from '../dto';
+import { UserService } from '../services';
 
 @UseGuards(AuthGuard)
 @Controller('user')
@@ -17,11 +17,11 @@ export class UserController {
     }
 
     const user = await this.userService.readUser(userUUID);
-    return HandlerFilter(user, {
+    return  {
       message: 'Get profile successfully',
       data: user,
       status: 200,
-    });
+    }
   }
 
   @Put('/me')
@@ -31,33 +31,33 @@ export class UserController {
     }
 
     const user = await this.userService.updateUser(userUUID, updateUserDTO);
-    return HandlerFilter(user, {
+    return  {
       message: 'Update profile successfully',
       data: user,
       status: 200,
-    });
+    }
   }
 
   @Put('/me/avatar')
   @UseInterceptors(FileInterceptor('avatar'))
   async updateAvatar(@UserDynamic('uuid') userUUID: string, @UploadedFile() file: Express.Multer.File): Promise<any> {
     const user = await this.userService.updateUserAvatar(userUUID, file);
-    return HandlerFilter(user, {
+    return  {
       message: 'Update avatar successfully',
       data: user,
       status: 200,
-    });
+    }
   }
 
   @Put('/me/cover')
   @UseInterceptors(FileInterceptor('cover'))
   async updateCover(@UserDynamic('uuid') userUUID: string, @UploadedFile() file: Express.Multer.File): Promise<any> {
     const user = await this.userService.updateUserCover(userUUID, file);
-    return HandlerFilter(user, {
+    return  {
       message: 'Update cover successfully',
       data: user,
       status: 200,
-    });
+    }
   }
 
   @Put('/me/phone')
@@ -68,11 +68,11 @@ export class UserController {
       return new HttpBadRequest('Phone is not valid');
     }
 
-    return HandlerFilter(user, {
+    return  {
       message: 'Update phone successfully',
       data: user,
       status: 200,
-    });
+    }
   }
 
   @Put('/me/email')
@@ -83,10 +83,10 @@ export class UserController {
       return new HttpBadRequest('Email is not valid');
     }
 
-    return HandlerFilter(user, {
+    return  {
       message: 'Update email successfully',
       data: user,
       status: 200,
-    });
+    }
   }
 }

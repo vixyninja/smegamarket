@@ -25,4 +25,4 @@ vscode
 dist
 document.txt
 .env
-datasource
+datasource/

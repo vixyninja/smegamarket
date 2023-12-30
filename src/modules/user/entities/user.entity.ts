@@ -1,7 +1,7 @@
 import {BaseEntity, RoleEnum} from '@/core';
 import {MediaEntity} from '@/modules/media';
 import * as bcryptjs from 'bcryptjs';
-import {BeforeInsert, Column, Entity, JoinColumn, OneToOne} from 'typeorm';
+import {Column, Entity, JoinColumn, OneToOne} from 'typeorm';
 import {StatusUser} from '../enum';
 
 @Entity({
@@ -38,29 +38,11 @@ export class UserEntity extends BaseEntity {
   @Column({type: 'varchar', length: 225, default: null})
   deviceToken: string;
 
-  @Column({type: 'varchar', length: 225, default: null})
-  deviceType: string;
-
   @JoinColumn({foreignKeyConstraintName: 'FK_USER_AVATAR'})
   @OneToOne(() => MediaEntity, (media) => media.uuid, {cascade: true, nullable: true})
   avatar: MediaEntity;
 
-  @JoinColumn({foreignKeyConstraintName: 'FK_USER_COVER'})
-  @OneToOne(() => MediaEntity, (media) => media.uuid, {cascade: true, nullable: true})
-  cover: MediaEntity;
-
-  @BeforeInsert()
-  async passwordBeforeInsert() {
-    this.salt = await bcryptjs.genSalt(Math.round(Math.random() * 10));
-    this.password = await bcryptjs.hash(this.password, this.salt);
-  }
-
-  async updatePassword(password: string) {
-    this.salt = await bcryptjs.genSalt(Math.round(Math.random() * 10));
-    this.password = await bcryptjs.hash(password, this.salt);
-  }
-
-  async validatePassword(attempt: string): Promise<boolean> {
+  async comparePassword(attempt: string): Promise<boolean> {
     const password = await bcryptjs.hash(attempt, this.salt);
     return password === this.password;
   }

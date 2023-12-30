@@ -7,7 +7,7 @@ WORKDIR /usr/src/app
 
 COPY --chown=node:node package*.json ./
 ENV NODE_ENV development
-RUN npm install --only=development && npm cache clean --force
+RUN yarn install --only=development && yarn cache clean --force
 COPY --chown=node:node . .
 USER node
 
@@ -24,9 +24,9 @@ COPY --chown=node:node package*.json ./
 COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modules
 COPY --chown=node:node . .
 
-RUN npm run build
+RUN yarn run build
 ENV NODE_ENV production
-RUN npm ci --only=production && npm cache clean --force
+RUN yarn ci --only=production && yarn cache clean --force
 USER node
 
 ###################

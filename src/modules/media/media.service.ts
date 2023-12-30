@@ -1,21 +1,14 @@
 import {CloudinaryService, Environment} from '@/configs';
+import {HttpBadRequest, HttpInternalServerError} from '@/core';
 import {Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
-import {HttpBadRequest, HttpInternalServerError} from '@/core';
+import {CreateMediaDTO} from './dto';
 import {MediaEntity} from './entities';
-
-interface MediaServiceInterface {
-  findFile(fileId: string): Promise<any>;
-  readOne(fileId: string): Promise<any>;
-  uploadFile(file: Express.Multer.File, folder?: string): Promise<any>;
-  uploadFiles(files: Express.Multer.File[], folder?: string): Promise<any>;
-  deleteFile(fileId: string): Promise<any>;
-  deleteFolder(folder: string): Promise<any>;
-}
+import {IMediaService} from './interfaces';
 
 @Injectable()
-export class MediaService implements MediaServiceInterface {
+export class MediaService implements IMediaService {
   constructor(
     @InjectRepository(MediaEntity)
     private readonly mediaRepository: Repository<MediaEntity>,
@@ -28,7 +21,7 @@ export class MediaService implements MediaServiceInterface {
 
       return file;
     } catch (e) {
-      throw new HttpInternalServerError(e.message);
+      throw e;
     }
   }
 
@@ -40,7 +33,7 @@ export class MediaService implements MediaServiceInterface {
 
       return file;
     } catch (e) {
-      throw new HttpInternalServerError(e.message);
+      throw e;
     }
   }
 
@@ -68,37 +61,41 @@ export class MediaService implements MediaServiceInterface {
         api_key,
       } = result;
 
+      const builder = new CreateMediaDTO({
+        publicId: public_id,
+        signature: signature,
+        version: version,
+        width: width,
+        height: height,
+        format: format,
+        resourceType: resource_type,
+        url: url,
+        secureUrl: secure_url,
+        bytes: bytes,
+        assetId: asset_id,
+        versionId: version_id,
+        tags: tags,
+        etag: etag,
+        placeholder: placeholder,
+        originalFilename: original_filename,
+        apiKey: api_key,
+        folder: folder ?? Environment.FOLDER_NAME,
+      });
+
       const fileResult = await this.mediaRepository
         .createQueryBuilder('media')
         .insert()
         .into(MediaEntity)
-        .values({
-          publicId: public_id,
-          signature,
-          version,
-          width,
-          height,
-          format,
-          resourceType: resource_type,
-          url,
-          secureUrl: secure_url,
-          bytes,
-          assetId: asset_id,
-          versionId: version_id,
-          tags,
-          etag,
-          placeholder,
-          originalFilename: original_filename,
-          apiKey: api_key,
-          folder: folder ?? Environment.FOLDER_NAME,
-        })
+        .values(builder)
         .execute();
 
       const fileResponse = await this.findFile(fileResult.raw[0].uuid);
 
-      return fileResponse ?? null;
+      if (!fileResponse) throw new HttpBadRequest('Media upload failed');
+
+      return fileResponse;
     } catch (e) {
-      throw new HttpInternalServerError(e.message);
+      throw e;
     }
   }
 
@@ -129,30 +126,32 @@ export class MediaService implements MediaServiceInterface {
           api_key,
         } = result;
 
+        const builder = new CreateMediaDTO({
+          publicId: public_id,
+          signature: signature,
+          version: version,
+          width: width,
+          height: height,
+          format: format,
+          resourceType: resource_type,
+          url: url,
+          secureUrl: secure_url,
+          bytes: bytes,
+          assetId: asset_id,
+          versionId: version_id,
+          tags: tags,
+          etag: etag,
+          placeholder: placeholder,
+          originalFilename: original_filename,
+          apiKey: api_key,
+          folder: folder ?? Environment.FOLDER_NAME,
+        });
+
         const fileResult = await this.mediaRepository
           .createQueryBuilder('media')
           .insert()
           .into(MediaEntity)
-          .values({
-            publicId: public_id,
-            signature,
-            version,
-            width,
-            height,
-            format,
-            resourceType: resource_type,
-            url,
-            secureUrl: secure_url,
-            bytes,
-            assetId: asset_id,
-            versionId: version_id,
-            tags,
-            etag,
-            placeholder,
-            originalFilename: original_filename,
-            apiKey: api_key,
-            folder: folder ?? Environment.FOLDER_NAME,
-          })
+          .values(builder)
           .execute();
 
         fileResults.push(await this.findFile(fileResult.raw[0].uuid));
@@ -174,7 +173,7 @@ export class MediaService implements MediaServiceInterface {
 
       return true;
     } catch (e) {
-      throw new HttpInternalServerError(e.message);
+      throw e;
     }
   }
 
@@ -186,7 +185,7 @@ export class MediaService implements MediaServiceInterface {
 
       return result;
     } catch (e) {
-      throw new HttpInternalServerError(e.message);
+      throw e;
     }
   }
 }
