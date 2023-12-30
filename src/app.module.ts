@@ -18,6 +18,10 @@ import {
 import {LoggerModule, LoggersMiddleware, OriginMiddleware} from './core';
 import {EventModule} from './event';
 import {MediaModule, UserModule} from './modules';
+import {TagModule} from './modules/tag/tag.module';
+import {CategoriesModule} from './modules/categories/categories.module';
+import {ProductModule} from './modules/product/product.module';
+import {ShippingModule} from './modules/shipping/shipping.module';
 
 @Module({
   imports: [
@@ -54,6 +58,10 @@ import {MediaModule, UserModule} from './modules';
     // MODULES
     UserModule,
     MediaModule,
+    TagModule,
+    CategoriesModule,
+    ProductModule,
+    ShippingModule,
   ],
   providers: [],
   controllers: [AppController],

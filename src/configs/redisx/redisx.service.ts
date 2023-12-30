@@ -1,14 +1,14 @@
-import {CACHE_KEY_TTL} from '@/core';
-import {InjectRedis} from '@nestjs-modules/ioredis';
-import {Injectable} from '@nestjs/common';
-import {Redis} from 'ioredis';
+import { CACHE_KEY_TTL } from '@/core';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import { Injectable } from '@nestjs/common';
+import { Redis } from 'ioredis';
 
 @Injectable()
 export class RedisxService {
   constructor(@InjectRedis() private readonly redis: Redis) {}
 
   async setKey(key: string, value: string, expire?: number) {
-    return await this.redis.set(key, value, 'EX', expire || CACHE_KEY_TTL.ONE_HOUR);
+    return await this.redis.set(key, value, 'EX', expire || CACHE_KEY_TTL.ONE_MINUTE);
   }
 
   async getKey(key: string) {

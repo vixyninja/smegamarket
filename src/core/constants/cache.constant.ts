@@ -1,1 +1,5 @@
-export {};
+export const CACHE_KEY_TTL = {
+  ONE_MINUTE: 60,
+  FIVE_MINUTES: 300,
+  FIFTEEN_MINUTES: 900,
+}

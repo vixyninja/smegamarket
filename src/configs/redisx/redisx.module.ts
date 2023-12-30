@@ -1,6 +1,6 @@
 import {RedisModule} from '@nestjs-modules/ioredis';
 
-import {Module} from '@nestjs/common';
+import {Module, OnModuleInit} from '@nestjs/common';
 import {RedisxConfigService} from './redisx.provider';
 import {RedisxService} from './redisx.service';
 
