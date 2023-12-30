@@ -7,7 +7,7 @@ import {CreateUserDTO, UpdateUserDTO} from '../dto';
 import {UserEntity} from '../entities';
 import {StatusUser} from '../enum';
 import {IUserService} from '../interfaces';
-import {UserRepository} from '../repository';
+import {UserRepository} from '../repositories';
 
 @Injectable()
 export class UserService implements IUserService {
