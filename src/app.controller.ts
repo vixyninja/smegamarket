@@ -1,15 +1,14 @@
 import {Controller, Get} from '@nestjs/common';
 import {I18n, I18nContext} from 'nestjs-i18n';
-import {Public} from './core';
+import {PublicRoute} from './core';
 import {I18nTranslations} from './i18n/generated/i18n.generated';
-import {UserMailService} from './modules';
 
 @Controller()
 export class AppController {
-  constructor(private readonly UserMailService: UserMailService) {}
+  constructor() {}
 
   @Get()
-  @Public()
+  @PublicRoute(true)
   getHello(@I18n() i18n: I18nContext<I18nTranslations>) {
     return {
       data: {
@@ -21,11 +20,5 @@ export class AppController {
         i18n: i18n.lang,
       },
     };
-  }
-
-  @Get('ping')
-  @Public()
-  async ping() {
-    return await this.UserMailService.ping();
   }
 }
