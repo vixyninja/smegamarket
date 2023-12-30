@@ -7,7 +7,7 @@ WORKDIR /usr/src/app
 
 COPY --chown=node:node package*.json ./
 ENV NODE_ENV development
-RUN npm ci --only=development && npm cache clean --force
+RUN npm install --only=development && npm cache clean --force
 COPY --chown=node:node . .
 USER node
 
