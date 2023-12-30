@@ -8,7 +8,7 @@ import {MediaModule} from '../media';
 import {EmailConsumer} from './consumers';
 import {AdminController, UserController} from './controllers';
 import {UserEntity} from './entities';
-import {UserRepository} from './repository';
+import {UserRepository} from './repositories';
 import {UserMailService, UserService} from './services';
 
 @Module({
