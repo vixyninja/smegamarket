@@ -1,4 +1,3 @@
-import {JWTPayload} from '@/configs/jwt/type.jwt';
 import {UserEntity} from '@/modules';
 import {
   ChangePasswordDTO,

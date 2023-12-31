@@ -18,27 +18,9 @@ async function bootstrap() {
   });
   app.use(express.static(join(__dirname, '..', 'public')));
 
-  app.useGlobalFilters(
-    new HttpExceptionFilter(),
-    // new I18nValidationExceptionFilter({
-    //   detailedErrors: false,
-    //   errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-    //   responseBodyFormatter(host, exc, formattedErrors) {
-    //     return {
-    //       statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-    //       message: CLIENT_ERROR_RESPONSES.UNPROCESSABLE_ENTITY,
-    //       errors: formattedErrors,
-    //     };
-    //   },
-    // }),
-  );
+  app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new TimeoutInterceptor(), new FormatResponseInterceptor());
-  app.useGlobalPipes(
-    // new I18nValidationPipe({
-    //   errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-    // }),
-    new ValidationPipe(),
-  );
+  app.useGlobalPipes(new ValidationPipe());
   await app.listen(port);
 }
 

@@ -22,22 +22,6 @@ import {TagModule} from './modules/tag/tag.module';
 
 @Module({
   imports: [
-    // I18nModule.forRoot({
-    //   fallbackLanguage: Environment.FALLBACK_LANGUAGE,
-    //   logging: true,
-    //   loaderOptions: {
-    //     path: join(__dirname, '/i18n/'),
-    //     watch: true,
-    //   },
-    //   typesOutputPath: join(__dirname, '../src/i18n/generated/i18n.generated.ts'),
-    //   resolvers: [
-    //     {use: QueryResolver, options: ['lang', 'locale', 'l']},
-    //     new HeaderResolver(['x-custom-lang']),
-    //     AcceptLanguageResolver,
-    //     new CookieResolver(['lang', 'locale', 'l']),
-    //   ],
-    // }),
-
     PostgresDBModule,
     // MongodbModule,
     FirebaseAdminModule,

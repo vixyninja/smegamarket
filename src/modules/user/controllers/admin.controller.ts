@@ -1,9 +1,9 @@
-import { AuthGuard, HttpBadRequest, RoleEnum, Roles, RolesGuard } from '@/core';
-import { QueryOptions } from '@/core/interface';
-import { Body, Controller, Delete, Get, Param, Put, Query, UseGuards } from '@nestjs/common';
-import { isUUID } from 'class-validator';
-import { StatusUser } from '../enum';
-import { UserService } from '../services';
+import {AuthGuard, HttpBadRequest, RoleEnum, Roles, RolesGuard} from '@/core';
+import {QueryOptions} from '@/core/interface';
+import {Body, Controller, Delete, Get, Param, Put, Query, UseGuards} from '@nestjs/common';
+import {isUUID} from 'class-validator';
+import {StatusUser} from '../enums';
+import {UserService} from '../services';
 
 @UseGuards(AuthGuard)
 @Controller('admin')
@@ -15,10 +15,10 @@ export class AdminController {
   @Get('user')
   async getAllUser() {
     const users = await this.adminService.readUsers();
-    return  {
+    return {
       data: users,
       message: 'Get all users successfully',
-    }
+    };
   }
 
   @Roles([RoleEnum.ADMIN])
@@ -26,11 +26,11 @@ export class AdminController {
   @Get('user/q')
   async queryUser(@Query() query: QueryOptions) {
     const users = await this.adminService.query(query);
-    return  {
+    return {
       data: users.data,
       message: 'Query users successfully',
       meta: users.meta,
-    }
+    };
   }
 
   @Roles([RoleEnum.ADMIN])

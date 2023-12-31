@@ -1,5 +1,4 @@
-import {Environment, JWTService} from '@/configs';
-import {JWTPayload} from '@/configs/jwt/type.jwt';
+import {Environment, JWTPayload, JWTService} from '@/configs';
 import {HttpBadRequest, RoleEnum, SpeakeasyUtil} from '@/core';
 import {I18nTranslations} from '@/i18n/generated/i18n.generated';
 import {CreateUserDTO, UserEntity, UserMailService, UserService} from '@/modules/user';
@@ -25,7 +24,6 @@ export class AuthService implements IAuthService {
     private readonly userService: UserService,
     private readonly userMailService: UserMailService,
     private readonly jwtService: JWTService,
-    private i18nService: I18nService<I18nTranslations>,
   ) {}
 
   async forgotPassword(arg: ForgotPasswordDTO): Promise<any> {
@@ -36,7 +34,7 @@ export class AuthService implements IAuthService {
 
       if (!user) {
         throw new HttpBadRequest(
-          this.i18nService.translate('content.auth.signIn.wrongCredentials', {lang: I18nContext.current().lang}),
+          "We can't find a user with that e-mail address. Please make sure you have entered the right e-mail address.",
         );
       }
 
@@ -46,7 +44,7 @@ export class AuthService implements IAuthService {
 
       if (!otp) {
         throw new HttpBadRequest(
-          this.i18nService.translate('content.auth.signIn.wrongCredentials', {lang: I18nContext.current().lang}),
+          "We can't generate otp for that user. Please make sure you have entered the right e-mail address.",
         );
       }
 
@@ -82,14 +80,14 @@ export class AuthService implements IAuthService {
 
       if (!user) {
         throw new HttpBadRequest(
-          this.i18nService.translate('content.auth.signIn.wrongCredentials', {lang: I18nContext.current().lang}),
+          "We can't find a user with that e-mail address. Please make sure you have entered the right e-mail address.",
         );
       }
 
-      const isMatch: boolean = await user.validatePassword(password);
+      const isMatch: boolean = await user.comparePassword(password);
       if (!isMatch) {
         throw new HttpBadRequest(
-          this.i18nService.translate('content.auth.signIn.wrongCredentials', {lang: I18nContext.current().lang}),
+          "We can't find a user with that e-mail address. Please make sure you have entered the right e-mail address.",
         );
       }
       const payloadJWT: JWTPayload = {
@@ -129,7 +127,7 @@ export class AuthService implements IAuthService {
 
       if (existUser) {
         throw new HttpBadRequest(
-          this.i18nService.translate('content.auth.signUp.emailExists', {lang: I18nContext.current().lang}),
+          'User with that e-mail address already exists. Please make sure you have entered the right e-mail address.',
         );
       }
 
@@ -137,7 +135,7 @@ export class AuthService implements IAuthService {
 
       if (!user) {
         throw new HttpBadRequest(
-          this.i18nService.translate('content.auth.signUp.error', {lang: I18nContext.current().lang}),
+          'We can not create user with that e-mail address. Please make sure you have entered the right e-mail address.',
         );
       }
 

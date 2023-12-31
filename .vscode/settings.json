@@ -5,6 +5,7 @@
     "Cachex",
     "cloudinary",
     "DBNAME",
+    "dtos",
     "firebasex",
     "flushall",
     "gosing",
