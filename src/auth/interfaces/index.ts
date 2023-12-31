@@ -9,7 +9,7 @@ import {
   VerifyEmailDTO,
   VerifyOtpDTO,
   VerifyPhoneDTO,
-} from '../dto';
+} from '../dtos';
 
 export interface IAuthService {
   signInEmailAndPassword(

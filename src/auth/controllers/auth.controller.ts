@@ -3,7 +3,7 @@ import {SkipThrottle} from '@nestjs/throttler';
 import {isEmail} from 'class-validator';
 import {Response} from 'express';
 import {I18n, I18nContext} from 'nestjs-i18n';
-import {SignInEmailDTO, SignInGoogleDTO, SignUpEmailDTO} from '../dto';
+import {SignInEmailDTO, SignInGoogleDTO, SignUpEmailDTO} from '../dtos';
 import {AuthService} from '../services';
 @SkipThrottle()
 @Controller('auth')

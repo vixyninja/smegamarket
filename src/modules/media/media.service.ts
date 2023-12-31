@@ -3,7 +3,7 @@ import {HttpBadRequest, HttpInternalServerError} from '@/core';
 import {Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
-import {CreateMediaDTO} from './dto';
+import {CreateMediaDTO} from './dtos';
 import {MediaEntity} from './entities';
 import {IMediaService} from './interfaces';
 
