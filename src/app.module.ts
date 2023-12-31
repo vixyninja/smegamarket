@@ -1,13 +1,10 @@
 import {MiddlewareConsumer, Module, NestModule} from '@nestjs/common';
-import {AcceptLanguageResolver, CookieResolver, HeaderResolver, I18nModule, QueryResolver} from 'nestjs-i18n';
-import {join} from 'path';
 import {AppController} from './app.controller';
 import {AuthModule} from './auth';
 import {
   CachexModule,
   CdnModule,
   CloudinaryModule,
-  Environment,
   FirebaseAdminModule,
   MailModule,
   PostgresDBModule,
@@ -18,28 +15,28 @@ import {
 import {LoggerModule, LoggersMiddleware, OriginMiddleware} from './core';
 import {EventModule} from './event';
 import {MediaModule, UserModule} from './modules';
-import {TagModule} from './modules/tag/tag.module';
 import {CategoriesModule} from './modules/categories/categories.module';
 import {ProductModule} from './modules/product/product.module';
 import {ShippingModule} from './modules/shipping/shipping.module';
+import {TagModule} from './modules/tag/tag.module';
 
 @Module({
   imports: [
-    I18nModule.forRoot({
-      fallbackLanguage: Environment.FALLBACK_LANGUAGE,
-      logging: true,
-      loaderOptions: {
-        path: join(__dirname, '/i18n/'),
-        watch: true,
-      },
-      typesOutputPath: join(__dirname, '../src/i18n/generated/i18n.generated.ts'),
-      resolvers: [
-        {use: QueryResolver, options: ['lang', 'locale', 'l']},
-        new HeaderResolver(['x-custom-lang']),
-        AcceptLanguageResolver,
-        new CookieResolver(['lang', 'locale', 'l']),
-      ],
-    }),
+    // I18nModule.forRoot({
+    //   fallbackLanguage: Environment.FALLBACK_LANGUAGE,
+    //   logging: true,
+    //   loaderOptions: {
+    //     path: join(__dirname, '/i18n/'),
+    //     watch: true,
+    //   },
+    //   typesOutputPath: join(__dirname, '../src/i18n/generated/i18n.generated.ts'),
+    //   resolvers: [
+    //     {use: QueryResolver, options: ['lang', 'locale', 'l']},
+    //     new HeaderResolver(['x-custom-lang']),
+    //     AcceptLanguageResolver,
+    //     new CookieResolver(['lang', 'locale', 'l']),
+    //   ],
+    // }),
 
     PostgresDBModule,
     // MongodbModule,
