@@ -2,7 +2,7 @@ import {BaseEntity, RoleEnum} from '@/core';
 import {MediaEntity} from '@/modules/media';
 import * as bcryptjs from 'bcryptjs';
 import {Column, Entity, JoinColumn, OneToOne} from 'typeorm';
-import {StatusUser} from '../enum';
+import {StatusUser} from '../enums';
 
 @Entity({
   name: 'user',

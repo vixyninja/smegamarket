@@ -1,9 +1,8 @@
 import {HttpNotFound} from '@/core';
 import {Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
-import {I18nService} from 'nestjs-i18n';
 import {Repository} from 'typeorm';
-import {CreateUserDTO, UpdateUserDTO} from '../dto';
+import {CreateUserDTO, UpdateUserDTO} from '../dtos';
 import {UserEntity} from '../entities';
 import {IUserRepository} from '../interfaces';
 
@@ -12,7 +11,6 @@ export class UserRepository extends Repository<UserEntity> implements IUserRepos
   constructor(
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
-    private readonly i18nService: I18nService,
   ) {
     super(userRepository.target, userRepository.manager, userRepository.queryRunner);
   }
@@ -93,7 +91,7 @@ export class UserRepository extends Repository<UserEntity> implements IUserRepos
     const {email, deviceToken, deviceType, firstName, lastName, password, ...props} = args;
 
     const user = await this.findByUuid(uuid).then((res) => {
-      if (!res) throw new HttpNotFound(this.i18nService.translate('content.auth.signIn.notFound'));
+      if (!res) throw new HttpNotFound("User doesn't exist");
       return res;
     });
 
@@ -105,7 +103,6 @@ export class UserRepository extends Repository<UserEntity> implements IUserRepos
         firstName: firstName || user.firstName,
         lastName: lastName || user.lastName,
         deviceToken: deviceToken || user.deviceToken,
-        deviceType: deviceType || user.deviceType,
         password: password || user.password,
       })
       .where('user.uuid = :uuid', {uuid: uuid})
@@ -115,7 +112,7 @@ export class UserRepository extends Repository<UserEntity> implements IUserRepos
 
   async deleteUserSoft(uuid: string): Promise<UserEntity> {
     await this.findByUuid(uuid).then((res) => {
-      if (!res) throw new HttpNotFound(this.i18nService.translate('content.auth.signIn.notFound'));
+      if (!res) throw new HttpNotFound("User doesn't exist");
       return res;
     });
 

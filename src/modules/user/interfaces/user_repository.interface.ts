@@ -1,4 +1,4 @@
-import {CreateUserDTO, UpdateUserDTO} from '../dto';
+import {CreateUserDTO, UpdateUserDTO} from '../dtos';
 import {UserEntity} from '../entities';
 
 /**

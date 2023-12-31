@@ -2,31 +2,26 @@ import {HttpBadRequest, HttpNotFound, Meta, QueryOptions, RoleEnum} from '@/core
 import {MediaService} from '@/modules/media';
 import {Injectable} from '@nestjs/common';
 import {isEmail, isPhoneNumber} from 'class-validator';
-import {I18nService} from 'nestjs-i18n';
-import {CreateUserDTO, UpdateUserDTO} from '../dto';
+import {CreateUserDTO, UpdateUserDTO} from '../dtos';
 import {UserEntity} from '../entities';
-import {StatusUser} from '../enum';
+import {StatusUser} from '../enums';
 import {IUserService} from '../interfaces';
 import {UserRepository} from '../repositories';
 
 @Injectable()
 export class UserService implements IUserService {
-  constructor(
-    private readonly userRepository: UserRepository,
-    private readonly mediaService: MediaService,
-    private readonly i18nService: I18nService,
-  ) {}
+  constructor(private readonly userRepository: UserRepository, private readonly mediaService: MediaService) {}
 
   async createUser(args: CreateUserDTO): Promise<UserEntity> {
     try {
       const {email, ...props} = args;
       const user = await this.userRepository.findByEmail(email);
       if (user) {
-        throw new HttpBadRequest(this.i18nService.translate('content.auth.signUp.emailExists'));
+        throw new HttpBadRequest("User's email already exists");
       }
       const createUser = await this.userRepository.createUser(args);
       if (!createUser) {
-        throw new HttpBadRequest(this.i18nService.translate('content.auth.signUp.error'));
+        throw new HttpBadRequest('Create user failed');
       }
       return createUser;
     } catch (e) {
@@ -67,7 +62,7 @@ export class UserService implements IUserService {
     try {
       const user = await this.userRepository.findByUuid(uuid);
       if (!user) {
-        throw new HttpNotFound(this.i18nService.translate('content.auth.signIn.notFound'));
+        throw new HttpNotFound('User not found');
       }
       return user;
     } catch (e) {
@@ -113,12 +108,12 @@ export class UserService implements IUserService {
     try {
       const user = await this.readUser(uuid);
 
-      user.updatePassword(password);
+      user.password = password;
 
       const updatedUser = await this.userRepository.save(user);
 
       if (!updatedUser) {
-        throw new HttpBadRequest(this.i18nService.translate('content.profile.update.error'));
+        throw new HttpBadRequest("Can't update password");
       }
 
       return updatedUser;
@@ -133,9 +128,7 @@ export class UserService implements IUserService {
 
       const media = await this.mediaService.uploadFile(avatar);
 
-      if (!media) {
-        throw new HttpBadRequest(this.i18nService.translate('content.profile.update.avatar'));
-      }
+      if (!media) throw new HttpBadRequest("Can't upload avatar");
 
       const updatedUser = await this.userRepository
         .createQueryBuilder('user')
@@ -146,38 +139,7 @@ export class UserService implements IUserService {
         .execute()
         .then((res) => res.raw[0]);
 
-      if (!updatedUser) {
-        throw new HttpBadRequest(this.i18nService.translate('content.profile.update.avatar'));
-      }
-
-      return updatedUser;
-    } catch (e) {
-      throw e;
-    }
-  }
-
-  async updateUserCover(uuid: string, cover: Express.Multer.File): Promise<UserEntity> {
-    try {
-      const user = await this.readUser(uuid);
-
-      const media = await this.mediaService.uploadFile(cover);
-
-      if (!media) {
-        throw new HttpBadRequest(this.i18nService.translate('content.profile.update.cover'));
-      }
-
-      const updatedUser = await this.userRepository
-        .createQueryBuilder('user')
-        .update()
-        .set({cover: media})
-        .where('user.uuid = :uuid', {uuid: user.uuid})
-        .returning('*')
-        .execute()
-        .then((res) => res.raw[0]);
-
-      if (!updatedUser) {
-        throw new HttpBadRequest(this.i18nService.translate('content.profile.update.cover'));
-      }
+      if (!updatedUser) throw new HttpBadRequest("Can't update avatar");
 
       return updatedUser;
     } catch (e) {
@@ -189,9 +151,9 @@ export class UserService implements IUserService {
     try {
       const user = await this.userRepository.findByPhone(phone);
 
-      if (user) {
-        throw new HttpBadRequest(this.i18nService.translate('content.auth.signUp.phoneExists'));
-      }
+      if (user.phone === phone) throw new HttpBadRequest('This phone is already exists');
+
+      if (user) throw new HttpBadRequest("User's phone already exists");
 
       await this.readUser(uuid);
 
@@ -203,9 +165,7 @@ export class UserService implements IUserService {
         .execute()
         .then((res) => res.raw[0]);
 
-      if (!updateUser) {
-        throw new HttpBadRequest(this.i18nService.translate('content.profile.update.phone'));
-      }
+      if (!updateUser) throw new HttpBadRequest("Can't update phone");
 
       return updateUser;
     } catch (e) {
@@ -217,9 +177,9 @@ export class UserService implements IUserService {
     try {
       const user = await this.userRepository.findByEmail(email);
 
-      if (user) {
-        throw new HttpBadRequest(this.i18nService.translate('content.auth.signUp.emailExists'));
-      }
+      if (user.email === email) throw new HttpBadRequest('This email is already exists');
+
+      if (user) throw new HttpBadRequest("User's email already exists");
 
       await this.readUser(uuid);
 
@@ -231,10 +191,7 @@ export class UserService implements IUserService {
         .execute()
         .then((res) => res.raw[0]);
 
-      if (!updateUser) {
-        throw new HttpBadRequest(this.i18nService.translate('content.profile.update.email'));
-      }
-
+      if (!updateUser) throw new HttpBadRequest("Can't update email");
       return updateUser;
     } catch (e) {
       throw e;
@@ -261,9 +218,7 @@ export class UserService implements IUserService {
         .execute()
         .then((res) => res.raw[0]);
 
-      if (!updateUser) {
-        throw new HttpBadRequest(this.i18nService.translate('content.profile.update.error'));
-      }
+      if (!updateUser) throw new HttpBadRequest("Can't update status");
 
       return updateUser;
     } catch (e) {
@@ -283,9 +238,7 @@ export class UserService implements IUserService {
         .execute()
         .then((res) => res.raw[0]);
 
-      if (!updateUser) {
-        throw new HttpBadRequest(this.i18nService.translate('content.profile.update.error'));
-      }
+      if (!updateUser) throw new HttpBadRequest("Can't update role");
 
       return updateUser;
     } catch (e) {
