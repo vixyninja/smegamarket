@@ -1,12 +1,11 @@
-import {HttpStatus, Logger, RequestMethod} from '@nestjs/common';
+import {Logger, RequestMethod} from '@nestjs/common';
 import {NestFactory} from '@nestjs/core';
 import {NestExpressApplication} from '@nestjs/platform-express';
 import * as express from 'express';
 import helmet from 'helmet';
-import {I18nValidationExceptionFilter, I18nValidationPipe} from 'nestjs-i18n';
 import {join} from 'path';
 import {AppModule} from './app.module';
-import {CLIENT_ERROR_RESPONSES, FormatResponseInterceptor, HttpExceptionFilter, TimeoutInterceptor} from './core';
+import {FormatResponseInterceptor, HttpExceptionFilter, TimeoutInterceptor, ValidationPipe} from './core';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -21,23 +20,24 @@ async function bootstrap() {
 
   app.useGlobalFilters(
     new HttpExceptionFilter(),
-    new I18nValidationExceptionFilter({
-      detailedErrors: false,
-      errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-      responseBodyFormatter(host, exc, formattedErrors) {
-        return {
-          statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-          message: CLIENT_ERROR_RESPONSES.UNPROCESSABLE_ENTITY,
-          errors: formattedErrors,
-        };
-      },
-    }),
+    // new I18nValidationExceptionFilter({
+    //   detailedErrors: false,
+    //   errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+    //   responseBodyFormatter(host, exc, formattedErrors) {
+    //     return {
+    //       statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+    //       message: CLIENT_ERROR_RESPONSES.UNPROCESSABLE_ENTITY,
+    //       errors: formattedErrors,
+    //     };
+    //   },
+    // }),
   );
   app.useGlobalInterceptors(new TimeoutInterceptor(), new FormatResponseInterceptor());
   app.useGlobalPipes(
-    new I18nValidationPipe({
-      errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-    }),
+    // new I18nValidationPipe({
+    //   errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+    // }),
+    new ValidationPipe(),
   );
   await app.listen(port);
 }
