@@ -15,7 +15,7 @@ import {
   VerifyEmailDTO,
   VerifyOtpDTO,
   VerifyPhoneDTO,
-} from '../dto';
+} from '../dtos';
 import {IAuthService} from '../interfaces';
 
 @Injectable()
