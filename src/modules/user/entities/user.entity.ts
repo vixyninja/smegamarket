@@ -38,10 +38,10 @@ export class UserEntity extends BaseEntity {
   @Column({type: 'varchar', length: 225, default: null, name: 'device_token'})
   deviceToken: string;
 
-  @Column({type: 'varchar', length: 225, default: null, name: 'two_factor_temp_secret', select: false})
+  @Column({type: 'varchar', length: 225, default: null, name: 'two_factor_temp_secret'})
   twoFactorTempSecret: string;
 
-  @Column({type: 'boolean', default: false, name: 'two_factor_enable', select: false})
+  @Column({type: 'boolean', default: false, name: 'two_factor_enable'})
   twoFactorEnable: boolean;
 
   // * RELATIONS

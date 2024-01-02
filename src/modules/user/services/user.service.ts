@@ -59,6 +59,22 @@ export class UserService implements IUserService {
     }
   }
 
+  async readUserForInformation(information: string): Promise<UserEntity> {
+    try {
+      let user: UserEntity;
+      if (isEmail(information)) {
+        user = await this.userRepository.findByEmail(information);
+      } else if (isPhoneNumber(information)) {
+        user = await this.userRepository.findByPhone(information);
+      } else {
+        user = await this.userRepository.findByUuid(information);
+      }
+      return user;
+    } catch (e) {
+      throw e;
+    }
+  }
+
   async readUser(uuid: string): Promise<UserEntity> {
     try {
       const user = await this.userRepository.findByUuid(uuid);
@@ -245,19 +261,21 @@ export class UserService implements IUserService {
 
   async updateUserStatus(uuid: string, status: StatusUser): Promise<UserEntity> {
     try {
-      await this.readUser(uuid);
+      var _status: StatusUser = StatusUser[status];
 
       const updateUser = await this.userRepository
         .createQueryBuilder('user')
         .update()
-        .set({status: status})
-        .where('user.uuid = :uuid', {uuid: uuid})
+        .set({status: _status})
+        .where('uuid = :uuid', {uuid: uuid})
         .execute()
-        .then((res) => res.raw[0]);
+        .then((res) => res);
 
       if (!updateUser) throw new HttpBadRequest("Can't update status");
 
-      return updateUser;
+      const user = await this.readUser(uuid);
+
+      return updateUser.affected > 0 ? user : user;
     } catch (e) {
       throw e;
     }

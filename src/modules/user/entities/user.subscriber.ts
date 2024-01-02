@@ -19,7 +19,7 @@ export class UserSubscriber implements EntitySubscriberInterface<UserEntity> {
   beforeUpdate(event: UpdateEvent<UserEntity>): void | Promise<any> {
     const entity = event.entity as UserEntity;
 
-    if (entity.password !== event.databaseEntity.password) {
+    if (entity.password && entity.password !== event.databaseEntity.password) {
       let salt: string = generateSalt();
       entity.salt = salt;
       entity.password = hashPassword(entity.password, salt);

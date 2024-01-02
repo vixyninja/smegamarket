@@ -176,7 +176,7 @@ export class AuthController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Put('verify-email-or-phone')
+  @Post('verify-email-or-phone')
   async verifyEmailOrPhone(@Body() verifyOtpDTO: VerifyOtpDTO, @Res() res: Response): Promise<any> {
     const user = await this.authService.verifyEmailOrPhone(verifyOtpDTO);
 

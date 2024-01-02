@@ -9,7 +9,7 @@ import {
 
 @Entity()
 export class BaseEntity extends CoreEntity {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn('uuid', {name: 'uuid'})
   uuid: string;
 
   @CreateDateColumn({

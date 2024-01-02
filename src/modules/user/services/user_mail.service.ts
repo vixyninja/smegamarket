@@ -74,15 +74,15 @@ export class UserMailService {
     };
   }
 
-  async sendUserVerifyCode(name: string, information: string, code: string) {
+  async sendUserVerifyCode(name: string, email: string, code: string) {
     const data: IMail = {
       from: GROUP_EMAIL,
       subject: 'Verify Code',
       text: 'Verify Code',
-      to: information,
+      to: email,
       // context
       name: name,
-      information: information,
+      email: email,
       code: code,
     };
 
@@ -90,7 +90,7 @@ export class UserMailService {
 
     return {
       message: 'Verify code information has been sent to your email',
-      data: job,
+      data: job.id,
     };
   }
 }

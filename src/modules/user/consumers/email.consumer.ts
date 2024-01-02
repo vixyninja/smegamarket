@@ -76,9 +76,10 @@ export class EmailConsumer {
   }
 
   @Process('sendUserVerifyCode')
-  async sendUserVerifyCode(data: IMail) {
+  async sendUserVerifyCode(job: Job<IMail>) {
     try {
-      const {from, subject, text, to, name, information, code} = data;
+      const {data} = job;
+      const {from, subject, text, to, name, email, code} = data;
       await this.mailerService.sendMail({
         from: from,
         subject: subject,
@@ -88,7 +89,7 @@ export class EmailConsumer {
         template: 'verify-code',
         context: {
           name: name,
-          information: information,
+          email: email,
           code: code,
         },
       });
