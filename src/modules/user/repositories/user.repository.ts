@@ -74,7 +74,7 @@ export class UserRepository extends Repository<UserEntity> implements IUserRepos
    * @returns returns user without password and salt
    */
   async createUser(args: CreateUserDTO): Promise<UserEntity> {
-    const {email, password, firstName, lastName, deviceToken, deviceType, ...props} = args;
+    const {email, password, firstName, lastName, deviceToken, twoFactorTempSecret, ...props} = args;
 
     const user = new UserEntity(args);
 
@@ -84,11 +84,13 @@ export class UserRepository extends Repository<UserEntity> implements IUserRepos
       .into(UserEntity)
       .values(user)
       .execute()
-      .then((res) => res.raw[0]);
+      .then((res) => {
+        return res.raw[0];
+      });
   }
 
   async updateUser(uuid: string, args: UpdateUserDTO): Promise<UserEntity> {
-    const {email, deviceToken, deviceType, firstName, lastName, password, ...props} = args;
+    const {email, deviceToken, firstName, lastName, password, ...props} = args;
 
     const user = await this.findByUuid(uuid).then((res) => {
       if (!res) throw new HttpNotFound("User doesn't exist");

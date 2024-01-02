@@ -1,10 +1,9 @@
 import {Environment, JWTPayload, JWTService} from '@/configs';
 import {HttpBadRequest, RoleEnum, SpeakeasyUtil} from '@/core';
-import {I18nTranslations} from '@/i18n/generated/i18n.generated';
-import {CreateUserDTO, UserEntity, UserMailService, UserService} from '@/modules/user';
+import {CreateUserDTO, StatusUser, UserEntity, UserMailService, UserService} from '@/modules';
 import {Injectable} from '@nestjs/common';
 import {LoginTicket, OAuth2Client, TokenPayload} from 'google-auth-library';
-import {I18nContext, I18nService} from 'nestjs-i18n';
+import {adjectives, names, starWars, uniqueNamesGenerator} from 'unique-names-generator';
 import {
   ChangePasswordDTO,
   ForgotPasswordDTO,
@@ -16,7 +15,7 @@ import {
   VerifyOtpDTO,
   VerifyPhoneDTO,
 } from '../dtos';
-import {IAuthService} from '../interfaces';
+import {IAuthResponse, IAuthService} from '../interfaces';
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -26,75 +25,23 @@ export class AuthService implements IAuthService {
     private readonly jwtService: JWTService,
   ) {}
 
-  async forgotPassword(arg: ForgotPasswordDTO): Promise<any> {
+  async signInEmailAndPassword(args: SignInEmailDTO): Promise<IAuthResponse> {
     try {
-      const {email} = arg;
-
+      const {email, password, deviceToken} = args;
       const user: UserEntity = await this.userService.readUserForAuth(email);
 
       if (!user) {
-        throw new HttpBadRequest(
-          "We can't find a user with that e-mail address. Please make sure you have entered the right e-mail address.",
-        );
-      }
-
-      const secret: string = SpeakeasyUtil.generateSecret();
-
-      const otp: string = SpeakeasyUtil.generateToken(secret);
-
-      if (!otp) {
-        throw new HttpBadRequest(
-          "We can't generate otp for that user. Please make sure you have entered the right e-mail address.",
-        );
-      }
-
-      const result = await this.userMailService.sendUserResetPasswordOtp(user.firstName, user.email, otp);
-
-      return result;
-    } catch (e) {
-      throw e;
-    }
-  }
-  sendOtpResetPassword(arg: ResetPasswordOtpDTO): Promise<any> {
-    throw new Error('Method not implemented.');
-  }
-  changePassword(arg: ChangePasswordDTO): Promise<any> {
-    throw new Error('Method not implemented.');
-  }
-  sendOtpEmail(arg: VerifyEmailDTO): Promise<any> {
-    throw new Error('Method not implemented.');
-  }
-  sendOtpPhone(arg: VerifyPhoneDTO): Promise<any> {
-    throw new Error('Method not implemented.');
-  }
-  verifyEmailOrPhone(arg: VerifyOtpDTO): Promise<any> {
-    throw new Error('Method not implemented.');
-  }
-
-  async signInEmailAndPassword(
-    args: SignInEmailDTO,
-  ): Promise<{accessToken: string; refreshToken: string; user: Omit<UserEntity, 'password' | 'salt'>}> {
-    try {
-      const {email, password, deviceToken, deviceType} = args;
-      const user: UserEntity = await this.userService.readUserForAuth(email);
-
-      if (!user) {
-        throw new HttpBadRequest(
-          "We can't find a user with that e-mail address. Please make sure you have entered the right e-mail address.",
-        );
+        throw new HttpBadRequest('User not found. Please make sure you have entered the right e-mail address.');
       }
 
       const isMatch: boolean = await user.comparePassword(password);
       if (!isMatch) {
-        throw new HttpBadRequest(
-          "We can't find a user with that e-mail address. Please make sure you have entered the right e-mail address.",
-        );
+        throw new HttpBadRequest('Password is incorrect. Please make sure you have entered the right password.');
       }
       const payloadJWT: JWTPayload = {
         uuid: user.uuid,
         role: user.role,
         deviceToken: deviceToken,
-        deviceType: deviceType,
         email: user.email,
       };
 
@@ -115,35 +62,52 @@ export class AuthService implements IAuthService {
     }
   }
 
-  async signUpEmailAndPassword(args: SignUpEmailDTO): Promise<{
-    accessToken: string;
-    refreshToken: string;
-    user: Omit<UserEntity, 'password' | 'salt'>;
-  }> {
+  async signUpEmailAndPassword(args: SignUpEmailDTO): Promise<IAuthResponse> {
     try {
-      const {email, deviceToken, deviceType, ...props} = args;
+      const {email, deviceToken, ...props} = args;
 
       const existUser = await this.userService.readUserForCreate(email);
 
       if (existUser) {
         throw new HttpBadRequest(
-          'User with that e-mail address already exists. Please make sure you have entered the right e-mail address.',
+          'User already exists. Please choose another e-mail address or sign in with your account.',
         );
       }
 
-      const user = await this.userService.createUser(args);
+      const randName: string = uniqueNamesGenerator({
+        dictionaries: [names, starWars, adjectives],
+        length: 2,
+        seed: Math.floor(Math.random() * 1000000),
+        separator: ' ',
+        style: 'capital',
+      });
 
-      if (!user) {
-        throw new HttpBadRequest(
-          'We can not create user with that e-mail address. Please make sure you have entered the right e-mail address.',
-        );
+      const firstName: string = randName.split(' ')[0];
+      const lastName: string = randName.split(' ')[1];
+
+      const twoFactorTempSecret: string = SpeakeasyUtil.generateSecret();
+
+      const createUser = await this.userService.createUser({
+        email: email,
+        deviceToken: deviceToken,
+        firstName: firstName,
+        lastName: lastName,
+        password: props.password,
+        twoFactorTempSecret: twoFactorTempSecret,
+      });
+
+      if (!createUser) {
+        throw new HttpBadRequest("User can't create. Please make sure you have entered the right information.");
       }
+
+      const user: UserEntity = await this.userService.readUser(createUser.uuid);
+
+      if (!user) throw new HttpBadRequest('User not found. Please make sure you have entered the right information.');
 
       const payloadJWT: JWTPayload = {
         uuid: user.uuid,
         role: user.role,
         deviceToken: deviceToken,
-        deviceType: deviceType,
         email: user.email,
       };
 
@@ -162,9 +126,9 @@ export class AuthService implements IAuthService {
     }
   }
 
-  async signInWithGoogle(args: SignInGoogleDTO): Promise<any> {
+  async signInWithGoogle(args: SignInGoogleDTO): Promise<IAuthResponse> {
     try {
-      const {idToken, deviceToken, deviceType} = args;
+      const {idToken, deviceToken} = args;
 
       const client: OAuth2Client = new OAuth2Client(Environment.GOOGLE_CLIENT_ID);
       const ticker: LoginTicket = await client.verifyIdToken({
@@ -177,9 +141,13 @@ export class AuthService implements IAuthService {
       const existUser: UserEntity = await this.userService.readUserForAuth(payload.email);
 
       if (existUser) {
+        const twoFactorTempSecret: string = SpeakeasyUtil.generateSecret();
+        const updatedUser = await this.userService.updateTwoFactorTempSecret(existUser.uuid, twoFactorTempSecret);
+
+        if (!updatedUser) throw new HttpBadRequest("Can't update two factor temp secret");
+
         const jwtPayLoad: JWTPayload = {
           deviceToken: deviceToken,
-          deviceType: deviceType,
           email: existUser.email,
           uuid: existUser.uuid,
           role: existUser.role,
@@ -194,20 +162,21 @@ export class AuthService implements IAuthService {
           user: existUser,
         };
       } else {
+        const twoFactorTempSecret: string = SpeakeasyUtil.generateSecret();
+
         const createUserDTO: CreateUserDTO = {
           email: payload.email,
           firstName: payload.given_name,
           lastName: payload.family_name,
           password: payload.sub,
           deviceToken: deviceToken,
-          deviceType: deviceType,
+          twoFactorTempSecret: twoFactorTempSecret,
         };
 
         const newUser: UserEntity = await this.userService.createUser(createUserDTO);
 
         const jwtPayLoad: JWTPayload = {
           deviceToken: deviceToken,
-          deviceType: deviceType,
           email: newUser.email,
           uuid: newUser.uuid,
           role: RoleEnum.USER,
@@ -227,13 +196,16 @@ export class AuthService implements IAuthService {
     }
   }
 
-  signInWithFacebook(): Promise<any> {
-    throw new Error('Method not implemented.');
-  }
-
   async refreshToken(refreshToken: string): Promise<{accessToken: string; refreshToken: string}> {
     try {
-      const payload: JWTPayload = await this.jwtService.verifyToken(refreshToken, 'refreshToken');
+      const decodePayload: JWTPayload = await this.jwtService.verifyToken(refreshToken, 'refreshToken');
+
+      const payload: JWTPayload = {
+        uuid: decodePayload.uuid,
+        role: decodePayload.role,
+        deviceToken: decodePayload.deviceToken,
+        email: decodePayload.email,
+      };
 
       const [newAccessToken, newRefreshToken] = await Promise.all([
         await this.jwtService.signToken(payload, 'accessToken'),
@@ -244,6 +216,151 @@ export class AuthService implements IAuthService {
         accessToken: newAccessToken,
         refreshToken: newRefreshToken,
       };
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  async forgotPassword(arg: ForgotPasswordDTO): Promise<any> {
+    try {
+      const {email} = arg;
+
+      const user: UserEntity = await this.userService.readUserForAuth(email);
+
+      if (!user) {
+        throw new HttpBadRequest('User not found. Please make sure you have entered the right e-mail address.');
+      }
+
+      const otp: string = SpeakeasyUtil.generateToken(user.twoFactorTempSecret);
+      if (!otp) throw new HttpBadRequest('OTP has error. Please contact to admin for more information.');
+
+      const result = await this.userMailService.sendUserResetPasswordOtp(user.firstName, user.email, otp);
+
+      return result;
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  async verifyOtpResetPassword(arg: ResetPasswordOtpDTO): Promise<UserEntity> {
+    try {
+      const {password, email, confirmPassword, otp} = arg;
+
+      if (password !== confirmPassword) throw new HttpBadRequest('Password and Confirm Password are not match.');
+
+      const user: UserEntity = await this.userService.readUserForAuth(email);
+
+      if (!user) {
+        throw new HttpBadRequest('User not found. Please make sure you have entered the right e-mail address.');
+      }
+
+      // verify otp
+      const isValid: boolean = SpeakeasyUtil.verifyToken(user.twoFactorTempSecret, otp.toString());
+      if (!isValid) throw new HttpBadRequest('OTP is invalid. Please make sure you have entered the right OTP.');
+
+      if (password !== confirmPassword) throw new HttpBadRequest('Password and Confirm Password are not match.');
+
+      const updatedUser = await this.userService.updateUserPassword(user.uuid, password);
+      if (!updatedUser) throw new HttpBadRequest("Can't update password");
+
+      const userUpdated = await this.userService.readUser(updatedUser.uuid);
+
+      return userUpdated;
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  async sendOtpEmail(arg: VerifyEmailDTO): Promise<any> {
+    try {
+      const {email} = arg;
+
+      const user: UserEntity = await this.userService.readUserForAuth(email);
+
+      if (!user) {
+        throw new HttpBadRequest('User not found. Please make sure you have entered the right e-mail address.');
+      }
+
+      // send otp to email
+      const otp: string = SpeakeasyUtil.generateToken(user.twoFactorTempSecret);
+      if (!otp) throw new HttpBadRequest('OTP has error. Please contact to admin for more information.');
+
+      const result = await this.userMailService.sendUserVerifyCode(user.firstName, user.email, otp);
+
+      return result;
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  async sendOtpPhone(arg: VerifyPhoneDTO): Promise<any> {
+    try {
+      const {phone} = arg;
+
+      const user: UserEntity = await this.userService.readUserForAuth(phone);
+
+      if (!user) {
+        throw new HttpBadRequest('User not found. Please make sure you have entered the right phone number.');
+      }
+
+      // send otp to phone number
+      const otp: string = SpeakeasyUtil.generateToken(user.twoFactorTempSecret);
+      if (!otp) throw new HttpBadRequest('OTP has error. Please contact to admin for more information.');
+
+      const result = await this.userMailService.sendUserVerifyCode(user.firstName, user.email, otp);
+
+      return result;
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  async verifyEmailOrPhone(arg: VerifyOtpDTO): Promise<UserEntity> {
+    try {
+      const {information, otp} = arg;
+
+      const user: UserEntity = await this.userService.readUserForAuth(information);
+
+      if (!user) {
+        throw new HttpBadRequest('User not found. Please make sure you have entered the right information.');
+      }
+
+      // verify otp
+      const isValid: boolean = SpeakeasyUtil.verifyToken(user.twoFactorTempSecret, otp.toString());
+      if (!isValid) throw new HttpBadRequest('OTP is invalid. Please make sure you have entered the right OTP.');
+
+      const updatedUser = await this.userService.updateUserStatus(user.uuid, StatusUser.ACTIVE);
+      if (!updatedUser) throw new HttpBadRequest("Can't update status");
+
+      return updatedUser;
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  async changePassword(arg: ChangePasswordDTO): Promise<UserEntity> {
+    try {
+      const {password, newPassword, confirmPassword, email} = arg;
+
+      const user: UserEntity = await this.userService.readUserForAuth(email);
+
+      if (!user) {
+        throw new HttpBadRequest('User not found. Please make sure you have entered the right e-mail address.');
+      }
+
+      if (newPassword !== confirmPassword) throw new HttpBadRequest('New password and confirm password are not match.');
+
+      const isMatch: boolean = await user.comparePassword(password);
+
+      if (!isMatch) {
+        throw new HttpBadRequest('Password is incorrect. Please make sure you have entered the right password.');
+      }
+
+      const updatedUser = await this.userService.updateUserPassword(user.uuid, newPassword);
+
+      if (!updatedUser) throw new HttpBadRequest("Can't update password");
+
+      return updatedUser;
     } catch (e) {
       throw e;
     }

@@ -1,7 +1,7 @@
+import {HttpUnauthorized, RoleEnum} from '@/core';
 import {Injectable} from '@nestjs/common';
 import {JwtService} from '@nestjs/jwt';
 import {Environment} from '../environments';
-import {HttpUnauthorized, RoleEnum} from '@/core';
 
 export type JWTPayload = {
   uuid: string;
@@ -11,6 +11,11 @@ export type JWTPayload = {
 };
 
 export type TokenType = 'accessToken' | 'refreshToken';
+
+export interface TokenResponse {
+  accessToken: string;
+  refreshToken: string;
+}
 
 export const RecordType: Record<TokenType, Record<string, string>> = {
   accessToken: {
@@ -29,7 +34,7 @@ export const RecordType: Record<TokenType, Record<string, string>> = {
 
 @Injectable()
 export class JWTService {
-  constructor(private jwtService: JwtService) {}
+  constructor(private readonly jwtService: JwtService) {}
 
   signToken(payload: JWTPayload, type: TokenType): Promise<string> {
     return new Promise((resolve, reject) => {

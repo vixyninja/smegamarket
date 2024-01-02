@@ -1,27 +1,18 @@
-import {IsEmail, IsNotEmpty, MinLength} from 'class-validator';
+import {IsEmail, IsNotEmpty, IsOptional, MinLength} from 'class-validator';
 
 export class SignUpEmailDTO {
-  @IsEmail()
-  @IsNotEmpty()
+  @IsEmail({}, {message: 'Your email is invalid, please check again!'})
+  @IsNotEmpty({message: 'Your email is required!'})
   readonly email: string;
 
-  @IsNotEmpty()
-  @MinLength(6)
+  @IsNotEmpty({message: 'Your password is required!'})
+  @MinLength(6, {message: 'Your password must be at least 6 characters!'})
   readonly password: string;
 
-  @IsNotEmpty()
-  @MinLength(6)
+  @IsNotEmpty({message: 'Your confirm password is required!'})
+  @MinLength(6, {message: 'Your confirm password must be at least 6 characters!'})
   readonly confirmPassword: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   readonly deviceToken: string;
-
-  @IsNotEmpty()
-  readonly deviceType: string;
-
-  @IsNotEmpty()
-  readonly firstName: string;
-
-  @IsNotEmpty()
-  readonly lastName: string;
 }

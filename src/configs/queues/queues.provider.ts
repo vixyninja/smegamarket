@@ -12,8 +12,8 @@ export class QueuesProvider implements SharedBullConfigurationFactory {
       },
       prefix: 'queue', // prefix for all queues
       defaultJobOptions: {
-        removeOnComplete: false,
-        removeOnFail: false,
+        removeOnComplete: true,
+        removeOnFail: true,
       },
     };
   }

@@ -15,6 +15,7 @@ export class BaseEntity extends CoreEntity {
   @CreateDateColumn({
     type: 'timestamp without time zone',
     default: () => 'CURRENT_TIMESTAMP',
+    name: 'created_at',
   })
   createdAt: Date;
 
@@ -22,9 +23,10 @@ export class BaseEntity extends CoreEntity {
     type: 'timestamp without time zone',
     default: () => 'CURRENT_TIMESTAMP',
     onUpdate: 'CURRENT_TIMESTAMP',
+    name: 'updated_at',
   })
   updatedAt: Date;
 
-  @DeleteDateColumn({type: 'timestamp without time zone'})
+  @DeleteDateColumn({type: 'timestamp without time zone', name: 'deleted_at', select: false})
   deletedAt: Date;
 }

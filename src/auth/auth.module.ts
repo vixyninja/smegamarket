@@ -1,5 +1,5 @@
 import {JWTService, MailModule, RedisxModule} from '@/configs';
-import {UserModule} from '@/modules/user';
+import {UserModule} from '@/modules';
 import {Module} from '@nestjs/common';
 import {JwtService} from '@nestjs/jwt';
 import {TypeOrmModule} from '@nestjs/typeorm';

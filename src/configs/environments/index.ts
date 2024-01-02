@@ -69,7 +69,6 @@ const SPEAKEASY_SECRET: string = process.env.SPEAKEASY_SECRET;
 const SPEAKEASY_LENGTH: number = +process.env.SPEAKEASY_LENGTH;
 const SPEAKEASY_ALGORITHM: string = process.env.SPEAKEASY_ALGORITHM;
 const SPEAKEASY_ENCODING: string = process.env.SPEAKEASY_ENCODING;
-const SPEAKEASY_STEP: number = +process.env.SPEAKEASY_STEP;
 
 export const Environment = {
   GOOGLE_CLIENT_ID,
@@ -113,5 +112,4 @@ export const Environment = {
   SPEAKEASY_ALGORITHM,
   SPEAKEASY_ENCODING,
   SPEAKEASY_LENGTH,
-  SPEAKEASY_STEP,
 };
