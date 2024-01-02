@@ -6,7 +6,4 @@ export class SignInGoogleDTO {
 
   @IsNotEmpty({message: 'deviceToken is required'})
   readonly deviceToken: string;
-
-  @IsNotEmpty({message: 'deviceType is required'})
-  readonly deviceType: string;
 }

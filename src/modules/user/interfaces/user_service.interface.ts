@@ -11,6 +11,8 @@ export interface IUserService {
   readUserForCreate(information: string): Promise<UserEntity>;
   readUsers(): Promise<UserEntity[]>;
   updateUser(uuid: string, arg: UpdateUserDTO): Promise<UserEntity>;
+  updateTwoFactorTempSecret(uuid: string, twoFactorTempSecret: string): Promise<UserEntity>;
+  updateTwoFactor: (uuid: string, twoFactorEnable: boolean) => Promise<UserEntity>;
   updateUserPassword(uuid: string, password: string): Promise<UserEntity>;
   updateUserAvatar(uuid: string, avatar: Express.Multer.File): Promise<UserEntity>;
   updateUserPhone(uuid: string, phone: string): Promise<UserEntity>;

@@ -14,11 +14,17 @@ import {
 } from './configs';
 import {LoggerModule, LoggersMiddleware, OriginMiddleware} from './core';
 import {EventModule} from './event';
-import {MediaModule, UserModule} from './modules';
+import {MediaModule, TagModule, UserModule} from './modules';
 import {CategoriesModule} from './modules/categories/categories.module';
 import {ProductModule} from './modules/product/product.module';
 import {ShippingModule} from './modules/shipping/shipping.module';
-import {TagModule} from './modules/tag/tag.module';
+import {CouponModule} from './modules/coupon/coupon.module';
+import {CartModule} from './modules/cart/cart.module';
+import {OrderModule} from './modules/order/order.module';
+import {SettingModule} from './modules/setting/setting.module';
+import {SlideshowModule} from './modules/slideshow/slideshow.module';
+import {RoleModule} from './modules/role/role.module';
+import {StaffModule} from './modules/staff/staff.module';
 
 @Module({
   imports: [
@@ -43,6 +49,13 @@ import {TagModule} from './modules/tag/tag.module';
     CategoriesModule,
     ProductModule,
     ShippingModule,
+    CouponModule,
+    CartModule,
+    OrderModule,
+    SettingModule,
+    SlideshowModule,
+    RoleModule,
+    StaffModule,
   ],
   providers: [],
   controllers: [AppController],

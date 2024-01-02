@@ -1,6 +1,6 @@
+import {generateSalt, hashPassword} from '@/core';
 import {UserEntity} from '@/modules';
 import {EntitySubscriberInterface, EventSubscriber, InsertEvent, UpdateEvent} from 'typeorm';
-import {hashPassword} from '../../../core/utils';
 
 @EventSubscriber()
 export class UserSubscriber implements EntitySubscriberInterface<UserEntity> {
@@ -10,7 +10,9 @@ export class UserSubscriber implements EntitySubscriberInterface<UserEntity> {
 
   beforeInsert(event: InsertEvent<UserEntity>): void | Promise<any> {
     if (event.entity.password) {
-      event.entity.password = hashPassword(event.entity.password);
+      let salt: string = generateSalt();
+      event.entity.salt = salt;
+      event.entity.password = hashPassword(event.entity.password, salt);
     }
   }
 
@@ -18,7 +20,9 @@ export class UserSubscriber implements EntitySubscriberInterface<UserEntity> {
     const entity = event.entity as UserEntity;
 
     if (entity.password !== event.databaseEntity.password) {
-      entity.password = hashPassword(entity.password);
+      let salt: string = generateSalt();
+      entity.salt = salt;
+      entity.password = hashPassword(entity.password, salt);
     }
   }
 }

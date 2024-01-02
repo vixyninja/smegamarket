@@ -5,7 +5,7 @@ import * as express from 'express';
 import helmet from 'helmet';
 import {join} from 'path';
 import {AppModule} from './app.module';
-import {FormatResponseInterceptor, HttpExceptionFilter, TimeoutInterceptor, ValidationPipe} from './core';
+import {HttpExceptionFilter, TimeoutInterceptor, ValidationPipe} from './core';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -19,7 +19,7 @@ async function bootstrap() {
   app.use(express.static(join(__dirname, '..', 'public')));
 
   app.useGlobalFilters(new HttpExceptionFilter());
-  app.useGlobalInterceptors(new TimeoutInterceptor(), new FormatResponseInterceptor());
+  app.useGlobalInterceptors(new TimeoutInterceptor());
   app.useGlobalPipes(new ValidationPipe());
   await app.listen(port);
 }

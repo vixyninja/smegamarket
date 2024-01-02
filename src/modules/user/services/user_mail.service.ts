@@ -90,7 +90,7 @@ export class UserMailService {
 
     return {
       message: 'Verify code information has been sent to your email',
-      data: job.id,
+      data: job,
     };
   }
 }

@@ -30,7 +30,7 @@ export class ProductEntity extends BaseEntity {
   @Column({name: 'product_description', type: 'text', nullable: true})
   productDescription: string;
 
-  @Column({name: 'product_weight', type: 'number', nullable: false, default: 0})
+  @Column({name: 'product_weight', type: 'numeric', nullable: false, default: 0})
   productWeight: number;
 
   @Column({name: 'product_note', type: 'text', nullable: true})
@@ -45,9 +45,13 @@ export class ProductEntity extends BaseEntity {
   @Column({name: 'updated_by', nullable: false, type: 'varchar', length: 225, default: RoleEnum.ADMIN})
   updatedBy: string;
 
+  // * RELATIONS
+
   @JoinColumn({foreignKeyConstraintName: 'FK_PRODUCT_GALLERY'})
-  @OneToMany(() => GalleryEntity, (gallery) => gallery.product, {cascade: true, lazy: true})
+  @OneToMany(() => GalleryEntity, (gallery) => gallery.product, {lazy: true})
   gallery: GalleryEntity[];
+
+  // * RELATIONS
 
   constructor(partial: Partial<ProductEntity>) {
     super();

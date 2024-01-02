@@ -1,12 +1,21 @@
 import * as bycryptjs from 'bcryptjs';
 
 /**
- * generate hash from password or string
- * @param {string} password
+ * generate random salt
  * @returns {string}
  */
-export function hashPassword(password: string): string {
-  return bycryptjs.hashSync(password, 10);
+export function generateSalt(): string {
+  return bycryptjs.genSaltSync(Math.floor(Math.random() * 10) + 1);
+}
+
+/**
+ * generate hash from password or string
+ * @param {string} password
+ * @param {string} salt
+ * @returns {string}
+ */
+export function hashPassword(password: string, salt: string): string {
+  return bycryptjs.hashSync(password, salt);
 }
 
 /**

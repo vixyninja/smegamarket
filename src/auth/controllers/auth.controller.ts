@@ -1,15 +1,25 @@
-import {Body, Controller, Get, HttpCode, HttpStatus, Post, Query, Res} from '@nestjs/common';
+import {Body, Controller, Get, HttpCode, HttpStatus, Patch, Post, Put, Query, Res} from '@nestjs/common';
 import {SkipThrottle} from '@nestjs/throttler';
 import {isEmail} from 'class-validator';
 import {Response} from 'express';
-import {I18n, I18nContext} from 'nestjs-i18n';
-import {SignInEmailDTO, SignInGoogleDTO, SignUpEmailDTO} from '../dtos';
+import {
+  ChangePasswordDTO,
+  ForgotPasswordDTO,
+  ResetPasswordOtpDTO,
+  SignInEmailDTO,
+  SignInGoogleDTO,
+  SignUpEmailDTO,
+  VerifyEmailDTO,
+  VerifyOtpDTO,
+  VerifyPhoneDTO,
+} from '../dtos';
 import {AuthService} from '../services';
 @SkipThrottle()
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @HttpCode(HttpStatus.OK)
   @Post('sign-in')
   async signInEmailAndPassword(@Body() signInEmailDTO: SignInEmailDTO, @Res() res: Response): Promise<any> {
     if (!isEmail(signInEmailDTO.email)) {
@@ -33,6 +43,7 @@ export class AuthController {
       .end();
   }
 
+  @HttpCode(HttpStatus.CREATED)
   @Post('sign-up')
   async signUpEmailAndPassword(@Body() signUpEmailDTO: SignUpEmailDTO, @Res() res: Response): Promise<any> {
     if (signUpEmailDTO.password !== signUpEmailDTO.confirmPassword) {
@@ -70,14 +81,10 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Get('refresh-token')
-  async refreshToken(
-    @Query('refresh-token') token: string,
-    @I18n() i18n: I18nContext,
-    @Res() res: Response,
-  ): Promise<any> {
+  async refreshToken(@Query('token') token: string, @Res() res: Response): Promise<any> {
     if (!token) {
       return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({
-        message: i18n.translate('content.auth.refreshToken.missing', {lang: i18n.lang}),
+        message: 'Refresh token is required',
         statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
       });
     }
@@ -86,9 +93,99 @@ export class AuthController {
 
     return res
       .json({
-        message: i18n.translate('content.auth.signIn.success', {lang: i18n.lang}),
+        message: 'Refresh token successfully',
         statusCode: HttpStatus.OK,
         data: credentials,
+      })
+      .end();
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('forgot-password')
+  async forgotPassword(@Body() forgotPasswordDTO: ForgotPasswordDTO, @Res() res: Response): Promise<any> {
+    const job = await this.authService.forgotPassword(forgotPasswordDTO);
+
+    return res
+      .status(HttpStatus.OK)
+      .json({
+        message: job.message,
+        statusCode: HttpStatus.OK,
+        data: job.id,
+      })
+      .end();
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Patch('verify-otp-reset-password')
+  async verifyOtpResetPassword(@Body() resetPasswordOtpDTO: ResetPasswordOtpDTO, @Res() res: Response): Promise<any> {
+    const user = await this.authService.verifyOtpResetPassword(resetPasswordOtpDTO);
+
+    return res
+      .status(HttpStatus.OK)
+      .json({
+        message: 'Verify OTP successfully',
+        statusCode: HttpStatus.OK,
+        data: user,
+      })
+      .end();
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Patch('change-password')
+  async changePassword(@Body() changePasswordDTO: ChangePasswordDTO, @Res() res: Response): Promise<any> {
+    const user = await this.authService.changePassword(changePasswordDTO);
+
+    return res
+      .status(HttpStatus.OK)
+      .json({
+        message: 'Change password successfully',
+        statusCode: HttpStatus.OK,
+        data: user,
+      })
+      .end();
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('send-otp-email')
+  async sendOtpEmail(@Body() verifyEmailDTO: VerifyEmailDTO, @Res() res: Response): Promise<any> {
+    const job = await this.authService.sendOtpEmail(verifyEmailDTO);
+
+    return res
+      .status(HttpStatus.OK)
+      .json({
+        message: job.message,
+        statusCode: HttpStatus.OK,
+        data: job.data,
+      })
+      .end();
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('send-otp-phone')
+  async sendOtpPhone(@Body() verifyPhoneDTO: VerifyPhoneDTO, @Res() res: Response): Promise<any> {
+    const job = await this.authService.sendOtpPhone(verifyPhoneDTO);
+
+    return res
+      .status(HttpStatus.OK)
+      .json({
+        message: job.message,
+        statusCode: HttpStatus.OK,
+        data: job.data,
+      })
+      .end();
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Put('verify-email-or-phone')
+  async verifyEmailOrPhone(@Body() verifyOtpDTO: VerifyOtpDTO, @Res() res: Response): Promise<any> {
+    const user = await this.authService.verifyEmailOrPhone(verifyOtpDTO);
+
+    return res
+      .status(HttpStatus.OK)
+      .json({
+        message: 'Verify OTP successfully',
+        statusCode: HttpStatus.OK,
+        data: user,
       })
       .end();
   }

@@ -36,8 +36,6 @@ export class EmailConsumer {
       const {data} = job;
       const {from, subject, text, to, code, email, name} = data;
 
-      console.log(job);
-
       await this.mailerService.sendMail({
         from: from,
         subject: subject,
@@ -102,24 +100,19 @@ export class EmailConsumer {
   @Process('ping')
   async ping() {
     try {
-      await this.mailerService
-        .sendMail({
-          from: GROUP_EMAIL,
-          subject: 'Ping 😆',
-          text: 'NIGGA WHAT?',
-          to: 'hhvy2003.dev@gmail.com',
-          date: new Date(),
-          template: 'verify-code',
-          context: {
-            name: GROUP_EMAIL,
-            information: 'NIGGA WHAT?',
-            code: '123456',
-          },
-        })
-        .then((res) => {
-          console.log(res);
-          return res;
-        });
+      await this.mailerService.sendMail({
+        from: GROUP_EMAIL,
+        subject: 'Ping 😆',
+        text: 'NIGGA WHAT?',
+        to: 'hhvy2003.dev@gmail.com',
+        date: new Date(),
+        template: 'verify-code',
+        context: {
+          name: GROUP_EMAIL,
+          information: 'NIGGA WHAT?',
+          code: '123456',
+        },
+      });
     } catch (error) {
       throw new HttpInternalServerError(error.message);
     }

@@ -23,6 +23,7 @@ export class UserService implements IUserService {
       if (!createUser) {
         throw new HttpBadRequest('Create user failed');
       }
+
       return createUser;
     } catch (e) {
       throw e;
@@ -114,6 +115,42 @@ export class UserService implements IUserService {
 
       if (!updatedUser) {
         throw new HttpBadRequest("Can't update password");
+      }
+
+      return updatedUser;
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  async updateTwoFactorTempSecret(uuid: string, twoFactorTempSecret: string): Promise<UserEntity> {
+    try {
+      const user = await this.readUser(uuid);
+
+      user.twoFactorTempSecret = twoFactorTempSecret;
+
+      const updatedUser = await this.userRepository.save(user);
+
+      if (!updatedUser) {
+        throw new HttpBadRequest("Can't update two factor temp secret");
+      }
+
+      return updatedUser;
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  async updateTwoFactor(uuid: string, twoFactorEnable: boolean): Promise<UserEntity> {
+    try {
+      const user = await this.readUser(uuid);
+
+      user.twoFactorEnable = twoFactorEnable;
+
+      const updatedUser = await this.userRepository.save(user);
+
+      if (!updatedUser) {
+        throw new HttpBadRequest("Can't update two factor");
       }
 
       return updatedUser;
