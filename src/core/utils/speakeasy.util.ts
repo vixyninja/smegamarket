@@ -4,7 +4,7 @@ import * as speakeasy from 'speakeasy';
 export class SpeakeasyUtil {
   static generateSecret(): string {
     return speakeasy.generateSecret({
-      length: 32,
+      length: 20,
       name: Environment.SPEAKEASY_SECRET,
       issuer: Environment.SPEAKEASY_SECRET,
     }).base32;

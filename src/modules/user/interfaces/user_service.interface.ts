@@ -9,6 +9,7 @@ export interface IUserService {
   readUser(uuid: string): Promise<UserEntity>;
   readUserForAuth(information: string): Promise<UserEntity>;
   readUserForCreate(information: string): Promise<UserEntity>;
+  readUserForInformation(information: string): Promise<UserEntity>;
   readUsers(): Promise<UserEntity[]>;
   updateUser(uuid: string, arg: UpdateUserDTO): Promise<UserEntity>;
   updateTwoFactorTempSecret(uuid: string, twoFactorTempSecret: string): Promise<UserEntity>;

@@ -141,11 +141,6 @@ export class AuthService implements IAuthService {
       const existUser: UserEntity = await this.userService.readUserForAuth(payload.email);
 
       if (existUser) {
-        const twoFactorTempSecret: string = SpeakeasyUtil.generateSecret();
-        const updatedUser = await this.userService.updateTwoFactorTempSecret(existUser.uuid, twoFactorTempSecret);
-
-        if (!updatedUser) throw new HttpBadRequest("Can't update two factor temp secret");
-
         const jwtPayLoad: JWTPayload = {
           deviceToken: deviceToken,
           email: existUser.email,
@@ -275,7 +270,7 @@ export class AuthService implements IAuthService {
     try {
       const {email} = arg;
 
-      const user: UserEntity = await this.userService.readUserForAuth(email);
+      const user: UserEntity = await this.userService.readUserForInformation(email);
 
       if (!user) {
         throw new HttpBadRequest('User not found. Please make sure you have entered the right e-mail address.');
@@ -297,7 +292,7 @@ export class AuthService implements IAuthService {
     try {
       const {phone} = arg;
 
-      const user: UserEntity = await this.userService.readUserForAuth(phone);
+      const user: UserEntity = await this.userService.readUserForInformation(phone);
 
       if (!user) {
         throw new HttpBadRequest('User not found. Please make sure you have entered the right phone number.');
@@ -319,7 +314,7 @@ export class AuthService implements IAuthService {
     try {
       const {information, otp} = arg;
 
-      const user: UserEntity = await this.userService.readUserForAuth(information);
+      const user: UserEntity = await this.userService.readUserForInformation(information);
 
       if (!user) {
         throw new HttpBadRequest('User not found. Please make sure you have entered the right information.');
